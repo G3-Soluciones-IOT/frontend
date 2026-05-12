@@ -1,0 +1,736 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Jost:wght@300;400;500;600&display=swap");
+
+:root {
+  --forest: #1a2e1c;
+  --forest-mid: #253d27;
+  --forest-light: #3a6040;
+  --green-accent: #2ecc71;
+  --green-accent-dark: #27ae60;
+  --gold: #c8a96e;
+  --cream: #f7f3eb;
+  --sidebar-bg: #1c2b1e;
+  --sidebar-hover: rgba(255,255,255,0.07);
+  --sidebar-active: rgba(46,204,113,0.15);
+  --sidebar-active-border: #2ecc71;
+  --text-dark: #1a2e1c;
+  --text-muted: #6b7c6d;
+  --text-light: #9aab9c;
+  --border: #e8e4dc;
+  --white: #ffffff;
+  --card-shadow: 0 1px 4px rgba(26,46,28,0.08);
+  --radius: 10px;
+  --radius-sm: 6px;
+  --tr: 0.2s ease;
+}
+
+/* ── App shell ──────────────────────────────────────────── */
+.shell {
+  display: flex;
+  min-height: 100dvh;
+  background: #f2f0ea;
+  font-family: "Jost", sans-serif;
+}
+
+/* ── Sidebar ────────────────────────────────────────────── */
+.sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  background: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100dvh;
+  z-index: 100;
+  overflow-y: auto;
+}
+
+.sidebarLogo {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.logoText {
+  font-family: "Fraunces", serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: #fff;
+  letter-spacing: -0.3px;
+}
+
+.logoText span {
+  color: var(--green-accent);
+}
+
+.sidebarNav {
+  flex: 1;
+  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.navSection {
+  padding: 0;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 20px;
+  color: rgba(255,255,255,0.65);
+  font-size: 0.85rem;
+  font-weight: 400;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  border-left: 3px solid transparent;
+  transition: background var(--tr), color var(--tr), border-color var(--tr);
+  text-decoration: none;
+  font-family: "Jost", sans-serif;
+}
+
+.navItem:hover {
+  background: var(--sidebar-hover);
+  color: rgba(255,255,255,0.9);
+}
+
+.navItem.active {
+  background: var(--sidebar-active);
+  color: var(--green-accent);
+  border-left-color: var(--sidebar-active-border);
+  font-weight: 500;
+}
+
+.navItem svg {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.navItem.active svg {
+  opacity: 1;
+}
+
+.navSub {
+  padding-left: 38px;
+  font-size: 0.8rem;
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+
+.navGroupLabel {
+  padding: 12px 20px 4px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+}
+
+/* ── Main area ──────────────────────────────────────────── */
+.main {
+  margin-left: 200px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+/* ── Topbar ─────────────────────────────────────────────── */
+.topbar {
+  height: 56px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.topbarTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--green-accent-dark);
+  letter-spacing: 0.2px;
+}
+
+.topbarActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.iconBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  transition: background var(--tr);
+}
+
+.iconBtn:hover {
+  background: #f0ede6;
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
+  border: 2px solid var(--border);
+}
+
+.avatarPlaceholder {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--forest-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ── Page content ───────────────────────────────────────── */
+.content {
+  padding: 28px;
+  flex: 1;
+}
+
+.pageHeading {
+  margin-bottom: 24px;
+}
+
+.pageTitle {
+  font-family: "Fraunces", serif;
+  font-size: 1.8rem;
+  font-weight: 400;
+  color: var(--text-dark);
+  letter-spacing: -0.3px;
+  margin: 0 0 4px;
+}
+
+.pageSubtitle {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ── Profile grid ───────────────────────────────────────── */
+.profileGrid {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+/* ── Cards ──────────────────────────────────────────────── */
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--card-shadow);
+  padding: 24px;
+}
+
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cardTitle svg {
+  color: var(--green-accent-dark);
+}
+
+/* right column stack */
+.rightStack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Profile left card ──────────────────────────────────── */
+.profileCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0;
+}
+
+.avatarWrap {
+  position: relative;
+  margin-bottom: 16px;
+  cursor: pointer;
+}
+
+.profileAvatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--border);
+}
+
+.profileAvatarPlaceholder {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--forest), var(--forest-light));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.8rem;
+  font-weight: 500;
+  border: 3px solid var(--border);
+}
+
+.avatarEditBadge {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 26px;
+  height: 26px;
+  background: var(--green-accent);
+  border-radius: 50%;
+  border: 2px solid white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.profileName {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0 0 4px;
+}
+
+.profileTitle {
+  font-size: 0.82rem;
+  color: var(--green-accent-dark);
+  font-weight: 500;
+  margin: 0 0 20px;
+}
+
+.profileCardDivider {
+  width: 100%;
+  height: 1px;
+  background: var(--border);
+  margin-bottom: 20px;
+}
+
+/* Buttons */
+.btnPrimary {
+  width: 100%;
+  padding: 10px 16px;
+  background: var(--green-accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: "Jost", sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background var(--tr), transform var(--tr);
+  margin-bottom: 10px;
+}
+
+.btnPrimary:hover:not(:disabled) {
+  background: var(--green-accent-dark);
+  transform: translateY(-1px);
+}
+
+.btnPrimary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btnOutline {
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  color: var(--text-dark);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: "Jost", sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: border-color var(--tr), color var(--tr);
+}
+
+.btnOutline:hover {
+  border-color: var(--green-accent);
+  color: var(--green-accent-dark);
+}
+
+/* Verification */
+.verificationBox {
+  width: 100%;
+  margin-top: 20px;
+  background: #f7f9f7;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  text-align: left;
+}
+
+.verificationTitle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.verifiedDot {
+  width: 20px;
+  height: 20px;
+  background: var(--green-accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.verificationItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  padding: 4px 0;
+}
+
+.verificationItem svg {
+  color: var(--green-accent);
+  flex-shrink: 0;
+}
+
+/* ── Form fields ─────────────────────────────────────────── */
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fieldGroupFull {
+  grid-column: 1 / -1;
+}
+
+.fieldLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.fieldInput {
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: "Jost", sans-serif;
+  font-size: 0.9rem;
+  color: var(--text-dark);
+  background: white;
+  outline: none;
+  transition: border-color var(--tr), box-shadow var(--tr);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.fieldInput:focus {
+  border-color: var(--green-accent);
+  box-shadow: 0 0 0 3px rgba(46,204,113,0.12);
+}
+
+.fieldInput::placeholder {
+  color: #bbc8bc;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.6;
+}
+
+.charCount {
+  text-align: right;
+  font-size: 0.72rem;
+  color: var(--text-light);
+  margin-top: 2px;
+}
+
+.charCount.nearLimit {
+  color: #e67e22;
+}
+
+.fieldSelect {
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: "Jost", sans-serif;
+  font-size: 0.9rem;
+  color: var(--text-dark);
+  background: white;
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color var(--tr), box-shadow var(--tr);
+}
+
+.fieldSelect:focus {
+  border-color: var(--green-accent);
+  box-shadow: 0 0 0 3px rgba(46,204,113,0.12);
+}
+
+/* Certification row */
+.certRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.certRow .fieldInput {
+  flex: 1;
+}
+
+.uploadBtn {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  background: #f0ede6;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: background var(--tr), border-color var(--tr);
+}
+
+.uploadBtn:hover {
+  background: #e8e4dc;
+  border-color: var(--green-accent);
+  color: var(--green-accent-dark);
+}
+
+/* ── Specialty tags ─────────────────────────────────────── */
+.tagsWrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: var(--green-accent);
+  color: white;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.tagRemove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(255,255,255,0.8);
+  display: flex;
+  align-items: center;
+  padding: 0;
+  line-height: 1;
+  transition: color var(--tr);
+}
+
+.tagRemove:hover {
+  color: white;
+}
+
+.tagAdd {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: none;
+  border: 1.5px dashed var(--border);
+  border-radius: 20px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: "Jost", sans-serif;
+  transition: border-color var(--tr), color var(--tr);
+}
+
+.tagAdd:hover {
+  border-color: var(--green-accent);
+  color: var(--green-accent-dark);
+}
+
+.tagInput {
+  padding: 5px 10px;
+  border: 1.5px solid var(--green-accent);
+  border-radius: 20px;
+  font-family: "Jost", sans-serif;
+  font-size: 0.8rem;
+  color: var(--text-dark);
+  outline: none;
+  width: 130px;
+  box-shadow: 0 0 0 3px rgba(46,204,113,0.12);
+}
+
+/* ── Save bar ────────────────────────────────────────────── */
+.saveBar {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 1px solid var(--border);
+  padding: 12px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 40;
+  box-shadow: 0 -2px 8px rgba(26,46,28,0.06);
+}
+
+.saveBarInfo {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.saveBarInfo strong {
+  color: var(--green-accent-dark);
+  font-weight: 600;
+}
+
+.saveBarActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btnSave {
+  padding: 9px 24px;
+  background: var(--green-accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: "Jost", sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background var(--tr), transform var(--tr);
+}
+
+.btnSave:hover:not(:disabled) {
+  background: var(--green-accent-dark);
+  transform: translateY(-1px);
+}
+
+.btnSave:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.savedBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--green-accent-dark);
+  font-weight: 500;
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Error banner ────────────────────────────────────────── */
+.errorBanner {
+  padding: 10px 16px;
+  background: rgba(192,57,43,0.07);
+  border: 1px solid rgba(192,57,43,0.2);
+  border-radius: var(--radius-sm);
+  font-size: 0.83rem;
+  color: #c0392b;
+  margin-bottom: 16px;
+}
+
+/* ── Skeleton loader ─────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(90deg, #f0ede6 25%, #e8e4dc 50%, #f0ede6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
