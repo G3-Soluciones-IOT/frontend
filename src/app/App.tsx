@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { SignInRoute, SignUpRoute } from "./routes/auth.routes";
 import { NutritionistProfileRoute } from "./routes/nutritionist.routes";
+import { PatientsRoute } from "./routes/patients.routes";
 
 export default function App() {
   const [path, setPath] = useState(() => window.location.pathname);
@@ -22,6 +23,10 @@ export default function App() {
 
   if (path === "/professional-profile") {
     return <NutritionistProfileRoute onNavigate={navigate} />;
+  }
+
+  if (path.startsWith("/patients") || path.startsWith("/nutritionist/patients")) {
+    return <PatientsRoute path={path} onNavigate={navigate} />;
   }
 
   return (
