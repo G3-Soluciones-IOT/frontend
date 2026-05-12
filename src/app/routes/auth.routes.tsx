@@ -1,12 +1,23 @@
 import { SignInPage, SignUpPage } from "@/modules/iam";
-import { useNavigate } from "react-router-dom";
 
-export function SignInRoute() {
-  const navigate = useNavigate();
+interface AuthRouteProps {
+  onNavigate: (path: string) => void;
+}
+
+export function SignInRoute({ onNavigate }: AuthRouteProps) {
   return (
     <SignInPage
-      onSignIn={() => navigate("/dashboard")}
-      onNavigateToSignUp={() => navigate("/sign-up")}
+      onSignIn={() => onNavigate("/professional-profile")}
+      onNavigateToSignUp={() => onNavigate("/sign-up")}
+    />
+  );
+}
+
+export function SignUpRoute({ onNavigate }: AuthRouteProps) {
+  return (
+    <SignUpPage
+      onSignUp={() => onNavigate("/professional-profile")}
+      onNavigateToSignIn={() => onNavigate("/sign-in")}
     />
   );
 }

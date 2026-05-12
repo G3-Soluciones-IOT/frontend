@@ -1,29 +1,30 @@
-import { useState } from "react";
-import { SignInPage, SignUpPage } from "@/modules/iam";
-
-type Screen = "signin" | "signup";
+import { useCallback, useEffect, useState } from "react";
+import { SignInRoute, SignUpRoute } from "./routes/auth.routes";
+import { NutritionistProfileRoute } from "./routes/nutritionist.routes";
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>("signin");
+  const [path, setPath] = useState(() => window.location.pathname);
 
-  if (screen === "signup") {
-    return (
-      <SignUpPage
-        onSignUp={(session) => {
-          console.log("Registered:", session);
-          setScreen("signin");
-        }}
-        onNavigateToSignIn={() => setScreen("signin")}
-      />
-    );
+  const navigate = useCallback((nextPath: string) => {
+    window.history.pushState({}, "", nextPath);
+    setPath(nextPath);
+  }, []);
+
+  useEffect(() => {
+    const handlePopState = () => setPath(window.location.pathname);
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  if (path === "/sign-up") {
+    return <SignUpRoute onNavigate={navigate} />;
+  }
+
+  if (path === "/professional-profile") {
+    return <NutritionistProfileRoute onNavigate={navigate} />;
   }
 
   return (
-    <SignInPage
-      onSignIn={(session) => {
-        console.log("Logged in:", session);
-      }}
-      onNavigateToSignUp={() => setScreen("signup")}
-    />
+    <SignInRoute onNavigate={navigate} />
   );
 }
