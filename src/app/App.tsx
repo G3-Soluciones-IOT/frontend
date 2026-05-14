@@ -3,6 +3,7 @@ import { SignInRoute, SignUpRoute } from "./routes/auth.routes";
 import { CommunicationRoute } from "./routes/communication.routes";
 import { isNutritionistShellPath, NutritionistProfileRoute, NutritionistShellRoute } from "./routes/nutritionist.routes";
 import { PatientsRoute } from "./routes/patients.routes";
+import {PaymentsRoute} from "@/app/routes/payments.routes.tsx";
 
 export default function App() {
   const [path, setPath] = useState(() => window.location.pathname);
@@ -32,6 +33,10 @@ export default function App() {
 
   if (path.startsWith("/communication")) {
     return <CommunicationRoute path={path} onNavigate={navigate} />;
+  }
+
+  if (path.startsWith("/subscriptions") || path.startsWith("/nutritionist/subscriptions")) {
+    return <PaymentsRoute path={path} onNavigate={navigate} />;
   }
 
   if (isNutritionistShellPath(path)) {

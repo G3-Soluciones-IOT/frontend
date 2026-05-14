@@ -21,4 +21,3 @@ export { deleteSubscriptionPlanUseCase } from "./application/use-cases/deleteSub
 // Infrastructure
 export { paymentsApi } from "./infrastructure/api/payments.api";
 export { HttpSubscriptionPlanRepository } from "./infrastructure/repositories/HttpSubscriptionPlanRepository";
-

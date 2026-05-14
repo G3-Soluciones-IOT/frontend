@@ -15,7 +15,7 @@ export const navigationConfig = {
     { label: "Content", href: "/content", icon: <FileIcon />, group: "root" },
     { label: "Tips", href: "/content/tips", icon: null, group: "content" },
     { label: "Analytics", href: "/analytics", icon: <ChartIcon />, group: "root" },
-    { label: "Subscriptions", href: "/subscriptions", icon: <ScreenIcon />, group: "root" },
+    { label: "Subscriptions", href: "/nutritionist/subscriptions", icon: <ScreenIcon />, group: "root" },
   ] as NavigationItem[],
 
   patient: [
