@@ -14,7 +14,6 @@ export type {
   WeightPoint,
 } from "./domain/models/Patient";
 
-export { PatientsLayout } from "./presentation/components/PatientsLayout";
 export { PatientsOverviewPage } from "./presentation/pages/PatientsOverviewPage";
 export { PatientsDirectoryPage } from "./presentation/pages/PatientsDirectoryPage";
 export { PatientDetailPage } from "./presentation/pages/PatientDetailPage";
