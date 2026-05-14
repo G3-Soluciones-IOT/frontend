@@ -1,5 +1,6 @@
 import { patientAlerts, patientsOverviewStats } from "../../infrastructure/mock/patients.mock";
-import { PatientsLayout } from "../components/PatientsLayout";
+import { SharedLayout } from "@/shared/components/layout";
+import { navigationConfig } from "@/shared/constants/navigation.config";
 import styles from "./PatientsPages.module.css";
 
 interface PatientsOverviewPageProps {
@@ -15,10 +16,11 @@ function severityClass(severity: "high" | "warning" | "info") {
 
 export function PatientsOverviewPage({ currentPath, onNavigate }: PatientsOverviewPageProps) {
   return (
-    <PatientsLayout
+    <SharedLayout
       title="Patients Overview"
       currentPath={currentPath}
       onNavigate={onNavigate}
+      navigationItems={navigationConfig.nutritionist}
       breadcrumbs={["Patients", "Overview"]}
     >
       <div className={styles.stack}>
@@ -98,6 +100,6 @@ export function PatientsOverviewPage({ currentPath, onNavigate }: PatientsOvervi
           </table>
         </section>
       </div>
-    </PatientsLayout>
+    </SharedLayout>
   );
 }

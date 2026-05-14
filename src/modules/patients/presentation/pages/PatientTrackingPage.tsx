@@ -1,5 +1,6 @@
 import { patientDetail, patientTracking } from "../../infrastructure/mock/patients.mock";
-import { PatientsLayout } from "../components/PatientsLayout";
+import { SharedLayout } from "@/shared/components/layout";
+import { navigationConfig } from "@/shared/constants/navigation.config";
 import styles from "./PatientsPages.module.css";
 
 interface PatientTrackingPageProps {
@@ -15,10 +16,11 @@ function insightToneClass(tone: "critical" | "positive" | "neutral") {
 
 export function PatientTrackingPage({ currentPath, onNavigate }: PatientTrackingPageProps) {
   return (
-    <PatientsLayout
+    <SharedLayout
       title={`${patientDetail.name} - Health Monitoring`}
       currentPath={currentPath}
       onNavigate={onNavigate}
+      navigationItems={navigationConfig.nutritionist}
       breadcrumbs={["Patients", "Directory", patientDetail.name, "Tracking"]}
     >
       <div className={styles.stack}>
@@ -90,6 +92,6 @@ export function PatientTrackingPage({ currentPath, onNavigate }: PatientTracking
           </aside>
         </div>
       </div>
-    </PatientsLayout>
+    </SharedLayout>
   );
 }

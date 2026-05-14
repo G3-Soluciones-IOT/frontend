@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from "react";
-import { NutritionistLayout } from "../components/NutritionistLayout";
+import { useMemo, useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from "react";
+import { SharedLayout } from "@/shared/components/layout";
+import { navigationConfig } from "@/shared/constants/navigation.config";
 import styles from "../components/NutritionistLayout.module.css";
 import { useNutritionistProfile } from "../hooks/useNutritionistProfile";
 import { useUpdateProfile } from "../hooks/useUpdateProfile";
@@ -7,7 +8,8 @@ import type { ExperienceRange, ProfessionalProfile, Specialty } from "../../doma
 import type { UpdateProfessionalProfileInput } from "../../application/dto/UpdateProfessionalProfileInput";
 
 interface NutritionistProfilePageProps {
-  onNavigate?: (href: string) => void;
+  currentPath?: string;
+  onNavigate: (href: string) => void;
   onSignOut?: () => void;
 }
 
@@ -113,16 +115,14 @@ function createSpecialty(label: string): Specialty {
   };
 }
 
-export function NutritionistProfilePage({ onNavigate, onSignOut }: NutritionistProfilePageProps) {
+export function NutritionistProfilePage({ currentPath = "/nutritionist", onNavigate, onSignOut }: NutritionistProfilePageProps) {
   const { profile, isLoading, setProfile } = useNutritionistProfile();
   const { execute, isSaving, error: saveError, savedAt } = useUpdateProfile();
-  const [form, setForm] = useState<ProfileForm>(emptyForm);
+  const [draftForm, setDraftForm] = useState<ProfileForm | null>(null);
   const [newSpecialty, setNewSpecialty] = useState("");
   const [showSpecialtyInput, setShowSpecialtyInput] = useState(false);
 
-  useEffect(() => {
-    if (profile) setForm(toForm(profile));
-  }, [profile]);
+  const form = draftForm ?? (profile ? toForm(profile) : emptyForm);
 
   const fullName = `Dr. ${`${form.firstName} ${form.lastName}`.trim() || "Sarah Jenkins"}`;
   const bioCount = form.bio.length;
@@ -131,10 +131,14 @@ export function NutritionistProfilePage({ onNavigate, onSignOut }: NutritionistP
     return JSON.stringify(form) !== JSON.stringify(toForm(profile));
   }, [form, profile]);
 
+  const updateForm = (updater: (current: ProfileForm) => ProfileForm) => {
+    setDraftForm((current) => updater(current ?? (profile ? toForm(profile) : emptyForm)));
+  };
+
   const handleFieldChange =
     (field: keyof ProfileForm) =>
     (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-      setForm((current) => ({ ...current, [field]: event.target.value }));
+      updateForm((current) => ({ ...current, [field]: event.target.value }));
     };
 
   const addSpecialty = () => {
@@ -150,7 +154,7 @@ export function NutritionistProfilePage({ onNavigate, onSignOut }: NutritionistP
       return;
     }
 
-    setForm((current) => ({
+    updateForm((current) => ({
       ...current,
       specialties: [...current.specialties, createSpecialty(label)],
     }));
@@ -171,25 +175,35 @@ export function NutritionistProfilePage({ onNavigate, onSignOut }: NutritionistP
   };
 
   const removeSpecialty = (id: string) => {
-    setForm((current) => ({
+    updateForm((current) => ({
       ...current,
       specialties: current.specialties.filter((specialty) => specialty.id !== id),
     }));
   };
 
   const resetForm = () => {
-    if (profile) setForm(toForm(profile));
+    setDraftForm(null);
   };
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     const updated = await execute(form);
-    if (updated) setProfile(updated);
+    if (updated) {
+      setProfile(updated);
+      setDraftForm(null);
+    }
   };
 
   if (isLoading) {
     return (
-      <NutritionistLayout title="Profile Information" userInitials="SJ" onNavigate={onNavigate} onSignOut={onSignOut}>
+      <SharedLayout
+        title="Profile Information"
+        currentPath={currentPath}
+        navigationItems={navigationConfig.nutritionist}
+        userInitials={getInitials(form)}
+        onNavigate={onNavigate}
+        onSettingsClick={onSignOut}
+      >
         <div className={styles.pageHeading}>
           <div className={`${styles.skeleton} ${styles.skeletonTitle}`} />
           <div className={`${styles.skeleton} ${styles.skeletonText}`} />
@@ -204,17 +218,18 @@ export function NutritionistProfilePage({ onNavigate, onSignOut }: NutritionistP
             <div className={`${styles.card} ${styles.skeletonPanel}`} />
           </div>
         </div>
-      </NutritionistLayout>
+      </SharedLayout>
     );
   }
 
   return (
-    <NutritionistLayout
+    <SharedLayout
       title="Profile Information"
-      avatarUrl={profile?.avatarUrl}
+      currentPath={currentPath}
+      navigationItems={navigationConfig.nutritionist}
       userInitials={getInitials(form)}
       onNavigate={onNavigate}
-      onSignOut={onSignOut}
+      onSettingsClick={onSignOut}
     >
       <div className={styles.pageHeading}>
         <h1 className={styles.pageTitle}>Professional Profile</h1>
@@ -457,6 +472,6 @@ export function NutritionistProfilePage({ onNavigate, onSignOut }: NutritionistP
           </div>
         </div>
       </form>
-    </NutritionistLayout>
+    </SharedLayout>
   );
 }

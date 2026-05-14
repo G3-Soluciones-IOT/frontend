@@ -1,5 +1,6 @@
 import { patientDirectory } from "../../infrastructure/mock/patients.mock";
-import { PatientsLayout } from "../components/PatientsLayout";
+import { SharedLayout } from "@/shared/components/layout";
+import { navigationConfig } from "@/shared/constants/navigation.config";
 import styles from "./PatientsPages.module.css";
 
 interface PatientsDirectoryPageProps {
@@ -15,10 +16,11 @@ function statusClass(status: "active" | "on_hold" | "completed") {
 
 export function PatientsDirectoryPage({ currentPath, onNavigate }: PatientsDirectoryPageProps) {
   return (
-    <PatientsLayout
+    <SharedLayout
       title="Patient Directory"
       currentPath={currentPath}
       onNavigate={onNavigate}
+      navigationItems={navigationConfig.nutritionist}
       breadcrumbs={["Patients", "Directory"]}
     >
       <div className={styles.stack}>
@@ -90,6 +92,6 @@ export function PatientsDirectoryPage({ currentPath, onNavigate }: PatientsDirec
           </div>
         </section>
       </div>
-    </PatientsLayout>
+    </SharedLayout>
   );
 }
