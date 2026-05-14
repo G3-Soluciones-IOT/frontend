@@ -19,7 +19,6 @@ export type { UpdateProfessionalProfileInput } from "./application/dto/UpdatePro
 export { HttpNutritionistRepository } from "./infrastructure/repositories/HttpNutritionistRepository";
 
 // Presentation
-export { NutritionistLayout } from "./presentation/components/NutritionistLayout";
 export { NutritionistProfilePage } from "./presentation/pages/NutritionistProfilePage";
 export { useNutritionistProfile } from "./presentation/hooks/useNutritionistProfile";
 export { useUpdateProfile } from "./presentation/hooks/useUpdateProfile";
