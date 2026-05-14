@@ -1,7 +1,7 @@
 import { useMemo, useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from "react";
 import { SharedLayout } from "@/shared/components/layout";
 import { navigationConfig } from "@/shared/constants/navigation.config";
-import styles from "../components/NutritionistLayout.module.css";
+import styles from "./NutritionistProfile.module.css";
 import { useNutritionistProfile } from "../hooks/useNutritionistProfile";
 import { useUpdateProfile } from "../hooks/useUpdateProfile";
 import type { ExperienceRange, ProfessionalProfile, Specialty } from "../../domain/models/ProfessionalProfile";
