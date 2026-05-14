@@ -30,7 +30,7 @@ export default function App() {
     return <PatientsRoute path={path} onNavigate={navigate} />;
   }
 
-  if (path === "/communication/chat") {
+  if (path.startsWith("/communication")) {
     return <CommunicationRoute path={path} onNavigate={navigate} />;
   }
 
