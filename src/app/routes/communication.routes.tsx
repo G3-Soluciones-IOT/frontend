@@ -1,5 +1,4 @@
-import { SharedLayout } from "@/shared/components/layout";
-import { navigationConfig } from "@/shared/constants/navigation.config";
+import { ChatPage, ConsultationsPage, RecommendationsPage } from "@/modules/communication";
 
 interface CommunicationRouteProps {
   path: string;
@@ -8,17 +7,15 @@ interface CommunicationRouteProps {
 
 export function CommunicationRoute({ path, onNavigate }: CommunicationRouteProps) {
   if (path === "/communication/chat") {
-    return (
-      <SharedLayout
-        title="Communication"
-        currentPath={path}
-        onNavigate={onNavigate}
-        navigationItems={navigationConfig.nutritionist}
-        breadcrumbs={["Communication", "Chat"]}
-      >
-        <p>Hola</p>
-      </SharedLayout>
-    );
+    return <ChatPage currentPath={path} onNavigate={onNavigate} />;
+  }
+
+  if (path === "/communication/consultations") {
+    return <ConsultationsPage currentPath={path} onNavigate={onNavigate} />;
+  }
+
+  if (path === "/communication/recommendations") {
+    return <RecommendationsPage currentPath={path} onNavigate={onNavigate} />;
   }
 
   return null;
