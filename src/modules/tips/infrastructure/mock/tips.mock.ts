@@ -1,0 +1,76 @@
+import type { Tip, TipResource } from "../../domain/models/Tip";
+
+export const mockTips: Tip[] = [
+  {
+    id: 1,
+    title: "Hydration Basics for Athletes",
+    category: "Nutrition",
+    status: "Published",
+    date: "Oct 24, 2023",
+    content: "Learn the importance of staying hydrated during athletic performance.",
+    author: "Dr. Smith",
+    createdAt: "2023-10-24T00:00:00Z",
+    updatedAt: "2023-10-24T00:00:00Z",
+  },
+  {
+    id: 2,
+    title: "Maximizing Post-Workout Recovery",
+    category: "Recovery",
+    status: "Draft",
+    date: "Oct 22, 2023",
+    content: "Best practices for recovery after intense workouts.",
+    author: "Coach Johnson",
+    createdAt: "2023-10-22T00:00:00Z",
+    updatedAt: "2023-10-22T00:00:00Z",
+  },
+  {
+    id: 3,
+    title: "Understanding Macronutrient Ratios",
+    category: "Diet Planning",
+    status: "Published",
+    date: "Oct 18, 2023",
+    content: "Guide to macronutrient distribution for optimal performance.",
+    author: "Nutritionist Lee",
+    createdAt: "2023-10-18T00:00:00Z",
+    updatedAt: "2023-10-18T00:00:00Z",
+  },
+  {
+    id: 4,
+    title: "The Importance of Sleep Quality",
+    category: "Wellness",
+    status: "Draft",
+    date: "Oct 15, 2023",
+    content: "How quality sleep impacts athletic recovery and performance.",
+    author: "Sleep Expert",
+    createdAt: "2023-10-15T00:00:00Z",
+    updatedAt: "2023-10-15T00:00:00Z",
+  },
+];
+
+export const mockTipResources: TipResource[] = [
+  {
+    id: 1,
+    title: "Meal Plan Template",
+    description: "A customizable 7-day meal prep template for endurance athletes.",
+    assetLabel: "PDF",
+    downloads: 124,
+    views: 450,
+    variant: "light",
+    url: "/resources/meal-plan-template.pdf",
+    createdAt: "2023-09-01T00:00:00Z",
+    updatedAt: "2023-09-01T00:00:00Z",
+  },
+  {
+    id: 2,
+    title: "Macro Infographic",
+    description: "Visual breakdown of protein, carbs, and fats for client education.",
+    assetLabel: "PNG",
+    downloads: 89,
+    views: 210,
+    variant: "dark",
+    url: "/resources/macro-infographic.png",
+    createdAt: "2023-08-15T00:00:00Z",
+    updatedAt: "2023-08-15T00:00:00Z",
+  },
+];
+
