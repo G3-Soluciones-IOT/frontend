@@ -1,4 +1,5 @@
-import { PaymentsLayout } from "../components/PaymentsLayout";
+import { SharedLayout } from "@/shared/components/layout";
+import { navigationConfig } from "@/shared/constants/navigation.config";
 import styles from "./PaymentsPages.module.css";
 import { useSubscriptionPlans } from "../hooks/useSubscriptionPlans";
 import type { SubscriptionPlan } from "../../domain/models/SubscriptionPlan";
@@ -77,10 +78,11 @@ export function PaymentsPage({ currentPath, onNavigate }: PaymentsPageProps) {
 
   if (isLoading) {
     return (
-      <PaymentsLayout
+      <SharedLayout
         title="Plans & Pricing"
         currentPath={currentPath}
         onNavigate={onNavigate}
+        navigationItems={navigationConfig.nutritionist}
         breadcrumbs={["Subscriptions"]}
       >
         <div className={styles.headerRow}>
@@ -94,15 +96,16 @@ export function PaymentsPage({ currentPath, onNavigate }: PaymentsPageProps) {
           </div>
         </div>
         <div style={{ textAlign: "center", padding: "40px" }}>Loading plans...</div>
-      </PaymentsLayout>
+      </SharedLayout>
     );
   }
 
   return (
-    <PaymentsLayout
+    <SharedLayout
       title="Plans & Pricing"
       currentPath={currentPath}
       onNavigate={onNavigate}
+      navigationItems={navigationConfig.nutritionist}
       breadcrumbs={["Subscriptions"]}
     >
       <div className={styles.headerRow}>
@@ -122,6 +125,6 @@ export function PaymentsPage({ currentPath, onNavigate }: PaymentsPageProps) {
           <PlanCard key={plan.id} plan={plan} />
         ))}
       </div>
-    </PaymentsLayout>
+    </SharedLayout>
   );
 }
