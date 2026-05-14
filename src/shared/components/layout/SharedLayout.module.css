@@ -17,6 +17,8 @@
   width: 182px;
   background: #293241;
   padding: 22px 14px 24px;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
   z-index: 100;
 }
@@ -34,6 +36,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  flex: 1;
 }
 
 .navItem {
@@ -72,6 +75,36 @@
 .navSpacer {
   width: 16px;
   flex: 0 0 16px;
+}
+
+.sidebarFooter {
+  padding-top: 12px;
+}
+
+.logoutButton {
+  width: 100%;
+  border: 0;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #d7deea;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  font: inherit;
+  font-size: 0.88rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.logoutButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.logoutButton svg {
+  flex: 0 0 auto;
 }
 
 .main {
@@ -176,6 +209,7 @@
   .nav {
     flex-direction: row;
     overflow-x: auto;
+    flex: 0;
     padding: 8px;
   }
 
@@ -187,6 +221,14 @@
 
   .main {
     margin-left: 0;
+  }
+
+  .sidebarFooter {
+    padding: 8px 8px 0;
+  }
+
+  .logoutButton {
+    width: auto;
   }
 
   .content {
