@@ -1,25 +1,21 @@
-@import url("https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap");
-
+﻿@import url("https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap");
 :root {
   --green: #10B34C;
   --blue: #099FE1;
   --light-pill: #DCE3F2;
   --card-border: #D1D5DB;
 }
-
 .pageHeading {
   margin: 0 0 6px;
   font-size: 1.125rem;
   font-weight: 700;
   color: #1f2937;
 }
-
 .pageIntro {
   margin: 0;
   color: #475569;
   font-size: 0.98rem;
 }
-
 .headerRow {
   display: flex;
   align-items: center;
@@ -27,7 +23,6 @@
   gap: 16px;
   margin-bottom: 20px;
 }
-
 .createButton {
   background: var(--green);
   color: #fff;
@@ -37,13 +32,11 @@
   font-weight: 600;
   cursor: pointer;
 }
-
 .cardsGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
 }
-
 .card {
   background: #fff;
   border: 1px solid var(--card-border);
@@ -55,11 +48,9 @@
   min-height: 450px;
   position: relative;
 }
-
 .cardPopular {
   border-color: var(--green);
 }
-
 .popularBadge {
   position: absolute;
   right: -1px;
@@ -72,21 +63,18 @@
   border-radius: 0 12px 0 12px;
   z-index: 1;
 }
-
 .cardBody {
   display: flex;
   flex-direction: column;
   gap: 6px;
   flex: 1;
 }
-
 .cardHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
-
 .badgePill {
   display: inline-block;
   padding: 6px 12px;
@@ -95,7 +83,6 @@
   color: #1f2937;
   font-size: 0.9rem;
 }
-
 .badgePillPopular {
   display: inline-block;
   padding: 6px 12px;
@@ -106,53 +93,44 @@
   border: none;
   font-size: 0.9rem;
 }
-
 .tierLabel {
   font-size: 0.85rem;
   color: #6b7280;
   font-weight: 600;
 }
-
 .tierLabelPopular {
   font-size: 0.85rem;
   color: var(--green);
   font-weight: 600;
 }
-
 .tierHeading {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
   color: #1f2937;
 }
-
 .priceRow {
   margin-top: 0;
 }
-
 .priceValue {
   display: flex;
   align-items: baseline;
   gap: 8px;
 }
-
 .priceAmount {
   font-size: 1.5rem;
   font-weight: 800;
   color: #0f172a;
 }
-
 .pricePeriod {
   font-size: 0.95rem;
   color: #475569;
 }
-
 .cardCopy {
   color: #374151;
   margin: 0;
   font-size: 0.95rem;
 }
-
 .checkList {
   list-style: none;
   padding: 0;
@@ -161,7 +139,6 @@
   flex-direction: column;
   gap: 8px;
 }
-
 .checkList li {
   display: flex;
   align-items: center;
@@ -169,11 +146,9 @@
   color: #334155;
   font-size: 0.95rem;
 }
-
 .checkList svg {
   color: var(--green);
 }
-
 .cardFooter {
   display: flex;
   justify-content: center;
@@ -181,7 +156,6 @@
   padding-top: 12px;
   width: 100%;
 }
-
 .editButton {
   background: #fff;
   color: var(--blue);
@@ -193,40 +167,33 @@
   width: 85%;
   text-align: center;
 }
-
 .editButtonPrimary {
   background: var(--green);
   color: white;
   border-color: var(--green);
 }
-
 .cardPopular .badgePillPopular {
   background: transparent;
   color: var(--green);
   border: none;
 }
-
 .cardPopular .tierLabelPopular {
   color: var(--green);
 }
-
 @media (max-width: 980px) {
   .cardsGrid {
     grid-template-columns: repeat(2, 1fr);
     gap: 14px;
   }
 }
-
 @media (max-width: 640px) {
   .headerRow {
     flex-direction: column;
     align-items: flex-start;
   }
-
   .cardsGrid {
     grid-template-columns: 1fr;
   }
-
   .popularBadge {
     right: -1px;
     top: -1px;
