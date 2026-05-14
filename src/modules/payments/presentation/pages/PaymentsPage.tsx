@@ -128,3 +128,4 @@ export function PaymentsPage({ currentPath, onNavigate }: PaymentsPageProps) {
     </SharedLayout>
   );
 }
+
