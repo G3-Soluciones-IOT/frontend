@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { SignInRoute, SignUpRoute } from "./routes/auth.routes";
-import { NutritionistProfileRoute } from "./routes/nutritionist.routes";
+import { CommunicationRoute } from "./routes/communication.routes";
+import { isNutritionistShellPath, NutritionistProfileRoute, NutritionistShellRoute } from "./routes/nutritionist.routes";
 import { PatientsRoute } from "./routes/patients.routes";
 
 export default function App() {
@@ -22,11 +23,19 @@ export default function App() {
   }
 
   if (path === "/professional-profile") {
-    return <NutritionistProfileRoute onNavigate={navigate} />;
+    return <NutritionistProfileRoute currentPath={path} onNavigate={navigate} />;
   }
 
   if (path.startsWith("/patients") || path.startsWith("/nutritionist/patients")) {
     return <PatientsRoute path={path} onNavigate={navigate} />;
+  }
+
+  if (path === "/communication/chat") {
+    return <CommunicationRoute path={path} onNavigate={navigate} />;
+  }
+
+  if (isNutritionistShellPath(path)) {
+    return <NutritionistShellRoute currentPath={path} onNavigate={navigate} />;
   }
 
   return (
