@@ -7,7 +7,7 @@ interface AuthRouteProps {
 export function SignInRoute({ onNavigate }: AuthRouteProps) {
   return (
     <SignInPage
-      onSignIn={() => onNavigate("/professional-profile")}
+      onSignIn={() => onNavigate("/nutritionist")}
       onNavigateToSignUp={() => onNavigate("/sign-up")}
     />
   );

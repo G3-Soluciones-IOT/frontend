@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { AccountSettingsRoute } from "./routes/account-settings.routes";
 import { SignInRoute, SignUpRoute } from "./routes/auth.routes";
 import { CommunicationRoute } from "./routes/communication.routes";
+import { DashboardRoute } from "./routes/dashboard.routes";
 import { isNutritionistShellPath, NutritionistProfileRoute, NutritionistShellRoute } from "./routes/nutritionist.routes";
 import { NotificationsRoute } from "./routes/notifications.routes";
 import { PatientsRoute } from "./routes/patients.routes";
@@ -36,6 +37,10 @@ export default function App() {
 
   if (path === "/notifications") {
     return <NotificationsRoute currentPath={path} onNavigate={navigate} />;
+  }
+
+  if (path === "/nutritionist" || path === "/nutritionist/recent-logs") {
+    return <DashboardRoute currentPath={path} onNavigate={navigate} />;
   }
 
   if (path.startsWith("/patients") || path.startsWith("/nutritionist/patients")) {
