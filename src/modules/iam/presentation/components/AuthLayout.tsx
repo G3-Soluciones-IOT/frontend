@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import styles from "./AuthLayout.module.css";
-import logo from "@/assets/LogoJameo.png";
+import logo from "@/assets/LogoJameoFit.png";
 
 interface AuthLayoutProps {
   children: ReactNode;

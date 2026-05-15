@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import logo from "@/assets/LogoJameo.png";
+import logo from "@/assets/LogoJameoFit.png";
 import styles from "./SharedLayout.module.css";
 import { Topbar } from "./Topbar";
 
@@ -17,6 +17,12 @@ export interface SharedLayoutProps {
   onNavigate: (href: string) => void;
   navigationItems: NavigationItem[];
   breadcrumbs?: string[];
+  topbarTabs?: {
+    label: string;
+    href: string;
+    active?: boolean;
+  }[];
+  showPageTitle?: boolean;
   userInitials?: string;
   onSettingsClick?: () => void;
   onNotificationsClick?: () => void;
@@ -27,8 +33,17 @@ export interface SharedLayoutProps {
 
 function isActive(currentPath: string, href: string) {
   if (currentPath === href) return true;
+  if (href === "/nutritionist") {
+    return currentPath.startsWith("/nutritionist/recent-logs");
+  }
   // Si es un padre, marca como activo si el currentPath comienza con ese href
-  if (href === "/nutritionist" || href === "/patients" || href === "/communication" || href === "/content") {
+  if (href === "/patients" || href === "/content") {
+    return currentPath.startsWith(href);
+  }
+  if (href === "/nutritionist/patients/overview") {
+    return currentPath.startsWith("/nutritionist/patients");
+  }
+  if (href === "/nutritionist/subscriptions") {
     return currentPath.startsWith(href);
   }
   return false;
@@ -51,6 +66,8 @@ export function SharedLayout({
   onNavigate,
   navigationItems,
   breadcrumbs = [],
+  topbarTabs = [],
+  showPageTitle = true,
   userInitials = "SJ",
   onSettingsClick,
   onNotificationsClick,
@@ -106,6 +123,7 @@ export function SharedLayout({
         <Topbar
           title={title}
           breadcrumbs={breadcrumbs}
+          tabs={topbarTabs}
           userInitials={userInitials}
           onSettingsClick={onSettingsClick ?? (() => onNavigate("/account-settings"))}
           onNotificationsClick={onNotificationsClick ?? (() => onNavigate("/notifications"))}
@@ -115,11 +133,10 @@ export function SharedLayout({
         />
 
         <section className={styles.content}>
-          <h1 className={styles.pageTitle}>{title}</h1>
+          {showPageTitle && <h1 className={styles.pageTitle}>{title}</h1>}
           {children}
         </section>
       </main>
     </div>
   );
 }
-

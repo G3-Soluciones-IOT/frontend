@@ -1,0 +1,386 @@
+.pageShell {
+  display: grid;
+  gap: 32px;
+  padding: 16px 10px 40px;
+}
+
+.hero h1 {
+  margin: 0;
+  color: #141a24;
+  font-size: 2.35rem;
+  line-height: 1.08;
+  font-weight: 700;
+}
+
+.hero p {
+  margin: 12px 0 0;
+  color: #3f4b3f;
+  font-size: 1.18rem;
+  line-height: 1.35;
+}
+
+.panel {
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e0e5ee;
+  border-radius: 10px;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+}
+
+.filterBar {
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 0 24px;
+  border-bottom: 1px solid #e5e9f1;
+  background: #ffffff;
+}
+
+.filterLabel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #586176;
+}
+
+.filterLabel span {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.filterButtons {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.filterButton {
+  min-height: 36px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 18px;
+  background: #e9effc;
+  color: #1f2937;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.filterButton:hover {
+  transform: translateY(-1px);
+}
+
+.filterButtonActive {
+  background: #13b84f;
+  color: #ffffff;
+}
+
+.errorText {
+  margin: 0;
+  padding: 10px 24px;
+  background: #fff7db;
+  color: #9a6300;
+  font-size: 0.86rem;
+}
+
+.tableWrap {
+  position: relative;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+}
+
+.table th {
+  height: 84px;
+  padding: 0 24px;
+  background: #f7f8fd;
+  border-bottom: 1px solid #e6ebf3;
+  color: #596174;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.25;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.table th:nth-child(1) {
+  width: 18%;
+}
+
+.table th:nth-child(2) {
+  width: 39%;
+}
+
+.table th:nth-child(3) {
+  width: 13%;
+}
+
+.table th:nth-child(4) {
+  width: 16%;
+}
+
+.table th:nth-child(5) {
+  width: 14%;
+  text-align: right;
+}
+
+.table td {
+  height: 113px;
+  padding: 0 24px;
+  border-bottom: 1px solid #eef1f6;
+  color: #151c28;
+  vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.patientCell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.patientCell strong {
+  display: block;
+  max-width: 118px;
+  color: #151c28;
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.patientCell span,
+.reasonCell span,
+.dateCell span {
+  display: block;
+  color: #2f3a35;
+  font-size: 0.78rem;
+  line-height: 1.25;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 1px solid #e1e6ef;
+  overflow: hidden;
+  color: #0b5f83;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.photo-woman,
+.photo-man {
+  background:
+    radial-gradient(circle at 50% 33%, #efc4a3 0 22%, transparent 23%),
+    radial-gradient(circle at 50% 28%, #4f382e 0 28%, transparent 29%),
+    linear-gradient(145deg, #dfe6ed, #f8fafc);
+}
+
+.photo-woman span,
+.photo-man span {
+  width: 70%;
+  height: 70%;
+  display: block;
+  border-radius: 50%;
+  background:
+    linear-gradient(#f5fafc, #f5fafc) center 85% / 75% 30% no-repeat,
+    radial-gradient(circle at 40% 42%, #18212c 0 4%, transparent 5%),
+    radial-gradient(circle at 60% 42%, #18212c 0 4%, transparent 5%),
+    radial-gradient(circle at 50% 58%, #d99572 0 8%, transparent 9%),
+    radial-gradient(circle at 50% 45%, #f1c4a6 0 45%, transparent 46%);
+}
+
+.photo-man {
+  background:
+    radial-gradient(circle at 50% 31%, #d6a17d 0 21%, transparent 22%),
+    radial-gradient(circle at 50% 27%, #1d2531 0 26%, transparent 27%),
+    linear-gradient(145deg, #dfe6ed, #f8fafc);
+}
+
+.blue {
+  background: #82cef8;
+}
+
+.reasonCell {
+  max-width: 430px;
+}
+
+.reasonCell strong,
+.dateCell strong {
+  display: block;
+  color: #151c28;
+  font-size: 1rem;
+  line-height: 1.25;
+  font-weight: 500;
+}
+
+.reasonCell span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dateCell strong {
+  max-width: 86px;
+}
+
+.dateCell span {
+  color: #4e5a70;
+}
+
+.statusPill {
+  min-height: 27px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 0 13px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.statusPill span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.statusPending {
+  background: #fff0c7;
+  color: #9b7000;
+}
+
+.statusPending span {
+  background: #f2b600;
+}
+
+.statusConfirmed {
+  background: #cde5ff;
+  color: #006fc9;
+}
+
+.statusConfirmed span {
+  background: #0087ff;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.approveButton,
+.moreButton,
+.pagination button {
+  border: 0;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.approveButton {
+  width: 28px;
+  height: 28px;
+  color: #00843d;
+}
+
+.moreButton {
+  width: 24px;
+  height: 32px;
+  color: #4b5563;
+}
+
+.loadingOverlay {
+  position: absolute;
+  inset: 84px 0 0;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.72);
+  color: #475569;
+  font-weight: 600;
+}
+
+.footer {
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 0 24px;
+  border-top: 1px solid #eef1f6;
+  background: #fbfbfd;
+}
+
+.footer p {
+  margin: 0;
+  color: #4b5563;
+  font-size: 0.84rem;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination button {
+  width: 30px;
+  height: 32px;
+  border-radius: 6px;
+  color: #111827;
+  font: inherit;
+  font-size: 0.82rem;
+}
+
+.pagination button:disabled {
+  color: #a8b0be;
+  cursor: default;
+}
+
+.pagination .pageActive {
+  background: #13b84f;
+  color: #ffffff;
+}
+
+.pagination span {
+  color: #111827;
+  font-size: 0.86rem;
+}
+
+@media (max-width: 860px) {
+  .pageShell {
+    padding: 10px 0 28px;
+  }
+
+  .hero h1 {
+    font-size: 2rem;
+  }
+
+  .filterBar,
+  .footer {
+    align-items: flex-start;
+    flex-direction: column;
+    justify-content: center;
+    padding: 18px;
+  }
+}

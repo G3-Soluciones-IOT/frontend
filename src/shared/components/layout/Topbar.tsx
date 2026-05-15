@@ -12,6 +12,11 @@ function SettingsIcon() {
 export interface TopbarProps {
   title: string;
   breadcrumbs?: string[];
+  tabs?: {
+    label: string;
+    href: string;
+    active?: boolean;
+  }[];
   userInitials?: string;
   onSettingsClick?: () => void;
   onNotificationsClick?: () => void;
@@ -23,6 +28,7 @@ export interface TopbarProps {
 export function Topbar({
   title,
   breadcrumbs = [],
+  tabs = [],
   userInitials = "SJ",
   onSettingsClick,
   onNotificationsClick,
@@ -52,7 +58,26 @@ export function Topbar({
 
   return (
     <header className={styles.topbar}>
-      <div className={styles.breadcrumbs}>{breadcrumbText}</div>
+      <div className={styles.topbarStart}>
+        <div className={styles.breadcrumbs}>{breadcrumbText}</div>
+        {tabs.length > 0 && (
+          <>
+            <span className={styles.topbarDivider} aria-hidden="true" />
+            <nav className={styles.topbarTabs} aria-label={`${title} views`}>
+              {tabs.map((tab) => (
+                <button
+                  key={tab.href}
+                  type="button"
+                  className={`${styles.topbarTab} ${tab.active ? styles.topbarTabActive : ""}`}
+                  onClick={() => onNavigate?.(tab.href)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+          </>
+        )}
+      </div>
       <div className={styles.topbarActions}>
         <NotificationBell
           className={styles.iconButton}

@@ -1,0 +1,317 @@
+.dashboard {
+  display: grid;
+  gap: 14px;
+}
+
+.heroHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.heading {
+  margin: 0;
+  color: #141a24;
+  font-size: 1.95rem;
+  line-height: 1.08;
+  font-weight: 700;
+}
+
+.subheading {
+  margin: 10px 0 0;
+  color: #3f4b3f;
+  font-size: 1.12rem;
+  line-height: 1.35;
+}
+
+.primaryButton {
+  border: 0;
+  border-radius: 4px;
+  background: #12b950;
+  color: #ffffff;
+  min-height: 40px;
+  padding: 0 17px;
+  font: inherit;
+  font-size: 0.98rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.primaryButton:hover {
+  background: #0da447;
+  transform: translateY(-1px);
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 308px);
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.aiCard {
+  min-height: 170px;
+  border-radius: 10px;
+  padding: 27px 26px 24px;
+  color: #062e24;
+  background: linear-gradient(112deg, #0fbd54 0%, #1ba9d7 100%);
+}
+
+.aiTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px;
+  color: #046539;
+  font-size: 1.25rem;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.aiText {
+  max-width: 590px;
+  margin: 0;
+  color: #051515;
+  font-size: 1.08rem;
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+
+.tagRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 25px;
+  border-radius: 999px;
+  padding: 0 11px;
+  font-size: 0.75rem;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.tagGreen {
+  background: #dff5e5;
+  color: #087437;
+}
+
+.tagRed {
+  background: #ffd9d5;
+  color: #ba1118;
+}
+
+.activePatientsCard,
+.panel {
+  background: #ffffff;
+  border: 1px solid #d6dde7;
+  border-radius: 10px;
+}
+
+.activePatientsCard {
+  min-height: 170px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: #096896;
+}
+
+.patientCount {
+  margin: 8px 0 0;
+  color: #121722;
+  font-size: 3.18rem;
+  line-height: 0.92;
+  font-weight: 700;
+}
+
+.patientLabel {
+  margin: 7px 0 0;
+  color: #3f4b3f;
+  font-size: 1rem;
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: minmax(260px, 309px) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.panel {
+  padding: 23px 24px 24px;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 15px;
+  padding-bottom: 13px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.panelTitle {
+  margin: 0;
+  color: #151c28;
+  font-size: 1.3rem;
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+.viewAllButton {
+  border: 0;
+  background: transparent;
+  color: #007a34;
+  font: inherit;
+  font-size: 0.98rem;
+  cursor: pointer;
+}
+
+.consultationList {
+  display: grid;
+  gap: 32px;
+  padding: 9px 7px 0;
+}
+
+.consultationItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.consultationAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #334155;
+  font-weight: 500;
+}
+
+.avatarBlue {
+  background: #98dcff;
+  color: #117099;
+}
+
+.avatarSlate {
+  background: #a7aebb;
+  color: #434a56;
+}
+
+.consultationName {
+  margin: 0;
+  color: #1f2530;
+  font-size: 1rem;
+  line-height: 1.1;
+  font-weight: 700;
+}
+
+.consultationMeta {
+  margin: 2px 0 0;
+  color: #232b36;
+  font-size: 0.8rem;
+}
+
+.upcomingPill,
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.upcomingPill {
+  margin-left: auto;
+  min-height: 32px;
+  border-radius: 4px;
+  padding: 0 9px;
+  background: #edf1ff;
+  color: #00813b;
+  text-transform: uppercase;
+}
+
+.mealTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.mealTable th,
+.mealTable td {
+  text-align: left;
+}
+
+.mealTable th {
+  padding: 7px 16px 14px;
+  border-bottom: 1px solid #dbe3ef;
+  color: #3c463c;
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.mealTable td {
+  padding: 15px 16px;
+  border-bottom: 1px solid #dbe3ef;
+  color: #19212d;
+  font-size: 1rem;
+}
+
+.mealTable tr:last-child td {
+  border-bottom: 0;
+}
+
+.statusPill {
+  min-height: 25px;
+  padding: 0 10px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.statusApproved {
+  background: #e9f8e7;
+  color: #008331;
+}
+
+.statusReviewNeeded {
+  background: #ffd9d7;
+  color: #d2121c;
+}
+
+.statusLogged {
+  background: #bfe2fb;
+  color: #006e9f;
+}
+
+@media (max-width: 860px) {
+  .heroHeader,
+  .summaryGrid,
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .heroHeader {
+    display: grid;
+  }
+
+  .primaryButton {
+    width: fit-content;
+  }
+
+  .mealTable {
+    min-width: 560px;
+  }
+
+  .tableWrap {
+    overflow-x: auto;
+  }
+}
