@@ -1,0 +1,598 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=Jost:wght@300;400;500;600&display=swap");
+
+/* ─── Tokens ─────────────────────────────────────────── */
+:root {
+  --cyan: #099FE1;
+  --black: #0000;
+  --forest: #1a2e1c;
+  --forest-mid: #253d27;
+  --forest-light: #3a6040;
+  --gold: #c8a96e;
+  --gold-light: #dfc08a;
+  --white: #ffff;
+  --text-dark: #1a2e1c;
+  --text-muted: #575E70;
+  --error: #c0392b;
+  --primary-color: #10B34C;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 24px;
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Layout ─────────────────────────────────────────── */
+.authRoot {
+  display: flex;
+  min-height: 100dvh;
+  font-family: "Jost", sans-serif;
+  background: var(--cream);
+  overflow: hidden;
+}
+
+/* ─── Left Visual Panel ───────────────────────────────── */
+.visualPanel {
+  position: relative;
+  flex: 0 0 55%;
+  background: var(--forest);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.visualPanel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 80%, rgba(200, 169, 110, 0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 70% at 85% 20%, rgba(58, 96, 64, 0.6) 0%, transparent 55%),
+    radial-gradient(ellipse 100% 80% at 50% 50%, rgba(37, 61, 39, 0.4) 0%, transparent 100%);
+}
+
+/* Organic blob shapes */
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.35;
+  animation: floatBlob 12s ease-in-out infinite;
+}
+
+.blob1 {
+  width: 420px;
+  height: 420px;
+  background: var(--forest-light);
+  top: -80px;
+  right: -60px;
+  animation-delay: 0s;
+}
+
+.blob2 {
+  width: 300px;
+  height: 300px;
+  background: var(--gold);
+  bottom: 60px;
+  left: -40px;
+  animation-delay: -4s;
+  opacity: 0.2;
+}
+
+.blob3 {
+  width: 200px;
+  height: 200px;
+  background: var(--forest-light);
+  bottom: 200px;
+  right: 80px;
+  animation-delay: -8s;
+}
+
+@keyframes floatBlob {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  33%       { transform: translateY(-24px) scale(1.04); }
+  66%       { transform: translateY(16px) scale(0.97); }
+}
+
+/* Grid texture overlay */
+.visualPanel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(200, 169, 110, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200, 169, 110, 0.06) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.visualContent {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  padding: 48px;
+  text-align: center;
+  max-width: 440px;
+}
+
+.brandMark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.brandIcon {
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 32px rgba(200, 169, 110, 0.4);
+}
+
+.brandName {
+  font-family: "Fraunces", serif;
+  font-size: 2.8rem;
+  font-weight: 300;
+  color: var(--cream);
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.brandName span {
+  color: var(--gold);
+}
+
+.visualTagline {
+  font-family: "Fraunces", serif;
+  font-size: 2rem;
+  font-weight: 300;
+  font-style: italic;
+  color: rgba(247, 243, 235, 0.75);
+  line-height: 1.4;
+  max-width: 340px;
+}
+
+.visualDivider {
+  width: 48px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.visualFeatures {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.featureItem {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  background: rgba(247, 243, 235, 0.06);
+  border: 1px solid rgba(200, 169, 110, 0.2);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(8px);
+  text-align: left;
+  animation: fadeSlideIn 0.6s ease-out both;
+}
+
+.featureItem:nth-child(1) { animation-delay: 0.1s; }
+.featureItem:nth-child(2) { animation-delay: 0.2s; }
+.featureItem:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.featureIcon {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.featureText {
+  font-size: 0.85rem;
+  color: rgba(247, 243, 235, 0.8);
+  font-weight: 400;
+  letter-spacing: 0.3px;
+}
+
+/* ─── Right Form Panel ────────────────────────────────── */
+.formPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 56px;
+  background: var(--white);
+  position: relative;
+}
+
+.formPanel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--black), var(--gold), var(--black));
+  opacity: 0.4;
+}
+
+.formCard {
+  width: 100%;
+  max-width: 380px;
+  animation: panelIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes panelIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.formLogo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 40px;
+}
+
+.formLogoMark {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, var(--forest) 0%, var(--forest-light) 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.formLogoName {
+  font-family: "Fraunces", serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: var(--text-dark);
+  letter-spacing: -0.3px;
+}
+
+.formLogoName span {
+  color: var(--gold);
+}
+
+.heading {
+  font-family: "Fraunces", serif;
+  font-size: 2rem;
+  font-weight: 400;
+  color: var(--text-dark);
+  margin: 0 0 6px;
+  letter-spacing: -0.5px;
+}
+
+.subheading {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0 0 36px;
+  font-weight: 400;
+}
+
+/* ─── Form Elements ───────────────────────────────────── */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fieldLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.fieldWrapper {
+  position: relative;
+}
+
+.fieldIcon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+  transition: color var(--transition);
+  display: flex;
+  align-items: center;
+}
+
+.fieldInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px 14px 13px 42px;
+  background: white;
+  border: 1.5px solid var(--cream-dark);
+  border-radius: var(--radius-sm);
+  font-family: "Jost", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--text-dark);
+  outline: none;
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition);
+}
+
+.fieldInput::placeholder {
+  color: #a8b8aa;
+}
+
+.fieldInput:focus {
+  border-color: var(--black);
+  box-shadow: 0 0 0 3px rgba(58, 96, 64, 0.12);
+}
+
+.fieldInput:focus ~ .fieldIcon,
+.fieldWrapper:focus-within .fieldIcon {
+  color: var(--black);
+}
+
+.fieldInput.hasError {
+  border-color: var(--error);
+  box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.1);
+}
+
+.fieldError {
+  font-size: 0.78rem;
+  color: var(--error);
+  margin-top: 2px;
+}
+
+/* Password toggle */
+.togglePassword {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: color var(--transition);
+}
+
+.togglePassword:hover {
+  color: var(--black);
+}
+
+/* Select input */
+.fieldSelect {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px 14px 13px 42px;
+  background: white;
+  border: 1.5px solid var(--cream-dark);
+  border-radius: var(--radius-sm);
+  font-family: "Jost", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--text-dark);
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition);
+}
+
+.fieldSelect:focus {
+  border-color: var(--text-muted);
+  box-shadow: 0 0 0 3px rgba(58, 96, 64, 0.12);
+}
+
+/* ─── Row layout for name fields ──────────────────────── */
+.fieldRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ─── Submit Button ───────────────────────────────────── */
+.submitBtn {
+  width: 100%;
+  padding: 14px;
+  margin-top: 4px;
+  background: var(--primary-color);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: "Jost", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition:
+    transform var(--transition),
+    box-shadow var(--transition),
+    opacity var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.submitBtn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(200, 169, 110, 0.15), transparent);
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.submitBtn:hover:not(:disabled)::after { opacity: 1; }
+
+.submitBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(26, 46, 28, 0.35);
+}
+
+.submitBtn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.submitBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(247, 243, 235, 0.4);
+  border-top-color: var(--cream);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Error Banner ────────────────────────────────────── */
+.errorBanner {
+  padding: 12px 16px;
+  background: rgba(192, 57, 43, 0.08);
+  border: 1px solid rgba(192, 57, 43, 0.25);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  color: var(--error);
+  text-align: center;
+}
+
+/* ─── Footer link ─────────────────────────────────────── */
+.formFooter {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.formFooter a,
+.formFooter button {
+  color: var(--cyan);
+  font-weight: 600;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-family: "Jost", sans-serif;
+  font-size: inherit;
+  transition: color var(--cyan);
+  padding: 0;
+}
+
+.formFooter a:hover,
+.formFooter button:hover {
+  color: var(--gold);
+}
+
+/* ─── Divider ─────────────────────────────────────────── */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--cream-dark);
+}
+
+.dividerText {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ─── Responsive ─────────────────────────────────────── */
+@media (max-width: 900px) {
+  .authRoot {
+    flex-direction: column;
+  }
+
+  .visualPanel {
+    flex: 0 0 220px;
+  }
+
+  .visualContent {
+    gap: 20px;
+    padding: 32px;
+  }
+
+  .visualTagline,
+  .visualFeatures {
+    display: none;
+  }
+
+  .brandName {
+    font-size: 2rem;
+  }
+
+  .formPanel {
+    padding: 40px 28px;
+    justify-content: flex-start;
+  }
+}
+
+.visualImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.visualOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(26, 46, 28, 0.55) 0%,
+    rgba(26, 46, 28, 0.4) 50%,
+    rgba(26, 46, 28, 0.7) 100%
+  );
+  z-index: 1;
+}
+
+/* asegura que el contenido quede sobre el overlay */
+.visualContent {
+  z-index: 2;
+}
