@@ -51,7 +51,7 @@ export function SharedLayout({
   onNavigate,
   navigationItems,
   breadcrumbs = [],
-  userInitials = "RG",
+  userInitials = "SJ",
   onSettingsClick,
   onNotificationsClick,
   onProfileClick,
@@ -107,8 +107,8 @@ export function SharedLayout({
           title={title}
           breadcrumbs={breadcrumbs}
           userInitials={userInitials}
-          onSettingsClick={onSettingsClick}
-          onNotificationsClick={onNotificationsClick}
+          onSettingsClick={onSettingsClick ?? (() => onNavigate("/account-settings"))}
+          onNotificationsClick={onNotificationsClick ?? (() => onNavigate("/notifications"))}
           onProfileClick={onProfileClick}
           onNavigate={onNavigate}
           styles={styles}

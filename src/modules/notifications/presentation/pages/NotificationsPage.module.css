@@ -1,0 +1,110 @@
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin: -8px 0 24px;
+  max-width: 930px;
+}
+
+.headerRow p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.86rem;
+}
+
+.markReadButton {
+  border: 0;
+  background: transparent;
+  color: #0284c7;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 930px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionHeader {
+  border-bottom: 1px solid #cfd8e6;
+  padding-bottom: 10px;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sectionTitle svg {
+  color: #ef4444;
+}
+
+.section:nth-child(2) .sectionTitle svg {
+  color: #16a34a;
+}
+
+.section:nth-child(3) .sectionTitle svg {
+  color: #0284c7;
+}
+
+.sectionTitle h2 {
+  margin: 0;
+  color: #334155;
+  font-size: 1.14rem;
+  font-weight: 800;
+}
+
+.notificationList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.actionButton {
+  border-radius: 5px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 8px 13px;
+}
+
+.actionPrimary {
+  border: 0;
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.actionSecondary {
+  border: 1px solid #0284c7;
+  background: #ffffff;
+  color: #0284c7;
+}
+
+.actionMuted {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+}
+
+@media (max-width: 720px) {
+  .headerRow {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

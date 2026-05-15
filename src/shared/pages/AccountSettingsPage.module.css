@@ -1,0 +1,226 @@
+.header {
+  margin: -10px 0 22px;
+}
+
+.header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.86rem;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 860px;
+}
+
+.statusMessage {
+  max-width: 860px;
+  margin: -8px 0 16px;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  background: #f0fdf4;
+  color: #15803d;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 10px 12px;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #d6dfeb;
+  border-radius: 8px;
+  padding: 24px 28px;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.cardHeader h2,
+.cardHeaderStack h2,
+.dangerHeader h2 {
+  margin: 0;
+  color: #374151;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.cardHeaderStack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cardHeaderStack p,
+.dangerCard p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.83rem;
+}
+
+.textButton {
+  border: 0;
+  background: transparent;
+  color: #0284c7;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field span {
+  color: #374151;
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.field input {
+  box-sizing: border-box;
+  width: 100%;
+  border: 0;
+  border-radius: 6px;
+  background: #d1d6de;
+  color: #334155;
+  font: inherit;
+  font-size: 0.86rem;
+  padding: 11px 14px;
+  outline: none;
+}
+
+.field input::placeholder {
+  color: #7b8798;
+}
+
+.divider {
+  height: 1px;
+  background: #d6dfeb;
+  margin: 20px 0;
+}
+
+.inlineAction {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+}
+
+.secondaryButton,
+.primaryButton,
+.dangerButton {
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.secondaryButton {
+  background: #89cff7;
+  color: #075985;
+  padding: 0 20px;
+}
+
+.primaryButton {
+  align-self: flex-start;
+  background: #11b957;
+  color: #ffffff;
+  padding: 11px 22px;
+}
+
+.secondaryButton:hover,
+.primaryButton:hover,
+.dangerButton:hover {
+  transform: translateY(-1px);
+}
+
+.passwordFields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 440px;
+}
+
+.dangerCard {
+  border-color: #f0b4b4;
+  background: rgba(127, 29, 29, 0.08);
+}
+
+.dangerHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #dc2626;
+  margin-bottom: 12px;
+}
+
+.dangerHeader h2 {
+  color: #dc2626;
+}
+
+.logoutBox {
+  margin-top: 22px;
+  background: #ffffff;
+  border-radius: 6px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.logoutBox div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.logoutBox strong {
+  color: #374151;
+  font-size: 0.84rem;
+}
+
+.logoutBox span {
+  color: #64748b;
+  font-size: 0.76rem;
+}
+
+.dangerButton {
+  background: #dc2626;
+  color: #ffffff;
+  padding: 12px 20px;
+}
+
+@media (max-width: 760px) {
+  .formGrid,
+  .inlineAction {
+    grid-template-columns: 1fr;
+  }
+
+  .secondaryButton {
+    padding: 11px 18px;
+  }
+
+  .logoutBox {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

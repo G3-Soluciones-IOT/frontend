@@ -202,7 +202,8 @@ export function NutritionistProfilePage({ currentPath = "/nutritionist", onNavig
         navigationItems={navigationConfig.nutritionist}
         userInitials={getInitials(form)}
         onNavigate={onNavigate}
-        onSettingsClick={onSignOut}
+        onSettingsClick={() => onNavigate("/account-settings")}
+        onLogout={onSignOut}
       >
         <div className={styles.pageHeading}>
           <div className={`${styles.skeleton} ${styles.skeletonTitle}`} />
@@ -229,7 +230,8 @@ export function NutritionistProfilePage({ currentPath = "/nutritionist", onNavig
       navigationItems={navigationConfig.nutritionist}
       userInitials={getInitials(form)}
       onNavigate={onNavigate}
-      onSettingsClick={onSignOut}
+      onSettingsClick={() => onNavigate("/account-settings")}
+      onLogout={onSignOut}
     >
       <div className={styles.pageHeading}>
         <h1 className={styles.pageTitle}>Professional Profile</h1>

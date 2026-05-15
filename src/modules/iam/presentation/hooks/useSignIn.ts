@@ -43,6 +43,8 @@ export function useSignIn() {
     };
 
     localStorage.setItem("accessToken", session.tokens.accessToken);
+    localStorage.setItem("mockAuthEmail", input.email);
+    localStorage.setItem("mockAuthPassword", input.password);
     setState({ isLoading: false, error: null, session });
     return session;
   };
