@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import logo from "@/assets/LogoJameo.png";
+import logo from "@/assets/LogoJameoFit.png";
 import styles from "./SharedLayout.module.css";
 import { Topbar } from "./Topbar";
 
@@ -37,7 +37,7 @@ function isActive(currentPath: string, href: string) {
     return currentPath.startsWith("/nutritionist/recent-logs");
   }
   // Si es un padre, marca como activo si el currentPath comienza con ese href
-  if (href === "/patients" || href === "/communication" || href === "/content") {
+  if (href === "/patients" || href === "/content") {
     return currentPath.startsWith(href);
   }
   if (href === "/nutritionist/patients/overview") {
