@@ -6,8 +6,8 @@ interface CommunicationRouteProps {
 }
 
 export function CommunicationRoute({ path, onNavigate }: CommunicationRouteProps) {
-  if (path === "/communication/chat") {
-    return <ChatPage currentPath={path} onNavigate={onNavigate} />;
+  if (path === "/communication" || path === "/communication/chat") {
+    return <ChatPage currentPath="/communication/chat" onNavigate={onNavigate} />;
   }
 
   if (path === "/communication/consultations") {
@@ -20,6 +20,5 @@ export function CommunicationRoute({ path, onNavigate }: CommunicationRouteProps
 
   return null;
 }
-
 
 
