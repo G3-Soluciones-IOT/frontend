@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { SharedLayout } from "@/shared/components/layout";
-import { navigationConfig } from "@/shared/constants/navigation.config";
+import { useNavigation } from "@/shared/hooks/useNavigation";
 import { useTips } from "../hooks/useTips";
 import { TipRow } from "../components/TipRow";
 import { ResourceCard } from "../components/ResourceCard";
@@ -93,7 +93,7 @@ export function TipsPage({ currentPath, onNavigate }: TipsPageProps) {
         title="Tips Library"
         currentPath={currentPath}
         onNavigate={onNavigate}
-        navigationItems={navigationConfig.nutritionist}
+        navigationItems={useNavigation()}
         breadcrumbs={["Content", "Tips"]}
       >
         <div style={{ textAlign: "center", padding: "40px" }}>Loading tips...</div>
@@ -106,7 +106,7 @@ export function TipsPage({ currentPath, onNavigate }: TipsPageProps) {
       title="Tips Library"
       currentPath={currentPath}
       onNavigate={onNavigate}
-      navigationItems={navigationConfig.nutritionist}
+      navigationItems={useNavigation()}
       breadcrumbs={["Content", "Tips"]}
     >
       <div className={styles.pageShell}>

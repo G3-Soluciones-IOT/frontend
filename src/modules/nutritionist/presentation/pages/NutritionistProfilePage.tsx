@@ -1,6 +1,6 @@
 import { useMemo, useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from "react";
 import { SharedLayout } from "@/shared/components/layout";
-import { navigationConfig } from "@/shared/constants/navigation.config";
+import { useNavigation } from "@/shared/hooks/useNavigation";
 import styles from "./NutritionistProfile.module.css";
 import { useNutritionistProfile } from "../hooks/useNutritionistProfile";
 import { useUpdateProfile } from "../hooks/useUpdateProfile";
@@ -196,10 +196,10 @@ export function NutritionistProfilePage({ currentPath = "/nutritionist", onNavig
 
   if (isLoading) {
     return (
-      <SharedLayout
+        <SharedLayout
         title="Profile Information"
         currentPath={currentPath}
-        navigationItems={navigationConfig.nutritionist}
+        navigationItems={useNavigation()}
         userInitials={getInitials(form)}
         onNavigate={onNavigate}
         onSettingsClick={() => onNavigate("/account-settings")}
@@ -227,7 +227,7 @@ export function NutritionistProfilePage({ currentPath = "/nutritionist", onNavig
     <SharedLayout
       title="Profile Information"
       currentPath={currentPath}
-      navigationItems={navigationConfig.nutritionist}
+      navigationItems={useNavigation()}
       userInitials={getInitials(form)}
       onNavigate={onNavigate}
       onSettingsClick={() => onNavigate("/account-settings")}

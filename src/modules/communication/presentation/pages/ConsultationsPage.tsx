@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { SharedLayout } from "@/shared/components/layout";
-import { navigationConfig } from "@/shared/constants/navigation.config";
+import { useNavigation } from "@/shared/hooks/useNavigation";
 import type { ConsultationRequest, ConsultationRequestStatus } from "../../domain/models/ConsultationRequest";
 import { useConsultationRequests } from "../hooks/useConsultationRequests";
 import styles from "./ConsultationsPage.module.css";
@@ -86,7 +86,7 @@ export function ConsultationsPage({ currentPath, onNavigate }: ConsultationsPage
       title="Communication"
       currentPath={currentPath}
       onNavigate={onNavigate}
-      navigationItems={navigationConfig.nutritionist}
+      navigationItems={useNavigation()}
       breadcrumbs={["Communication", "Consultations"]}
       showPageTitle={false}
     >

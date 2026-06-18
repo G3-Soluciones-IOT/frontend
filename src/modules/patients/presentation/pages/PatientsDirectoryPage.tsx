@@ -1,6 +1,6 @@
 import { patientDirectory } from "../../infrastructure/mock/patients.mock";
 import { SharedLayout } from "@/shared/components/layout";
-import { navigationConfig } from "@/shared/constants/navigation.config";
+import { useNavigation } from "@/shared/hooks/useNavigation";
 import styles from "./PatientsPages.module.css";
 
 interface PatientsDirectoryPageProps {
@@ -20,7 +20,7 @@ export function PatientsDirectoryPage({ currentPath, onNavigate }: PatientsDirec
       title="Patient Directory"
       currentPath={currentPath}
       onNavigate={onNavigate}
-      navigationItems={navigationConfig.nutritionist}
+      navigationItems={useNavigation()}
       breadcrumbs={["Patients", "Directory"]}
     >
       <div className={styles.stack}>

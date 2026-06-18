@@ -28,10 +28,8 @@ export const navigationConfig = {
 
   admin: [
     { label: "Dashboard", href: "/admin", icon: <DashboardIcon />, group: "root" },
-    { label: "Users", href: "/admin/users", icon: <UsersIcon />, group: "root" },
-    { label: "Nutritionists", href: "/admin/nutritionists", icon: <UsersIcon />, group: "root" },
-    { label: "Patients", href: "/admin/patients", icon: <UsersIcon />, group: "root" },
-    { label: "Analytics", href: "/admin/analytics", icon: <ChartIcon />, group: "root" },
+    { label: "User Management", href: "/admin/users", icon: <UsersIcon />, group: "root" },
+    { label: "Content Library", href: "/admin/content", icon: <FileIcon />, group: "root" },
     { label: "Settings", href: "/admin/settings", icon: <ScreenIcon />, group: "root" },
   ] as NavigationItem[],
 } as const;
