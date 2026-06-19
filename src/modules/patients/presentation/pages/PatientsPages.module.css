@@ -659,4 +659,21 @@
     flex-direction: column;
     align-items: start;
   }
+  .iotButton {
+    margin-top: 10px;
+    width: 100%;
+    height: 40px;
+    border: 0;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #22b7e0 0%, #0284c7 100%);
+    color: #ffffff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+
+  .iotButton:hover {
+    transform: translateY(-1px);
+  }
 }

@@ -1,0 +1,104 @@
+// src/modules/iot-devices/infrastructure/mock/devices.mock.ts
+
+import type { PatientDevicesOverview } from "../../domain/models/IoTDevice";
+
+export const mockPatientDevicesOverview: PatientDevicesOverview = {
+    patientId: "michael-chen",
+    patientName: "Michael Chen",
+    patientEmail: "michael.c@example.com",
+    devices: [
+        {
+            id: "device-smart-bottle",
+            name: "Botella Inteligente",
+            type: "smart_bottle",
+            status: "connected",
+            battery: { percentage: 78 },
+            lastSyncLabel: "Hace 2 min",
+        },
+        {
+            id: "device-smart-scale",
+            name: "Báscula Inteligente",
+            type: "smart_scale",
+            status: "connected",
+            battery: { percentage: 95 },
+            lastSyncLabel: "Hace 10 min",
+        },
+        {
+            id: "device-wearable-sensor",
+            name: "Sensor Vestible",
+            type: "wearable_sensor",
+            status: "syncing",
+            battery: { percentage: 60 },
+            lastSyncLabel: "Sincronizando...",
+        },
+    ],
+    smartBottle: {
+        device: {
+            id: "device-smart-bottle",
+            name: "Botella Inteligente",
+            type: "smart_bottle",
+            status: "connected",
+            battery: { percentage: 78 },
+            lastSyncLabel: "Hace 2 min",
+        },
+        currentLiters: 1.68,
+        goalLiters: 2,
+        lastDrinkLabel: "10:15 AM",
+        lastDrinkAmountMl: 220,
+        weeklyHydration: [
+            { day: "Lun", liters: 1.9, goalReached: false },
+            { day: "Mar", liters: 2.3, goalReached: true },
+            { day: "Mié", liters: 1.6, goalReached: false },
+            { day: "Jue", liters: 2.1, goalReached: true },
+            { day: "Vie", liters: 1.7, goalReached: false },
+            { day: "Sáb", liters: 1.68, goalReached: false },
+            { day: "Dom", liters: 0, goalReached: false },
+        ],
+        recentEntries: [
+            { id: "hydration-1", amountMl: 220, timeLabel: "10:15 AM" },
+            { id: "hydration-2", amountMl: 250, timeLabel: "08:40 AM" },
+            { id: "hydration-3", amountMl: 300, timeLabel: "07:05 AM" },
+        ],
+    },
+    smartScale: {
+        device: {
+            id: "device-smart-scale",
+            name: "Báscula Inteligente",
+            type: "smart_scale",
+            status: "connected",
+            battery: { percentage: 95 },
+            lastSyncLabel: "Hace 10 min",
+        },
+        currentWeightGrams: 135,
+        isStable: true,
+        detectedFood: {
+            name: "Manzana Gala",
+            weightGrams: 135,
+            estimatedCalories: 70,
+            estimatedCarbsGrams: 19,
+        },
+        weightTrend: [
+            { label: "L", value: 120 },
+            { label: "M", value: 140 },
+            { label: "M", value: 110 },
+            { label: "J", value: 150 },
+            { label: "V", value: 135 },
+        ],
+    },
+    wearableSensor: {
+        device: {
+            id: "device-wearable-sensor",
+            name: "Sensor Vestible",
+            type: "wearable_sensor",
+            status: "syncing",
+            battery: { percentage: 60 },
+            lastSyncLabel: "Sincronizando...",
+        },
+        vitals: {
+            heartRateBpm: 74,
+            steps: 4561,
+            bodyTemperatureCelsius: 36.6,
+        },
+        lastUpdatedLabel: "Hace 2 min",
+    },
+};

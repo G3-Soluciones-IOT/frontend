@@ -1,0 +1,464 @@
+/* src/modules/iot-devices/presentation/pages/IoTDevicesPage.module.css */
+
+/* ── Patient mini-card ──────────────────────────────────────── */
+.patientMiniCard {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding: 12px 16px;
+    background: #ffffff;
+    border: 1px solid #dbe4ee;
+    border-radius: 10px;
+    width: fit-content;
+}
+
+.patientAvatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #daf4e2 0%, #b7e7fb 100%);
+    display: grid;
+    place-items: center;
+    color: #1f2937;
+    font-size: 0.78rem;
+    font-weight: 700;
+    border: 1px solid #dbe4ee;
+    flex: 0 0 auto;
+}
+
+.patientName {
+    display: block;
+    color: #1f2937;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.patientEmail {
+    display: block;
+    color: #64748b;
+    font-size: 0.8rem;
+}
+
+/* ── Layout principal ────────────────────────────────────────── */
+.layoutGrid {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 16px;
+    align-items: start;
+}
+
+.mainColumn {
+    display: grid;
+    gap: 16px;
+}
+
+.lowerCardsGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+/* ── Card base ───────────────────────────────────────────────── */
+.card {
+    background: #ffffff;
+    border: 1px solid #dbe4ee;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
+}
+
+.cardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.cardTitle {
+    margin: 0;
+    color: #1f2937;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.cardTitle svg {
+    color: #16a34a;
+}
+
+.cardSubtitle {
+    color: #64748b;
+    font-size: 0.8rem;
+}
+
+/* ── Botella — visual ────────────────────────────────────────── */
+.bottleLayout {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 16px;
+}
+
+.bottleVisualWrap {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: center;
+}
+
+.bottleShell {
+    width: 46px;
+    height: 120px;
+    border: 2px solid #bae6fd;
+    border-radius: 8px 8px 14px 14px;
+    overflow: hidden;
+    background: #f0f9ff;
+    display: flex;
+    align-items: flex-end;
+}
+
+.bottleFill {
+    width: 100%;
+    background: linear-gradient(180deg, #67d2f0 0%, #0ea5e9 100%);
+    border-radius: 0 0 12px 12px;
+    transition: height 0.6s ease;
+}
+
+.bottleStats {
+    flex: 1;
+    display: grid;
+    gap: 10px;
+}
+
+.progressCircleWrap {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.progressValue {
+    color: #0369a1;
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.progressSub {
+    color: #64748b;
+    font-size: 0.84rem;
+}
+
+.progressBarTrack {
+    width: 100%;
+    height: 8px;
+    background: #e0f2fe;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.progressBarValue {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, #16a34a 0%, #22c55e 100%);
+    border-radius: inherit;
+    transition: width 0.6s ease;
+}
+
+.lastDrinkText {
+    margin: 0;
+    color: #475569;
+    font-size: 0.84rem;
+}
+
+/* ── Chart compartido (botella + báscula) ────────────────────── */
+.weeklyChartTitle {
+    margin: 16px 0 8px;
+    color: #334155;
+    font-size: 0.84rem;
+    font-weight: 600;
+}
+
+.barChart {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 72px;
+    margin-bottom: 14px;
+}
+
+.barColumn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
+    justify-content: flex-end;
+}
+
+.barTrack {
+    width: 100%;
+    height: 58px;
+    display: flex;
+    align-items: flex-end;
+}
+
+.bar {
+    width: 100%;
+    border-radius: 4px 4px 0 0;
+    background: #bfddfa;
+    min-height: 4px;
+}
+
+.barHighlight {
+    background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+}
+
+.chartLabel {
+    color: #64748b;
+    font-size: 0.7rem;
+    text-align: center;
+}
+
+/* ── Entradas de hidratación ─────────────────────────────────── */
+.entryList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 6px;
+}
+
+.entryRow {
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 10px;
+    background: #f8fafc;
+    border-radius: 8px;
+    font-size: 0.84rem;
+    color: #334155;
+}
+
+.entryTime {
+    color: #64748b;
+}
+
+/* ── Báscula ─────────────────────────────────────────────────── */
+.scaleDisplay {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.scaleWeight {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: #1f2937;
+    line-height: 1;
+}
+
+.stabilityPillStable {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: #dcfce7;
+    color: #16a34a;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.stabilityPillReading {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: #fef3c7;
+    color: #ca8a04;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.foodDetected {
+    padding: 12px 14px;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 10px;
+    margin-bottom: 14px;
+}
+
+.foodName {
+    display: block;
+    color: #166534;
+    font-size: 0.96rem;
+    font-weight: 700;
+}
+
+.foodMacros {
+    display: block;
+    color: #15803d;
+    font-size: 0.8rem;
+    margin-top: 3px;
+}
+
+/* ── Vestible ────────────────────────────────────────────────── */
+.vitalsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.vitalCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 8px;
+    background: #f8fafc;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+}
+
+.vitalIcon {
+    color: #0ea5e9;
+    display: flex;
+}
+
+.vitalValue {
+    color: #1f2937;
+    font-size: 1.3rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.vitalLabel {
+    color: #64748b;
+    font-size: 0.72rem;
+}
+
+/* ── Panel de estado de dispositivos ────────────────────────── */
+.statusPanel {
+    background: #ffffff;
+    border: 1px solid #dbe4ee;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
+}
+
+.panelTitle {
+    margin: 0 0 16px;
+    color: #1f2937;
+    font-size: 1.0rem;
+    font-weight: 700;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.statusList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 14px;
+}
+
+.statusRow {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.statusIcon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #eef2f7;
+    color: #0ea5e9;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+}
+
+.statusInfo {
+    display: grid;
+    gap: 4px;
+    flex: 1;
+}
+
+.statusName {
+    color: #1f2937;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+.statusPill {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    width: fit-content;
+}
+
+.statusConnected {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.statusSyncing {
+    background: #fef3c7;
+    color: #ca8a04;
+}
+
+.statusDisconnected {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.batteryWrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.batteryText {
+    color: #64748b;
+    font-size: 0.76rem;
+}
+
+.lastSync {
+    color: #94a3b8;
+    font-size: 0.74rem;
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+    .layoutGrid {
+        grid-template-columns: 1fr;
+    }
+    .statusPanel {
+        order: -1;
+    }
+    .statusList {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+}
+
+@media (max-width: 760px) {
+    .lowerCardsGrid,
+    .vitalsGrid,
+    .statusList {
+        grid-template-columns: 1fr;
+    }
+    .bottleLayout {
+        flex-direction: column;
+        align-items: center;
+    }
+}

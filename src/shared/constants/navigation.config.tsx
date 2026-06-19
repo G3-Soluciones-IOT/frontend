@@ -22,6 +22,7 @@ export const navigationConfig = {
     { label: "Dashboard", href: "/patient", icon: <DashboardIcon />, group: "root" },
     { label: "Meal Plans", href: "/patient/meal-plans", icon: <FileIcon />, group: "root" },
     { label: "Tracking", href: "/patient/tracking", icon: <ChartIcon />, group: "root" },
+    { label: "IoT Devices", href: "/nutritionist/patients/iot-devices", icon: null, group: "patients" },
     { label: "Messages", href: "/patient/messages", icon: <MessageIcon />, group: "root" },
     { label: "Appointments", href: "/patient/appointments", icon: <DashboardIcon />, group: "root" },
   ] as NavigationItem[],

@@ -81,6 +81,13 @@ export function PatientDetailPage({ currentPath, onNavigate }: PatientDetailPage
             <button type="button" className={styles.primaryButton} onClick={() => onNavigate("/nutritionist/patients/michael-chen/tracking")}>
               {patientDetail.smartAnalysis.actionLabel}
             </button>
+            <button
+                type="button"
+                className={styles.iotButton}
+                onClick={() => onNavigate("/nutritionist/patients/michael-chen/iot-devices")}
+            >
+              🔌 Ver Dispositivos IoT
+            </button>
           </aside>
         </div>
 
