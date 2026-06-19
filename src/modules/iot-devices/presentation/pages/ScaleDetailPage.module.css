@@ -1,0 +1,156 @@
+/* src/modules/iot-devices/presentation/pages/ScaleDetailPage.module.css */
+
+.backButton {
+    width: fit-content;
+    border: 0;
+    padding: 0;
+    margin-bottom: 16px;
+    background: transparent;
+    color: #475569;
+    font: inherit;
+    font-size: 0.86rem;
+    cursor: pointer;
+}
+
+.backButton:hover {
+    color: #1f2937;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.statCard {
+    background: #ffffff;
+    border: 1px solid #dbe4ee;
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    display: grid;
+    gap: 4px;
+}
+
+.statValue {
+    color: #1f2937;
+    font-size: 1.4rem;
+    font-weight: 800;
+}
+
+.statLabel {
+    color: #64748b;
+    font-size: 0.78rem;
+}
+
+.panel {
+    background: #ffffff;
+    border: 1px solid #dbe4ee;
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.panelTitle {
+    margin: 0 0 16px;
+    color: #1f2937;
+    font-size: 1rem;
+    font-weight: 700;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eef2f7;
+}
+
+/* ── "Foto" simulada (gradiente, sin imágenes externas) ───────── */
+.foodPhoto {
+    width: 64px;
+    height: 64px;
+    flex: 0 0 auto;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+}
+
+.foodPhotoLight {
+    background:
+            radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.55) 0 18%, transparent 19%),
+            linear-gradient(135deg, #d9f99d 0%, #bbf7d0 50%, #a7f3d0 100%);
+}
+
+.foodPhotoDark {
+    background:
+            radial-gradient(circle at 70% 25%, rgba(255, 255, 255, 0.25) 0 16%, transparent 17%),
+            linear-gradient(135deg, #0f4b49 0%, #083b2d 100%);
+}
+
+.foodEmoji {
+    font-size: 1.7rem;
+}
+
+/* ── Última medición ───────────────────────────────────────────── */
+.lastMeasure {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.lastFoodName {
+    display: block;
+    color: #1f2937;
+    font-size: 1.05rem;
+}
+
+.lastFoodMeta {
+    margin: 4px 0 0;
+    color: #64748b;
+    font-size: 0.86rem;
+}
+
+/* ── Grid de historial ─────────────────────────────────────────── */
+.foodLogGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.foodCard {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px;
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    border-radius: 12px;
+}
+
+.foodCardBody {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.foodCardName {
+    color: #1f2937;
+    font-size: 0.9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.foodCardMeta {
+    color: #475569;
+    font-size: 0.8rem;
+}
+
+.foodCardTime {
+    color: #94a3b8;
+    font-size: 0.74rem;
+}
+
+@media (max-width: 760px) {
+    .statsGrid,
+    .foodLogGrid {
+        grid-template-columns: 1fr;
+    }
+}

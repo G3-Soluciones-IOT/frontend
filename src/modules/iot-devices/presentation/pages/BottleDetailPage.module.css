@@ -1,0 +1,197 @@
+/* src/modules/iot-devices/presentation/pages/BottleDetailPage.module.css */
+
+.backButton {
+    width: fit-content;
+    border: 0;
+    padding: 0;
+    margin-bottom: 16px;
+    background: transparent;
+    color: #475569;
+    font: inherit;
+    font-size: 0.86rem;
+    cursor: pointer;
+}
+
+.backButton:hover {
+    color: #1f2937;
+}
+
+.heroRow {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    background: #ffffff;
+    border: 1px solid #dbe4ee;
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 16px;
+}
+
+.bottleVisualWrap {
+    flex: 0 0 auto;
+}
+
+.bottleShell {
+    width: 64px;
+    height: 160px;
+    border: 3px solid #bae6fd;
+    border-radius: 10px 10px 18px 18px;
+    overflow: hidden;
+    background: #f0f9ff;
+    display: flex;
+    align-items: flex-end;
+}
+
+.bottleFill {
+    width: 100%;
+    background: linear-gradient(180deg, #67d2f0 0%, #0ea5e9 100%);
+    border-radius: 0 0 16px 16px;
+    transition: height 0.6s ease;
+}
+
+.heroStats {
+    flex: 1;
+    display: grid;
+    gap: 8px;
+}
+
+.heroValue {
+    font-size: 2.6rem;
+    font-weight: 800;
+    color: #0369a1;
+    line-height: 1;
+}
+
+.heroGoal {
+    color: #94a3b8;
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+.heroSub {
+    color: #64748b;
+    font-size: 0.92rem;
+}
+
+.lastDrinkText {
+    margin: 6px 0 0;
+    color: #475569;
+    font-size: 0.86rem;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.statCard {
+    background: #ffffff;
+    border: 1px solid #dbe4ee;
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    display: grid;
+    gap: 4px;
+}
+
+.statValue {
+    color: #1f2937;
+    font-size: 1.4rem;
+    font-weight: 800;
+}
+
+.statLabel {
+    color: #64748b;
+    font-size: 0.78rem;
+}
+
+.panel {
+    background: #ffffff;
+    border: 1px solid #dbe4ee;
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.panelTitle {
+    margin: 0 0 16px;
+    color: #1f2937;
+    font-size: 1rem;
+    font-weight: 700;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.barChart {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    height: 130px;
+}
+
+.barColumn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    height: 100%;
+    justify-content: flex-end;
+}
+
+.barTrack {
+    width: 100%;
+    height: 105px;
+    display: flex;
+    align-items: flex-end;
+}
+
+.bar {
+    width: 100%;
+    border-radius: 5px 5px 0 0;
+    background: #bfddfa;
+    min-height: 4px;
+}
+
+.barHighlight {
+    background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+}
+
+.chartLabel {
+    color: #64748b;
+    font-size: 0.76rem;
+}
+
+.entryList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 8px;
+}
+
+.entryRow {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: #f8fafc;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    color: #334155;
+}
+
+.entryTime {
+    color: #64748b;
+}
+
+@media (max-width: 760px) {
+    .heroRow {
+        flex-direction: column;
+        text-align: center;
+    }
+    .statsGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
