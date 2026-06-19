@@ -16,17 +16,13 @@ interface NutritionistProfilePageProps {
 type ProfileForm = UpdateProfessionalProfileInput;
 
 const emptyForm: ProfileForm = {
-  firstName: "Sarah",
-  lastName: "Jenkins",
-  professionalTitle: "Registered Dietitian & Sports Nutritionist",
-  bio: "Passionate about helping athletes and active individuals optimize their performance through evidence-based nutrition strategies. With over 8 years of clinical experience...",
-  primaryCertification: "RD, CSSD",
-  specialties: [
-    { id: "sports-nutrition", label: "Sports Nutrition" },
-    { id: "keto", label: "Keto" },
-    { id: "weight-management", label: "Weight Management" },
-  ],
-  experienceRange: "6-10 years",
+  firstName: "",
+  lastName: "",
+  professionalTitle: "",
+  bio: "",
+  primaryCertification: "",
+  specialties: [],
+  experienceRange: "0-1 years",
 };
 
 const experienceOptions: ExperienceRange[] = [
@@ -124,7 +120,8 @@ export function NutritionistProfilePage({ currentPath = "/nutritionist", onNavig
 
   const form = draftForm ?? (profile ? toForm(profile) : emptyForm);
 
-  const fullName = `Dr. ${`${form.firstName} ${form.lastName}`.trim() || "Sarah Jenkins"}`;
+  const displayName = `${form.firstName} ${form.lastName}`.trim();
+  const fullName = displayName ? `Dr. ${displayName}` : "Nutritionist";
   const bioCount = form.bio.length;
   const hasChanges = useMemo(() => {
     if (!profile) return false;
@@ -271,17 +268,19 @@ export function NutritionistProfilePage({ currentPath = "/nutritionist", onNavig
             <div className={styles.verificationBox}>
               <div className={styles.verificationTitle}>
                 Verification Status
-                <span className={styles.verifiedDot}>
-                  <CheckIcon />
-                </span>
+                {profile?.identityVerified && profile.credentialsVerified && (
+                  <span className={styles.verifiedDot}>
+                    <CheckIcon />
+                  </span>
+                )}
               </div>
               <div className={styles.verificationItem}>
-                <CheckIcon />
-                Identity Verified
+                {profile?.identityVerified ? <CheckIcon /> : null}
+                {profile?.identityVerified ? "Identity Verified" : "Identity Pending"}
               </div>
               <div className={styles.verificationItem}>
-                <CheckIcon />
-                Credentials Verified
+                {profile?.credentialsVerified ? <CheckIcon /> : null}
+                {profile?.credentialsVerified ? "Credentials Verified" : "Credentials Pending"}
               </div>
             </div>
           </aside>
