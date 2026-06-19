@@ -1,0 +1,369 @@
+/* src/modules/iot-devices/presentation/pages/PatientIoTStatusPage.module.css */
+
+.page {
+    display: grid;
+    gap: 20px;
+}
+
+/* ── Banner global de error ──────────────────────────────────── */
+.globalErrorBanner {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 18px;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-left: 4px solid #ea580c;
+    border-radius: 10px;
+}
+
+.globalErrorIcon {
+    font-size: 1.4rem;
+    flex: 0 0 auto;
+    margin-top: 2px;
+}
+
+.globalErrorBanner strong {
+    display: block;
+    color: #9a3412;
+    font-size: 0.96rem;
+    margin-bottom: 3px;
+}
+
+.globalErrorBanner p {
+    margin: 0;
+    color: #c2410c;
+    font-size: 0.84rem;
+}
+
+/* ── Resumen rápido ──────────────────────────────────────────── */
+.summaryRow {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.summaryCard {
+    background: #ffffff;
+    border: 1px solid #dbe4ee;
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    display: grid;
+    gap: 4px;
+}
+
+.summaryNumber {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1f2937;
+    line-height: 1;
+}
+
+.summaryNumberError {
+    color: #dc2626;
+}
+
+.summaryLabel {
+    color: #64748b;
+    font-size: 0.82rem;
+}
+
+/* ── Grid de dispositivos ────────────────────────────────────── */
+.devicesGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    align-items: start;
+}
+
+/* ── Card de dispositivo ─────────────────────────────────────── */
+.deviceCard {
+    position: relative;
+    background: #ffffff;
+    border: 1px solid #dbe4ee;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+    display: grid;
+    gap: 14px;
+}
+
+.deviceCardComingSoon {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    opacity: 0.8;
+}
+
+.comingSoonBadge {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: #e2e8f0;
+    color: #475569;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.deviceCardHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.deviceIconWrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: #eff6ff;
+    color: #0ea5e9;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+}
+
+.deviceIconGray {
+    background: #f1f5f9;
+    color: #94a3b8;
+}
+
+.deviceMeta {
+    flex: 1;
+    display: grid;
+    gap: 5px;
+}
+
+.deviceName {
+    color: #1f2937;
+    font-size: 0.96rem;
+    font-weight: 700;
+}
+
+/* ── Status pill ─────────────────────────────────────────────── */
+.statusPill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    width: fit-content;
+}
+
+.pillConnected {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.pillSyncing {
+    background: #fef3c7;
+    color: #ca8a04;
+}
+
+.pillDisconnected {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+/* ── Batería ─────────────────────────────────────────────────── */
+.batterySection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    flex: 0 0 auto;
+}
+
+.batteryPct {
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+/* ── Último registro ─────────────────────────────────────────── */
+.lastReading {
+    padding: 10px 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    display: grid;
+    gap: 2px;
+}
+
+.lastReadingLabel {
+    color: #94a3b8;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+}
+
+.lastReadingValue {
+    color: #1f2937;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.lastSyncTime {
+    color: #94a3b8;
+    font-size: 0.74rem;
+}
+
+/* ── Alertas individuales ────────────────────────────────────── */
+.alertList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 8px;
+}
+
+.alertBanner {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border-left: 3px solid transparent;
+}
+
+.alertError {
+    background: #fef2f2;
+    border-left-color: #dc2626;
+}
+
+.alertWarning {
+    background: #fffbeb;
+    border-left-color: #f59e0b;
+}
+
+.alertInfo {
+    background: #eff6ff;
+    border-left-color: #3b82f6;
+}
+
+.alertIcon {
+    font-size: 1rem;
+    flex: 0 0 auto;
+    margin-top: 1px;
+}
+
+.alertBody {
+    display: grid;
+    gap: 8px;
+    flex: 1;
+}
+
+.alertMessage {
+    margin: 0;
+    font-size: 0.82rem;
+    color: #334155;
+    line-height: 1.45;
+}
+
+.alertAction {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #0284c7;
+    cursor: pointer;
+    text-align: left;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.alertAction:hover {
+    color: #0369a1;
+}
+
+/* ── Banner OK ───────────────────────────────────────────────── */
+.okBanner {
+    padding: 10px 14px;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    color: #16a34a;
+    font-size: 0.84rem;
+    font-weight: 600;
+}
+
+/* ── Coming soon ─────────────────────────────────────────────── */
+.comingSoonText {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.84rem;
+    line-height: 1.5;
+}
+
+/* ── Sección de ayuda ────────────────────────────────────────── */
+.helpSection {
+    background: #ffffff;
+    border: 1px solid #dbe4ee;
+    border-radius: 14px;
+    padding: 20px 22px;
+}
+
+.helpTitle {
+    margin: 0 0 16px;
+    color: #1f2937;
+    font-size: 1rem;
+    font-weight: 700;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.helpGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+.helpCard {
+    padding: 14px;
+    background: #f8fafc;
+    border-radius: 10px;
+    display: grid;
+    gap: 6px;
+}
+
+.helpEmoji {
+    font-size: 1.4rem;
+}
+
+.helpCard strong {
+    display: block;
+    color: #1f2937;
+    font-size: 0.88rem;
+}
+
+.helpCard p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 980px) {
+    .devicesGrid,
+    .helpGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .summaryRow {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .summaryRow {
+        grid-template-columns: 1fr;
+    }
+}
