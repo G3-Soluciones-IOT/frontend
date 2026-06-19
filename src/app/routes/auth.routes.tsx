@@ -16,7 +16,7 @@ export function SignInRoute({ onNavigate }: AuthRouteProps) {
 export function SignUpRoute({ onNavigate }: AuthRouteProps) {
   return (
     <SignUpPage
-      onSignUp={() => onNavigate("/professional-profile")}
+        onSignUp={() => onNavigate("/sign-in")}
       onNavigateToSignIn={() => onNavigate("/sign-in")}
     />
   );

@@ -9,3 +9,4 @@ export const authApi = axios.create({
   },
   timeout: 10_000,
 });
+

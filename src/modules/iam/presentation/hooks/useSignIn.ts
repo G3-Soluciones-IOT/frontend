@@ -1,12 +1,17 @@
 import { useState } from "react";
 import type { SignInInput } from "../../application/dto/SignInInput";
 import type { AuthSession } from "../../domain/models/User";
+import { HttpAuthRepository } from "../../infrastructure/repositories/HttpAuthRepository";
+import { signInUseCase } from "../../application/use-cases/sign-in.usecase.ts";
 
 interface UseSignInState {
   isLoading: boolean;
   error: string | null;
   session: AuthSession | null;
 }
+
+const repository = new HttpAuthRepository();
+const signIn = signInUseCase(repository);
 
 export function useSignIn() {
   const [state, setState] = useState<UseSignInState>({
@@ -15,40 +20,41 @@ export function useSignIn() {
     session: null,
   });
 
-  const execute = async (input: SignInInput): Promise<AuthSession | null> => {
-    setState({ isLoading: true, error: null, session: null });
-
-    if (input.email !== "admin@gmail.com" || input.password !== "admin") {
+  const execute = async (
+      input: SignInInput
+  ): Promise<AuthSession | null> => {
+    try {
       setState({
-        isLoading: false,
-        error: "Use admin@gmail.com as email and admin as password.",
+        isLoading: true,
+        error: null,
         session: null,
       });
+
+      const session = await signIn(input);
+
+      setState({
+        isLoading: false,
+        error: null,
+        session,
+      });
+
+      return session;
+    } catch (error) {
+      setState({
+        isLoading: false,
+        error:
+            error instanceof Error
+                ? error.message
+                : "Failed to sign in",
+        session: null,
+      });
+
       return null;
     }
-
-    const session: AuthSession = {
-      user: {
-        id: "admin-user",
-        email: "admin@gmail.com",
-        fullName: "Admin",
-        role: "admin",
-        createdAt: new Date().toISOString(),
-      },
-      tokens: {
-        accessToken: "mock-admin-access-token",
-        refreshToken: "mock-admin-refresh-token",
-        expiresIn: 3600,
-      },
-    };
-
-    localStorage.setItem("accessToken", session.tokens.accessToken);
-    localStorage.setItem("mockAuthEmail", input.email);
-    localStorage.setItem("mockAuthPassword", input.password);
-    localStorage.setItem("mockAuthRole", session.user.role);
-    setState({ isLoading: false, error: null, session });
-    return session;
   };
 
-  return { ...state, execute };
+  return {
+    ...state,
+    execute,
+  };
 }

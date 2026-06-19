@@ -82,6 +82,43 @@
       "role": "patient",
       "isActive": true,
       "id": 10
+    },
+    {
+      "fullName": "Mathias",
+      "email": "ma@gmai",
+      "role": "nutritionist",
+      "isActive": true,
+      "id": 11
+    },
+    {
+      "email": "valentino@gmail.com",
+      "fullName": "Valentino Sandoval",
+      "password": "12345678",
+      "role": "nutritionist",
+      "avatarUrl": "",
+      "createdAt": "2026-06-19T03:34:51.413Z",
+      "isActive": true,
+      "id": 12
+    },
+    {
+      "email": "omar1@gmail.com",
+      "fullName": "Omar",
+      "password": "12345678",
+      "role": "patient",
+      "avatarUrl": "",
+      "createdAt": "2026-06-19T03:40:21.335Z",
+      "isActive": true,
+      "id": 13
+    },
+    {
+      "email": "logan@gmail.com",
+      "fullName": "logan",
+      "password": "12345678",
+      "role": "nutritionist",
+      "avatarUrl": "",
+      "createdAt": "2026-06-19T04:01:37.222Z",
+      "isActive": true,
+      "id": 14
     }
   ]
 }
