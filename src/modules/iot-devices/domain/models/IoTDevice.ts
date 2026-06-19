@@ -77,3 +77,28 @@ export interface PatientDevicesOverview {
     smartScale: SmartScaleData;
     wearableSensor: WearableSensorData;
 }
+export type DeviceAlertSeverity = "error" | "warning" | "info";
+
+export interface DeviceAlert {
+    id: string;
+    severity: DeviceAlertSeverity;
+    message: string;
+    actionLabel?: string;
+}
+
+export type DeviceAvailability = "available" | "coming_soon";
+
+// Versión extendida del resumen que incluye alertas
+export interface IoTDeviceSummaryWithAlerts extends IoTDeviceSummary {
+    alerts: DeviceAlert[];
+    availability: DeviceAvailability;
+    lastReadingLabel: string;
+}
+
+export interface PatientOwnDevicesOverview {
+    patientName: string;
+    devices: IoTDeviceSummaryWithAlerts[];
+    smartBottle: SmartBottleData | null;
+    smartScale: SmartScaleData | null;
+    wearableSensor: WearableSensorData | null;
+}
