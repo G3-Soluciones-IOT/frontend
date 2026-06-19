@@ -1,5 +1,3 @@
-// src/modules/iot-devices/presentation/pages/PatientIoTStatusPage.tsx
-
 import { SharedLayout } from "@/shared/components/layout";
 import { navigationConfig } from "@/shared/constants/navigation.config";
 import { usePatientOwnDevices } from "../hooks/usePatientOwnDevices";
@@ -53,25 +51,48 @@ function hasErrors(devices: IoTDeviceSummaryWithAlerts[]) {
 
 // ── Componente de card por dispositivo ───────────────────────────
 
-function DeviceCard({ device }: { device: IoTDeviceSummaryWithAlerts }) {
+function DeviceCard({
+                        device,
+                        onNavigate,
+                    }: {
+    device: IoTDeviceSummaryWithAlerts;
+    onNavigate: (href: string) => void;
+}) {
     const isComingSoon = device.availability === "coming_soon";
 
+    const handleClick = () => {
+        if (isComingSoon) return;
+        if (device.type === "smart_bottle") onNavigate("/patient/iot-devices/bottle");
+        if (device.type === "smart_scale") onNavigate("/patient/iot-devices/scale");
+    };
+
     return (
-        <article className={`${styles.deviceCard} ${isComingSoon ? styles.deviceCardComingSoon : ""}`}>
+        <article
+            className={`${styles.deviceCard} ${isComingSoon ? styles.deviceCardComingSoon : styles.deviceCardClickable}`}
+            onClick={handleClick}
+            role={isComingSoon ? undefined : "button"}
+            tabIndex={isComingSoon ? undefined : 0}
+            onKeyDown={(e) => {
+                if (!isComingSoon && (e.key === "Enter" || e.key === " ")) {
+                    e.preventDefault();
+                    handleClick();
+                }
+            }}
+        >
             {isComingSoon && (
                 <div className={styles.comingSoonBadge}>Próximamente</div>
             )}
 
             <div className={styles.deviceCardHeader}>
-        <span className={`${styles.deviceIconWrap} ${isComingSoon ? styles.deviceIconGray : ""}`}>
-          {deviceIcon(device.type)}
-        </span>
+                <span className={`${styles.deviceIconWrap} ${isComingSoon ? styles.deviceIconGray : ""}`}>
+                    {deviceIcon(device.type)}
+                </span>
                 <div className={styles.deviceMeta}>
                     <span className={styles.deviceName}>{device.name}</span>
                     {!isComingSoon && (
                         <span className={`${styles.statusPill} ${statusClass(device.status)}`}>
-              {statusLabel(device.status)}
-            </span>
+                            {statusLabel(device.status)}
+                        </span>
                     )}
                 </div>
                 {!isComingSoon && (
@@ -121,6 +142,10 @@ function DeviceCard({ device }: { device: IoTDeviceSummaryWithAlerts }) {
                         </div>
                     )}
                 </>
+            )}
+
+            {!isComingSoon && (
+                <span className={styles.viewMoreLink}>Ver más detalles →</span>
             )}
         </article>
     );
@@ -179,23 +204,23 @@ export function PatientIoTStatusPage({ currentPath, onNavigate }: PatientIoTStat
                 {/* Resumen rápido */}
                 <div className={styles.summaryRow}>
                     <div className={styles.summaryCard}>
-            <span className={styles.summaryNumber}>
-              {availableDevices.filter((d) => d.status === "connected").length}
-            </span>
+                        <span className={styles.summaryNumber}>
+                            {availableDevices.filter((d) => d.status === "connected").length}
+                        </span>
                         <span className={styles.summaryLabel}>Conectados</span>
                     </div>
                     <div className={styles.summaryCard}>
-            <span className={`${styles.summaryNumber} ${errorCount > 0 ? styles.summaryNumberError : ""}`}>
-              {errorCount}
-            </span>
+                        <span className={`${styles.summaryNumber} ${errorCount > 0 ? styles.summaryNumberError : ""}`}>
+                            {errorCount}
+                        </span>
                         <span className={styles.summaryLabel}>Con errores</span>
                     </div>
                     <div className={styles.summaryCard}>
-            <span className={styles.summaryNumber}>
-              {availableDevices.filter((d) =>
-                  d.alerts.some((a) => a.severity === "warning")
-              ).length}
-            </span>
+                        <span className={styles.summaryNumber}>
+                            {availableDevices.filter((d) =>
+                                d.alerts.some((a) => a.severity === "warning")
+                            ).length}
+                        </span>
                         <span className={styles.summaryLabel}>Advertencias</span>
                     </div>
                 </div>
@@ -203,7 +228,11 @@ export function PatientIoTStatusPage({ currentPath, onNavigate }: PatientIoTStat
                 {/* Cards de dispositivos */}
                 <div className={styles.devicesGrid}>
                     {overview.devices.map((device) => (
-                        <DeviceCard key={device.id} device={device} />
+                        <DeviceCard
+                            key={device.id}
+                            device={device}
+                            onNavigate={onNavigate}
+                        />
                     ))}
                 </div>
 

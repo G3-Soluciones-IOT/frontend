@@ -1,5 +1,5 @@
 import type { NavigationItem } from "@/shared/components/layout";
-import { DashboardIcon, UsersIcon, MessageIcon, FileIcon, ChartIcon, ScreenIcon } from "./navigation-icons";
+import { DashboardIcon, UsersIcon, MessageIcon, FileIcon, ChartIcon, ScreenIcon, IoTIcon } from "./navigation-icons";
 
 // Configuración de navegación por rol
 export const navigationConfig = {
@@ -22,8 +22,8 @@ export const navigationConfig = {
     { label: "Dashboard", href: "/patient", icon: <DashboardIcon />, group: "root" },
     { label: "Meal Plans", href: "/patient/meal-plans", icon: <FileIcon />, group: "root" },
     { label: "Tracking", href: "/patient/tracking", icon: <ChartIcon />, group: "root" },
-    { label: "Mis Dispositivos", href: "/patient/iot-devices", icon: <ScreenIcon />, group: "root" },
-    { label: "IoT Devices", href: "/nutritionist/patients/iot-devices", icon: null, group: "patients" },
+    { label: "Mis Dispositivos", href: "/patient/iot-devices", icon: <IoTIcon />, group: "root" },
+    { label: "Dispositivos IoT", href: "/nutritionist/patients/iot-devices", icon: <IoTIcon />, group: "root" },
     { label: "Messages", href: "/patient/messages", icon: <MessageIcon />, group: "root" },
     { label: "Appointments", href: "/patient/appointments", icon: <DashboardIcon />, group: "root" },
   ] as NavigationItem[],

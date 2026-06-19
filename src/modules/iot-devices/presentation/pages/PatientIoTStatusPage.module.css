@@ -361,7 +361,22 @@
         grid-template-columns: repeat(3, 1fr);
     }
 }
+.deviceCardClickable {
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
 
+.deviceCardClickable:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.09);
+}
+
+.viewMoreLink {
+    color: #0284c7;
+    font-size: 0.82rem;
+    font-weight: 700;
+    width: fit-content;
+}
 @media (max-width: 640px) {
     .summaryRow {
         grid-template-columns: 1fr;

@@ -34,6 +34,7 @@ export interface SmartBottleData {
     lastDrinkAmountMl: number;
     weeklyHydration: HydrationWeekPoint[];
     recentEntries: HydrationLogEntry[];
+    stats: SmartBottleStats; // 🆕
 }
 
 export interface DetectedFoodEstimate {
@@ -54,6 +55,7 @@ export interface SmartScaleData {
     isStable: boolean;
     detectedFood: DetectedFoodEstimate;
     weightTrend: WeightTrendPoint[];
+    stats: SmartScaleStats; // 🆕
 }
 
 export interface VitalsSnapshot {
@@ -101,4 +103,32 @@ export interface PatientOwnDevicesOverview {
     smartBottle: SmartBottleData | null;
     smartScale: SmartScaleData | null;
     wearableSensor: WearableSensorData | null;
+}
+export interface SmartBottleStats {
+    avgDailyLiters: number;
+    weeklyAverageLiters: number;
+    monthlyAverageLiters: number;
+    daysGoalReachedThisWeek: number;
+    longestStreakDays: number;
+}
+
+// ── Detalle extendido de Báscula ────────────────────────────────
+
+export interface FoodLogEntry {
+    id: string;
+    foodName: string;
+    weightGrams: number;
+    estimatedCalories: number;
+    estimatedCarbsGrams: number;
+    dateLabel: string;
+    timeLabel: string;
+    emoji: string;
+    photoVariant: "light" | "dark";
+}
+
+export interface SmartScaleStats {
+    mealsLoggedToday: number;
+    totalLogsThisWeek: number;
+    averageCaloriesPerMeal: number;
+    foodLog: FoodLogEntry[];
 }

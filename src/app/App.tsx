@@ -9,6 +9,8 @@ import { PatientsRoute } from "./routes/patients.routes";
 import { PaymentsRoute } from "@/app/routes/payments.routes.tsx";
 import { TipsRoute } from "@/app/routes/tips.routes";
 import { PatientIoTStatusPage } from "@/modules/iot-devices/presentation/pages/PatientIoTStatusPage";
+import { BottleDetailPage } from "@/modules/iot-devices/presentation/pages/BottleDetailPage";
+import { ScaleDetailPage } from "@/modules/iot-devices/presentation/pages/ScaleDetailPage";
 
 export default function App() {
   const [path, setPath] = useState(() => window.location.pathname);
@@ -61,6 +63,12 @@ export default function App() {
   }
   if (path === "/patient/iot-devices") {
     return <PatientIoTStatusPage currentPath={path} onNavigate={navigate} />;
+  }
+  if (path === "/patient/iot-devices/bottle") {
+    return <BottleDetailPage currentPath={path} onNavigate={navigate} />;
+  }
+  if (path === "/patient/iot-devices/scale") {
+    return <ScaleDetailPage currentPath={path} onNavigate={navigate} />;
   }
   if (isNutritionistShellPath(path)) {
     return <NutritionistShellRoute currentPath={path} onNavigate={navigate} />;

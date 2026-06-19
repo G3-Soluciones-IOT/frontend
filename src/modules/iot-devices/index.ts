@@ -17,6 +17,9 @@ export type {
     DeviceAvailability,
     IoTDeviceSummaryWithAlerts,
     PatientOwnDevicesOverview,
+    SmartBottleStats,
+    FoodLogEntry,
+    SmartScaleStats,
 } from "./domain/models/IoTDevice";
 
 export type { IoTDeviceRepository } from "./domain/repositories/IoTDeviceRepository";
@@ -28,3 +31,5 @@ export type { PatientDeviceRepository } from "./infrastructure/repositories/Mock
 export { MockPatientDeviceRepository } from "./infrastructure/repositories/MockPatientDeviceRepository";
 export { usePatientOwnDevices } from "./presentation/hooks/usePatientOwnDevices";
 export { PatientIoTStatusPage } from "./presentation/pages/PatientIoTStatusPage";
+export { BottleDetailPage } from "./presentation/pages/BottleDetailPage";
+export { ScaleDetailPage } from "./presentation/pages/ScaleDetailPage";
