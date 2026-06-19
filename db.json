@@ -120,5 +120,82 @@
       "isActive": true,
       "id": 14
     }
-  ]
+  ],
+  "dashboard": {
+    "stats": {
+      "activePatients": {
+        "value": 1245,
+        "trendPercentage": 12,
+        "trendIsPositive": true
+      },
+      "consultationsToday": {
+        "total": 10,
+        "pending": 2
+      },
+      "iotAlerts": {
+        "total": 3,
+        "requiresAttention": 3
+      }
+    },
+    "upcomingAppointments": [
+      {
+        "id": "app-1781852852795",
+        "patientName": "Clara Belón",
+        "date": "2026-06-19T07:07:32.795Z",
+        "type": "Evaluación de Grasa",
+        "avatar": "CB"
+      },
+      {
+        "id": "app-1781852848044",
+        "patientName": "Andrés Soto",
+        "date": "2026-06-19T07:07:28.044Z",
+        "type": "Evaluación de Grasa",
+        "avatar": "AS"
+      },
+      {
+        "id": "app-1",
+        "patientName": "Carlos Ramírez",
+        "date": "2026-06-19T15:00:00Z",
+        "type": "Primera consulta",
+        "avatar": "CR"
+      },
+      {
+        "id": "app-2",
+        "patientName": "María Pérez",
+        "date": "2026-06-19T16:30:00Z",
+        "type": "Control de peso",
+        "avatar": "MP"
+      },
+      {
+        "id": "app-3",
+        "patientName": "Luis Torres",
+        "date": "2026-06-19T20:00:00Z",
+        "type": "Seguimiento",
+        "avatar": "LT"
+      }
+    ],
+    "recentActivities": [
+      {
+        "id": "act-1",
+        "type": "water",
+        "patientName": "Carlos Ramírez",
+        "action": "registró 500ml de agua",
+        "timestamp": "2026-06-19T13:50:00Z"
+      },
+      {
+        "id": "act-2",
+        "type": "calories",
+        "patientName": "María Pérez",
+        "action": "superó su meta de calorías",
+        "timestamp": "2026-06-19T12:00:00Z"
+      },
+      {
+        "id": "act-3",
+        "type": "alert",
+        "patientName": "Luis Torres",
+        "action": "Alerta de sedentarismo",
+        "timestamp": "2026-06-19T11:00:00Z"
+      }
+    ]
+  }
 }
