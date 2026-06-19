@@ -1,6 +1,6 @@
 import { SharedLayout } from "@/shared/components/layout";
 import { Badge, NotificationCard, Toast } from "@/shared/components/ui";
-import { navigationConfig } from "@/shared/constants/navigation.config";
+import { useNavigation } from "@/shared/hooks/useNavigation";
 import { nutritionistNotificationSections } from "../../infrastructure/mock/nutritionistNotifications.mock";
 import type { NotificationAction, NotificationItem, NotificationSection } from "../../domain/models/Notification";
 import styles from "./NotificationsPage.module.css";
@@ -100,7 +100,7 @@ export function NotificationsPage({ currentPath, onNavigate }: NotificationsPage
       title="Notifications"
       currentPath={currentPath}
       onNavigate={onNavigate}
-      navigationItems={navigationConfig.nutritionist}
+      navigationItems={useNavigation()}
       breadcrumbs={["Notifications"]}
     >
       <div className={styles.headerRow}>

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { SharedLayout } from "@/shared/components/layout";
-import { navigationConfig } from "@/shared/constants/navigation.config";
+import { useNavigation } from "@/shared/hooks/useNavigation";
 import type { ChatAttachment, ChatPatient, PatientConnectionStatus } from "../../domain/models/PatientChat";
 import { usePatientChats } from "../hooks/usePatientChats";
 import styles from "./ChatPage.module.css";
@@ -176,11 +176,11 @@ export function ChatPage({ currentPath, onNavigate }: ChatPageProps) {
 
   if (!activeChat) {
     return (
-      <SharedLayout
+        <SharedLayout
         title="Communication"
         currentPath={currentPath}
         onNavigate={onNavigate}
-        navigationItems={navigationConfig.nutritionist}
+          navigationItems={useNavigation()}
         breadcrumbs={["Communication", "Chat"]}
         showPageTitle={false}
       >
@@ -213,7 +213,7 @@ export function ChatPage({ currentPath, onNavigate }: ChatPageProps) {
       title="Communication"
       currentPath={currentPath}
       onNavigate={onNavigate}
-      navigationItems={navigationConfig.nutritionist}
+      navigationItems={useNavigation()}
       breadcrumbs={["Communication", "Chat"]}
       showPageTitle={false}
     >

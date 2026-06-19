@@ -1,0 +1,124 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "email": "admin@gmail.com",
+      "fullName": "Admin",
+      "password": "admin",
+      "role": "admin",
+      "avatarUrl": "",
+      "createdAt": "2023-01-01T00:00:00.000Z",
+      "isActive": true
+    },
+    {
+      "id": 2,
+      "email": "jane.doe@example.com",
+      "fullName": "Jane Doe",
+      "password": "supersecret123",
+      "role": "patient",
+      "avatarUrl": "",
+      "createdAt": "2024-06-01T12:00:00.000Z",
+      "isActive": true
+    },
+    {
+      "id": 3,
+      "email": "john.smith@example.com",
+      "fullName": "John Smith",
+      "password": "patient123",
+      "role": "patient",
+      "avatarUrl": "",
+      "createdAt": "2024-08-15T09:30:00.000Z",
+      "isActive": true
+    },
+    {
+      "id": 4,
+      "email": "laura.garcia@jameofit.com",
+      "fullName": "Laura Garcia",
+      "password": "nutrition123",
+      "role": "nutritionist",
+      "avatarUrl": "",
+      "createdAt": "2024-03-10T10:00:00.000Z",
+      "isActive": false
+    },
+    {
+      "id": 5,
+      "email": "carlos.mendoza@jameofit.com",
+      "fullName": "Carlos Mendoza",
+      "password": "nutrition456",
+      "role": "nutritionist",
+      "avatarUrl": "",
+      "createdAt": "2024-04-22T14:15:00.000Z",
+      "isActive": true
+    },
+    {
+      "fullName": "Valentino Sandoval",
+      "email": "valentinosandoval2805@gmail.com",
+      "role": "patient",
+      "isActive": true,
+      "id": 6
+    },
+    {
+      "fullName": "Omar Luquillas Asno",
+      "email": "omar@gmail.com",
+      "role": "nutritionist",
+      "id": 7
+    },
+    {
+      "fullName": "dd",
+      "email": "valentinosandoval2805@gmail.com",
+      "role": "patient",
+      "id": 8
+    },
+    {
+      "fullName": "dd",
+      "email": "valentinosandoval280@gmail.com",
+      "role": "nutritionist",
+      "isActive": true,
+      "id": 9
+    },
+    {
+      "fullName": "ga",
+      "email": "ga@gmail.com",
+      "role": "patient",
+      "isActive": true,
+      "id": 10
+    },
+    {
+      "fullName": "Mathias",
+      "email": "ma@gmai",
+      "role": "nutritionist",
+      "isActive": true,
+      "id": 11
+    },
+    {
+      "email": "valentino@gmail.com",
+      "fullName": "Valentino Sandoval",
+      "password": "12345678",
+      "role": "nutritionist",
+      "avatarUrl": "",
+      "createdAt": "2026-06-19T03:34:51.413Z",
+      "isActive": true,
+      "id": 12
+    },
+    {
+      "email": "omar1@gmail.com",
+      "fullName": "Omar",
+      "password": "12345678",
+      "role": "patient",
+      "avatarUrl": "",
+      "createdAt": "2026-06-19T03:40:21.335Z",
+      "isActive": true,
+      "id": 13
+    },
+    {
+      "email": "logan@gmail.com",
+      "fullName": "logan",
+      "password": "12345678",
+      "role": "nutritionist",
+      "avatarUrl": "",
+      "createdAt": "2026-06-19T04:01:37.222Z",
+      "isActive": true,
+      "id": 14
+    }
+  ]
+}

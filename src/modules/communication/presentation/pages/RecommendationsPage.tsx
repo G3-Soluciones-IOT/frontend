@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { SharedLayout } from "@/shared/components/layout";
-import { navigationConfig } from "@/shared/constants/navigation.config";
+import { useNavigation } from "@/shared/hooks/useNavigation";
 
 interface RecommendationsPageProps {
   currentPath: string;
@@ -13,7 +13,7 @@ export const RecommendationsPage: FC<RecommendationsPageProps> = ({ currentPath,
       title="Communication"
       currentPath={currentPath}
       onNavigate={onNavigate}
-      navigationItems={navigationConfig.nutritionist}
+      navigationItems={useNavigation()}
       breadcrumbs={["Communication", "Recommendations"]}
     >
       <div className="communication-recommendations-page">

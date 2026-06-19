@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { SharedLayout } from "@/shared/components/layout";
-import { navigationConfig } from "@/shared/constants/navigation.config";
+import { useNavigation } from "@/shared/hooks/useNavigation";
 import styles from "./AccountSettingsPage.module.css";
 
 interface AccountSettingsPageProps {
@@ -51,7 +51,7 @@ export function AccountSettingsPage({
       title="Account Settings"
       currentPath={currentPath}
       onNavigate={onNavigate}
-      navigationItems={navigationConfig.nutritionist}
+      navigationItems={useNavigation()}
       breadcrumbs={["Account Settings"]}
       onSettingsClick={() => onNavigate("/account-settings")}
     >

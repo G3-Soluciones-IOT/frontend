@@ -1,5 +1,5 @@
 import { SharedLayout } from "@/shared/components/layout";
-import { navigationConfig } from "@/shared/constants/navigation.config";
+import { useNavigation } from "@/shared/hooks/useNavigation";
 import {
   dashboardSummary,
   recentMealLogs,
@@ -26,7 +26,7 @@ export function DashboardPage({ currentPath, onNavigate }: DashboardPageProps) {
       title="Dashboard"
       currentPath={currentPath}
       onNavigate={onNavigate}
-      navigationItems={navigationConfig.nutritionist}
+      navigationItems={useNavigation()}
       showPageTitle={false}
       topbarTabs={[
         { label: "Overview", href: "/nutritionist", active: currentPath === "/nutritionist" },

@@ -1,6 +1,6 @@
 import { patientAlerts, patientsOverviewStats } from "../../infrastructure/mock/patients.mock";
 import { SharedLayout } from "@/shared/components/layout";
-import { navigationConfig } from "@/shared/constants/navigation.config";
+import { useNavigation } from "@/shared/hooks/useNavigation";
 import styles from "./PatientsPages.module.css";
 
 interface PatientsOverviewPageProps {
@@ -20,7 +20,7 @@ export function PatientsOverviewPage({ currentPath, onNavigate }: PatientsOvervi
       title="Patients Overview"
       currentPath={currentPath}
       onNavigate={onNavigate}
-      navigationItems={navigationConfig.nutritionist}
+      navigationItems={useNavigation()}
       breadcrumbs={["Patients", "Overview"]}
     >
       <div className={styles.stack}>

@@ -1,23 +1,13 @@
 import { NutritionistProfilePage } from "@/modules/nutritionist";
 import { SharedLayout } from "@/shared/components/layout";
-import { navigationConfig } from "@/shared/constants/navigation.config";
+import { useNavigation } from "@/shared/hooks/useNavigation";
 
 interface NutritionistProfileRouteProps {
   currentPath: string;
   onNavigate: (path: string) => void;
 }
 
-const nutritionistShellPrefixes = [
-  "/nutritionist",
-  "/communication",
-  "/content",
-  "/analytics",
-  "/subscriptions",
-];
-
-export function isNutritionistShellPath(path: string) {
-  return nutritionistShellPrefixes.some((prefix) => path.startsWith(prefix));
-}
+// helper moved to shared utils
 
 export function NutritionistProfileRoute({ currentPath, onNavigate }: NutritionistProfileRouteProps) {
   return (
@@ -38,7 +28,7 @@ export function NutritionistShellRoute({ currentPath, onNavigate }: Nutritionist
       title=""
       currentPath={currentPath}
       onNavigate={onNavigate}
-      navigationItems={navigationConfig.nutritionist}
+      navigationItems={useNavigation()}
     >
       {/* Intentionally empty: this keeps shell navigation visible while section content is pending. */}
       <></>

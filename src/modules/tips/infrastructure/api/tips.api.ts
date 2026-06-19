@@ -4,7 +4,7 @@ import type { ListTipsInput } from "../../application/dto/ListTipsInput";
 import type { CreateTipInput } from "../../application/dto/CreateTipInput";
 import type { UpdateTipInput } from "../../application/dto/UpdateTipInput";
 
-const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
+const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
 
 export const tipsApi = {
   listTips: (input?: ListTipsInput) =>

@@ -3,7 +3,9 @@ import { AccountSettingsRoute } from "./routes/account-settings.routes";
 import { SignInRoute, SignUpRoute } from "./routes/auth.routes";
 import { CommunicationRoute } from "./routes/communication.routes";
 import { DashboardRoute } from "./routes/dashboard.routes";
-import { isNutritionistShellPath, NutritionistProfileRoute, NutritionistShellRoute } from "./routes/nutritionist.routes";
+import { NutritionistProfileRoute, NutritionistShellRoute } from "./routes/nutritionist.routes";
+import { AdminRoute } from "./routes/admin.routes";
+import { isNutritionistShellPath } from "@/shared/utils/isNutritionistShellPath";
 import { NotificationsRoute } from "./routes/notifications.routes";
 import { PatientsRoute } from "./routes/patients.routes";
 import { PaymentsRoute } from "@/app/routes/payments.routes.tsx";
@@ -61,6 +63,10 @@ export default function App() {
 
   if (isNutritionistShellPath(path)) {
     return <NutritionistShellRoute currentPath={path} onNavigate={navigate} />;
+  }
+
+  if (path.startsWith("/admin")) {
+    return <AdminRoute currentPath={path} onNavigate={navigate} />;
   }
 
   return (

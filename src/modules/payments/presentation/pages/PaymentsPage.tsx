@@ -1,5 +1,5 @@
 import { SharedLayout } from "@/shared/components/layout";
-import { navigationConfig } from "@/shared/constants/navigation.config";
+import { useNavigation } from "@/shared/hooks/useNavigation";
 import styles from "./PaymentsPages.module.css";
 import { useSubscriptionPlans } from "../hooks/useSubscriptionPlans";
 import type { SubscriptionPlan } from "../../domain/models/SubscriptionPlan";
@@ -82,7 +82,7 @@ export function PaymentsPage({ currentPath, onNavigate }: PaymentsPageProps) {
         title="Plans & Pricing"
         currentPath={currentPath}
         onNavigate={onNavigate}
-        navigationItems={navigationConfig.nutritionist}
+        navigationItems={useNavigation()}
         breadcrumbs={["Subscriptions"]}
       >
         <div className={styles.headerRow}>
@@ -105,7 +105,7 @@ export function PaymentsPage({ currentPath, onNavigate }: PaymentsPageProps) {
       title="Plans & Pricing"
       currentPath={currentPath}
       onNavigate={onNavigate}
-      navigationItems={navigationConfig.nutritionist}
+      navigationItems={useNavigation()}
       breadcrumbs={["Subscriptions"]}
     >
       <div className={styles.headerRow}>
