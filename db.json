@@ -39,6 +39,30 @@
         "ROLE_PATIENT"
       ],
       "id": 5
+    },
+    {
+      "username": "Goku",
+      "password": "12345678",
+      "roles": [
+        "ROLE_NUTRITIONIST"
+      ],
+      "id": 6
+    },
+    {
+      "username": "Scott",
+      "password": "12345678",
+      "roles": [
+        "ROLE_NUTRITIONIST"
+      ],
+      "id": 7
+    },
+    {
+      "username": "Magneto",
+      "password": "12345678",
+      "roles": [
+        "ROLE_NUTRITIONIST"
+      ],
+      "id": 8
     }
   ],
   "nutritionists": [
@@ -63,6 +87,50 @@
       "profilePictureUrl": "https://sm.ign.com/t/ign_latam/screenshot/default/wolverine-jackman_smx7.1280.jpg",
       "acceptingNewPatients": true,
       "yearsExperience": 5
+    },
+    {
+      "userId": "6",
+      "fullName": "Son Goku",
+      "licenseNumber": "CAAAA",
+      "specialty": "CLINICAL",
+      "bio": "SOY BATMAN",
+      "profilePictureUrl": "https://elcomercio.pe/resizer/v2/H6VNBOQQJBGC3IRNB52MMO35HU.jpg?auth=fd2335d32014c735f41c56d9d65fe56e1e0923bd34ac8e5ae7d6f0b46b06f669&width=1200&height=1200&quality=75&smart=true",
+      "acceptingNewPatients": true,
+      "yearsExperience": 10,
+      "id": 3
+    },
+    {
+      "id": 4,
+      "userId": "7",
+      "fullName": "scott summers",
+      "licenseNumber": "ccc",
+      "specialty": "CLINICAL",
+      "bio": "gaa",
+      "profilePictureUrl": "https://threepennypress.org/wp-content/uploads/2024/11/4TBSVE25HySJPGPD2wQk68bBmaNqdGw1Xbaqb4Sn-1200x900.jpg",
+      "acceptingNewPatients": true,
+      "yearsExperience": 10
+    },
+    {
+      "userId": "8",
+      "fullName": "Magnus sss",
+      "licenseNumber": "DADAD",
+      "specialty": "CLINICAL",
+      "bio": "sss",
+      "profilePictureUrl": "https://static0.srcdn.com/wordpress/wp-content/uploads/Michael-Fassbender-Magneto-X-Men-Days-of-Future-Past.jpg",
+      "acceptingNewPatients": true,
+      "yearsExperience": 1,
+      "id": 5
+    },
+    {
+      "id": "8",
+      "userId": "8",
+      "licenseNumber": "DADAD",
+      "specialty": "CLINICAL",
+      "fullName": "Magnus sss",
+      "bio": "sss",
+      "profilePictureUrl": "https://static0.srcdn.com/wordpress/wp-content/uploads/Michael-Fassbender-Magneto-X-Men-Days-of-Future-Past.jpg",
+      "acceptingNewPatients": true,
+      "yearsExperience": 1
     }
   ],
   "nutritionistPatients": [

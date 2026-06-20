@@ -21,34 +21,20 @@ export function writeStoredProfileInput(userId: string, input: UpdateProfessiona
   localStorage.setItem(profileStorageKey(userId), JSON.stringify(input));
 }
 
-function splitFullName(fullName: string) {
-  const parts = fullName.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return { firstName: "", lastName: "" };
-  if (parts.length === 1) return { firstName: parts[0], lastName: "" };
-  return { firstName: parts[0], lastName: parts.slice(1).join(" ") };
-}
-
 export function mapUserToProfessionalProfile(
   user: User,
   overrides?: Partial<UpdateProfessionalProfileInput>
 ): ProfessionalProfile {
-  const fromName = splitFullName(user.fullName);
-
   return {
     id: user.id,
     userId: user.id,
-    firstName: overrides?.firstName ?? fromName.firstName,
-    lastName: overrides?.lastName ?? fromName.lastName,
-    professionalTitle: overrides?.professionalTitle ?? "",
+    fullName: overrides?.fullName ?? user.username,
+    licenseNumber: overrides?.licenseNumber ?? "",
+    specialty: overrides?.specialty ?? "CLINICAL",
+    yearsExperience: overrides?.yearsExperience ?? 0,
+    acceptingNewPatients: overrides?.acceptingNewPatients ?? true,
     bio: overrides?.bio ?? "",
-    avatarUrl: user.avatarUrl,
-    primaryCertification: overrides?.primaryCertification ?? "",
-    specialties: overrides?.specialties ?? [],
-    experienceRange: overrides?.experienceRange ?? "0-1 years",
-    identityVerified: false,
-    credentialsVerified: false,
-    verificationStatus: "pending",
-    updatedAt: new Date().toISOString(),
+    profilePictureUrl: overrides?.profilePictureUrl ?? "",
   };
 }
 
