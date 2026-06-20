@@ -1,12 +1,9 @@
-export type UserRole = "patient" | "nutritionist" | "admin";
+export type UserRole = "ROLE_PATIENT" | "ROLE_NUTRITIONIST" | "ROLE_ADMIN";
 
 export interface User {
   id: string;
-  email: string;
-  fullName: string;
-  role: UserRole;
-  avatarUrl?: string;
-  createdAt: string;
+  username: string;
+  roles: string[];
 }
 
 export interface AuthTokens {

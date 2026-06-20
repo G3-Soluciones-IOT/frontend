@@ -6,9 +6,11 @@ import { UserDetailsModal } from "../components/UserDetailsModal";
 
 interface User {
   id: number;
-  email: string;
-  fullName: string;
-  role: string;
+  email?: string;
+  fullName?: string;
+  username?: string;
+  role?: string;
+  roles?: string[];
   avatarUrl?: string;
   createdAt?: string;
   isActive?: boolean;
@@ -26,6 +28,14 @@ const roleTabs: Array<{ key: RoleTab; label: string }> = [
   { key: "nutritionist", label: "Nutritionists" },
   { key: "patient", label: "Patients" },
 ];
+
+function getDisplayName(user: User) {
+  return user.fullName || user.username || `User ${user.id}`;
+}
+
+function getDisplayEmail(user: User) {
+  return user.email || "-";
+}
 
 function getInitials(name: string) {
   return name
@@ -48,8 +58,9 @@ function formatDate(value?: string) {
   });
 }
 
-function normalizeRole(role: string) {
-  return role.trim().toLowerCase();
+function normalizeRole(user: User) {
+  const role = user.role ?? user.roles?.[0] ?? "";
+  return role.replace(/^ROLE_/, "").trim().toLowerCase();
 }
 
 export function UsersPage({ currentPath, onNavigate }: UsersPageProps) {
@@ -77,12 +88,12 @@ export function UsersPage({ currentPath, onNavigate }: UsersPageProps) {
   }, []);
 
   const nutritionists = useMemo(
-    () => users.filter((user) => normalizeRole(user.role) === "nutritionist"),
+    () => users.filter((user) => normalizeRole(user) === "nutritionist"),
     [users],
   );
 
   const patients = useMemo(
-    () => users.filter((user) => normalizeRole(user.role) === "patient"),
+    () => users.filter((user) => normalizeRole(user) === "patient"),
     [users],
   );
 
@@ -127,7 +138,7 @@ export function UsersPage({ currentPath, onNavigate }: UsersPageProps) {
               onClick={() => {
                 const csvRows = [
                   ["fullName", "email", "role", "isActive", "createdAt"],
-                  ...visibleUsers.map((u) => [u.fullName, u.email, u.role, String(Boolean(u.isActive)), u.createdAt ?? ""]),
+                  ...visibleUsers.map((u) => [getDisplayName(u), getDisplayEmail(u), normalizeRole(u), String(Boolean(u.isActive)), u.createdAt ?? ""]),
                 ];
                 const csv = csvRows.map((row) => row.map((cell) => `"${String(cell ?? "").replaceAll('"', '""')}"`).join(",")).join("\n");
                 const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -314,17 +325,17 @@ export function UsersPage({ currentPath, onNavigate }: UsersPageProps) {
                               flexShrink: 0,
                             }}
                           >
-                            {u.avatarUrl ? null : getInitials(u.fullName)}
+                            {u.avatarUrl ? null : getInitials(getDisplayName(u))}
                           </div>
                           <div>
-                            <div style={{ fontSize: 15, color: "#111827", fontWeight: 500 }}>{u.fullName}</div>
-                            <div style={{ fontSize: 14, color: "#6b7280" }}>{u.email}</div>
+                            <div style={{ fontSize: 15, color: "#111827", fontWeight: 500 }}>{getDisplayName(u)}</div>
+                            <div style={{ fontSize: 14, color: "#6b7280" }}>{getDisplayEmail(u)}</div>
                           </div>
                         </div>
                       </td>
                       <td style={{ padding: "18px 24px" }}>
                         <div style={{ fontSize: 15, color: "#111827" }}>
-                          {normalizeRole(u.role) === "nutritionist" ? "Nutritionist" : "Patient"}
+                          {normalizeRole(u) === "nutritionist" ? "Nutritionist" : "Patient"}
                         </div>
                         <div style={{ fontSize: 14, color: "#6b7280" }}>General Access</div>
                       </td>

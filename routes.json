@@ -1,7 +1,8 @@
 {
-  "/auth/sign-up": "/users",
-  "/auth/sign-in": "/users",
-  "/auth/me": "/users/:id",
+  "/api/v1/authentication/sign-up": "/users",
+  "/api/v1/authentication/me/:id": "/users/:id",
+  "/api/v1/nutritionists": "/nutritionists",
+  "/api/v1/nutritionists/:id": "/nutritionists/:id",
   "/api/*": "/$1"
 }
 

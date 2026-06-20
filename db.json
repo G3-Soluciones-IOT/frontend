@@ -2,123 +2,156 @@
   "users": [
     {
       "id": 1,
-      "email": "admin@gmail.com",
-      "fullName": "Admin",
-      "password": "admin",
-      "role": "admin",
-      "avatarUrl": "",
-      "createdAt": "2023-01-01T00:00:00.000Z",
-      "isActive": true
+      "username": "valentino",
+      "password": "12345678",
+      "roles": [
+        "ROLE_NUTRITIONIST"
+      ]
+    },
+    {
+      "username": "Logan",
+      "password": "12345678",
+      "roles": [
+        "ROLE_NUTRITIONIST"
+      ],
+      "id": 2
+    },
+    {
+      "username": "Eric",
+      "password": "12345678",
+      "roles": [
+        "ROLE_ADMIN"
+      ],
+      "id": 3
+    },
+    {
+      "username": "Camila",
+      "password": "12345678",
+      "roles": [
+        "ROLE_PATIENT"
+      ],
+      "id": 4
+    },
+    {
+      "username": "Andres",
+      "password": "12345678",
+      "roles": [
+        "ROLE_PATIENT"
+      ],
+      "id": 5
+    }
+  ],
+  "nutritionists": [
+    {
+      "id": 1,
+      "userId": "1",
+      "licenseNumber": "",
+      "specialty": "",
+      "fullName": "Valentino Sandoval Paiva",
+      "bio": "gaaa",
+      "profilePictureUrl": "https://media.gq.com.mx/photos/5f6ce732bc946e88f6c96320/16:9/w_2560%2Cc_limit/goky%2520ultra%2520instinto.jpg",
+      "acceptingNewPatients": true,
+      "yearsExperience": 5
     },
     {
       "id": 2,
-      "email": "jane.doe@example.com",
-      "fullName": "Jane Doe",
-      "password": "supersecret123",
-      "role": "patient",
-      "avatarUrl": "",
-      "createdAt": "2024-06-01T12:00:00.000Z",
-      "isActive": true
-    },
-    {
-      "id": 3,
-      "email": "john.smith@example.com",
-      "fullName": "John Smith",
-      "password": "patient123",
-      "role": "patient",
-      "avatarUrl": "",
-      "createdAt": "2024-08-15T09:30:00.000Z",
-      "isActive": true
-    },
-    {
-      "id": 4,
-      "email": "laura.garcia@jameofit.com",
-      "fullName": "Laura Garcia",
-      "password": "nutrition123",
-      "role": "nutritionist",
-      "avatarUrl": "",
-      "createdAt": "2024-03-10T10:00:00.000Z",
-      "isActive": false
-    },
-    {
-      "id": 5,
-      "email": "carlos.mendoza@jameofit.com",
-      "fullName": "Carlos Mendoza",
-      "password": "nutrition456",
-      "role": "nutritionist",
-      "avatarUrl": "",
-      "createdAt": "2024-04-22T14:15:00.000Z",
-      "isActive": true
-    },
-    {
-      "fullName": "Valentino Sandoval",
-      "email": "valentinosandoval2805@gmail.com",
-      "role": "patient",
-      "isActive": true,
-      "id": 6
-    },
-    {
-      "fullName": "Omar Luquillas Asno",
-      "email": "omar@gmail.com",
-      "role": "nutritionist",
-      "id": 7
-    },
-    {
-      "fullName": "dd",
-      "email": "valentinosandoval2805@gmail.com",
-      "role": "patient",
-      "id": 8
-    },
-    {
-      "fullName": "dd",
-      "email": "valentinosandoval280@gmail.com",
-      "role": "nutritionist",
-      "isActive": true,
-      "id": 9
-    },
-    {
-      "fullName": "ga",
-      "email": "ga@gmail.com",
-      "role": "patient",
-      "isActive": true,
-      "id": 10
-    },
-    {
-      "fullName": "Mathias",
-      "email": "ma@gmai",
-      "role": "nutritionist",
-      "isActive": true,
-      "id": 11
-    },
-    {
-      "email": "valentino@gmail.com",
-      "fullName": "Valentino Sandoval",
-      "password": "12345678",
-      "role": "nutritionist",
-      "avatarUrl": "",
-      "createdAt": "2026-06-19T03:34:51.413Z",
-      "isActive": true,
-      "id": 12
-    },
-    {
-      "email": "omar1@gmail.com",
-      "fullName": "Omar",
-      "password": "12345678",
-      "role": "patient",
-      "avatarUrl": "",
-      "createdAt": "2026-06-19T03:40:21.335Z",
-      "isActive": true,
-      "id": 13
-    },
-    {
-      "email": "logan@gmail.com",
-      "fullName": "logan",
-      "password": "12345678",
-      "role": "nutritionist",
-      "avatarUrl": "",
-      "createdAt": "2026-06-19T04:01:37.222Z",
-      "isActive": true,
-      "id": 14
+      "userId": "2",
+      "licenseNumber": "DADAD",
+      "specialty": "CLINICAL",
+      "fullName": "Logan 1",
+      "bio": "ga",
+      "profilePictureUrl": "https://sm.ign.com/t/ign_latam/screenshot/default/wolverine-jackman_smx7.1280.jpg",
+      "acceptingNewPatients": true,
+      "yearsExperience": 5
     }
-  ]
+  ],
+  "nutritionistPatients": [
+    {
+      "id": 9,
+      "nutritionistId": 1,
+      "patientUserId": 5,
+      "serviceType": "DIET_PLAN",
+      "startDate": "2026-06-18T14:30:00.000Z",
+      "scheduledAt": "2026-06-22T16:00:00.000Z",
+      "accepted": true,
+      "requestedAt": "2026-06-18T14:30:00.000Z"
+    }
+  ],
+  "dashboard": {
+    "stats": {
+      "activePatients": {
+        "value": 1245,
+        "trendPercentage": 12,
+        "trendIsPositive": true
+      },
+      "consultationsToday": {
+        "total": 10,
+        "pending": 2
+      },
+      "iotAlerts": {
+        "total": 3,
+        "requiresAttention": 3
+      }
+    },
+    "upcomingAppointments": [
+      {
+        "id": "app-1781852852795",
+        "patientName": "Clara Belón",
+        "date": "2026-06-19T07:07:32.795Z",
+        "type": "Evaluación de Grasa",
+        "avatar": "CB"
+      },
+      {
+        "id": "app-1781852848044",
+        "patientName": "Andrés Soto",
+        "date": "2026-06-19T07:07:28.044Z",
+        "type": "Evaluación de Grasa",
+        "avatar": "AS"
+      },
+      {
+        "id": "app-1",
+        "patientName": "Carlos Ramírez",
+        "date": "2026-06-19T15:00:00Z",
+        "type": "Primera consulta",
+        "avatar": "CR"
+      },
+      {
+        "id": "app-2",
+        "patientName": "María Pérez",
+        "date": "2026-06-19T16:30:00Z",
+        "type": "Control de peso",
+        "avatar": "MP"
+      },
+      {
+        "id": "app-3",
+        "patientName": "Luis Torres",
+        "date": "2026-06-19T20:00:00Z",
+        "type": "Seguimiento",
+        "avatar": "LT"
+      }
+    ],
+    "recentActivities": [
+      {
+        "id": "act-1",
+        "type": "water",
+        "patientName": "Carlos Ramírez",
+        "action": "registró 500ml de agua",
+        "timestamp": "2026-06-19T13:50:00Z"
+      },
+      {
+        "id": "act-2",
+        "type": "calories",
+        "patientName": "María Pérez",
+        "action": "superó su meta de calorías",
+        "timestamp": "2026-06-19T12:00:00Z"
+      },
+      {
+        "id": "act-3",
+        "type": "alert",
+        "patientName": "Luis Torres",
+        "action": "Alerta de sedentarismo",
+        "timestamp": "2026-06-19T11:00:00Z"
+      }
+    ]
+  }
 }

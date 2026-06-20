@@ -8,56 +8,80 @@ import {
   EmailAlreadyInUseError,
 } from "../../domain/errors/AuthDomainError";
 import axios from "axios";
-import { apiUrl } from "@/app/config/env";
+import { API_BASE_URL, apiUrl } from "@/app/config/env.ts";
+
+interface AuthApiUser {
+  id: number | string;
+  username: string;
+  roles: string[];
+  token?: string;
+}
+
+function toSession(user: AuthApiUser): AuthSession {
+  const accessToken = user.token ?? `token-${user.id}`;
+
+  return {
+    user: {
+      id: String(user.id),
+      username: user.username,
+      roles: user.roles,
+    },
+    tokens: {
+      accessToken,
+      refreshToken: `refresh-${user.id}`,
+      expiresIn: 3600,
+    },
+  };
+}
 
 export class HttpAuthRepository implements AuthRepository {
   async signIn(input: SignInInput): Promise<AuthSession> {
-    const response = await fetch(
-        apiUrl(`/users?email=${encodeURIComponent(input.email)}`)
-    );
-
-    const users = await response.json();
-
-    const user = users.find(
-        (u: any) => u.password === input.password
-    );
-
-    if (!user) {
-      throw new InvalidCredentialsError();
+    if (API_BASE_URL.includes("localhost:3001")) {
+      return this._signInWithJsonServer(input);
     }
 
-    const session: AuthSession = {
-      user: {
-        id: String(user.id),
-        email: user.email,
-        fullName: user.fullName,
-        role: user.role,
-        avatarUrl: user.avatarUrl,
-        createdAt: user.createdAt,
-      },
-      tokens: {
-        accessToken: `token-${user.id}`,
-        refreshToken: `refresh-${user.id}`,
-        expiresIn: 3600,
-      },
-    };
+    try {
+      const { data } = await authApi.post<AuthApiUser>("/sign-in", {
+        username: input.username,
+        password: input.password,
+      });
 
-    localStorage.setItem("session", JSON.stringify(session));
+      const session = toSession(data);
 
-    this._persistTokens(session);
+      this._persistTokens(session);
 
-    return session;
+      return session;
+    } catch {
+      return this._signInWithJsonServer(input);
+    }
   }
 
   async signUp(input: SignUpInput): Promise<AuthSession> {
     try {
-      const { data } = await authApi.post<AuthSession>("/sign-up", input);
-      this._persistTokens(data);
-      return data;
+      if (await this._usernameExists(input.username)) {
+        throw new EmailAlreadyInUseError();
+      }
+
+      const { data } = await authApi.post<AuthApiUser>("/sign-up", {
+        username: input.username,
+        password: input.password,
+        roles: [input.role],
+      });
+
+      return toSession(data);
     } catch (error) {
+      if (error instanceof EmailAlreadyInUseError) {
+        throw error;
+      }
+
       if (axios.isAxiosError(error) && error.response?.status === 409) {
         throw new EmailAlreadyInUseError();
       }
+
+      if (axios.isAxiosError(error) && error.response?.status === 404 && API_BASE_URL.includes("localhost:3001")) {
+        return this._signUpWithJsonServer(input);
+      }
+
       throw error;
     }
   }
@@ -71,6 +95,7 @@ export class HttpAuthRepository implements AuthRepository {
 
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
+    localStorage.removeItem("session");
   }
 
   async getCurrentUser(): Promise<User | null> {
@@ -104,5 +129,72 @@ export class HttpAuthRepository implements AuthRepository {
   private _persistTokens(session: AuthSession): void {
     localStorage.setItem("accessToken", session.tokens.accessToken);
     localStorage.setItem("refreshToken", session.tokens.refreshToken);
+    localStorage.setItem("session", JSON.stringify(session));
+  }
+
+  private async _signInWithJsonServer(input: SignInInput): Promise<AuthSession> {
+    if (!API_BASE_URL.includes("localhost:3001")) {
+      throw new InvalidCredentialsError();
+    }
+
+    const params = new URLSearchParams({
+      username: input.username,
+      password: input.password,
+    });
+
+    const response = await fetch(apiUrl(`/users?${params.toString()}`));
+
+    if (!response.ok) {
+      throw new InvalidCredentialsError();
+    }
+
+    const users = (await response.json()) as AuthApiUser[];
+    const user = users[0];
+
+    if (!user) {
+      throw new InvalidCredentialsError();
+    }
+
+    const session = toSession(user);
+    this._persistTokens(session);
+
+    return session;
+  }
+
+  private async _usernameExists(username: string): Promise<boolean> {
+    if (!API_BASE_URL.includes("localhost:3001")) {
+      return false;
+    }
+
+    const params = new URLSearchParams({ username });
+    const response = await fetch(apiUrl(`/users?${params.toString()}`));
+
+    if (!response.ok) {
+      return false;
+    }
+
+    const users = (await response.json()) as AuthApiUser[];
+
+    return users.length > 0;
+  }
+
+  private async _signUpWithJsonServer(input: SignUpInput): Promise<AuthSession> {
+    const response = await fetch(apiUrl("/users"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: input.username,
+        password: input.password,
+        roles: [input.role],
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to create account.");
+    }
+
+    const user = (await response.json()) as AuthApiUser;
+
+    return toSession(user);
   }
 }

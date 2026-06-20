@@ -1,12 +1,10 @@
-import type { ExperienceRange, Specialty } from "../../domain/models/ProfessionalProfile";
- 
 export interface UpdateProfessionalProfileInput {
-  firstName: string;
-  lastName: string;
-  professionalTitle: string;
+  id: number | string;
   bio: string;
-  primaryCertification: string;
-  specialties: Specialty[];
-  experienceRange: ExperienceRange;
+  fullName: string;
+  licenseNumber?: string;
+  specialty?: string;
+  profilePictureUrl: string;
+  acceptingNewPatients: boolean;
+  yearsExperience: number;
 }
- 

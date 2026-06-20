@@ -5,7 +5,8 @@ import { DashboardIcon, UsersIcon, MessageIcon, FileIcon, ChartIcon, ScreenIcon 
 export const navigationConfig = {
   nutritionist: [
     { label: "Dashboard", href: "/nutritionist", icon: <DashboardIcon />, group: "root" },
-    { label: "Patients", href: "/nutritionist/patients/overview", icon: <UsersIcon />, group: "root" },
+    { label: "Patients", href: "/nutritionist/patients", icon: <UsersIcon />, group: "root" },
+    { label: "Overview", href: "/nutritionist/patients/overview", icon: null, group: "patients" },
     { label: "Directory", href: "/nutritionist/patients/directory", icon: null, group: "patients" },
     { label: "Tracking", href: "/nutritionist/patients/tracking", icon: null, group: "patients" },
     { label: "Communication", href: "/communication", icon: <MessageIcon />, group: "root" },

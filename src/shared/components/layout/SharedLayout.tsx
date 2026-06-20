@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import logo from "@/assets/LogoJameoFit.png";
 import styles from "./SharedLayout.module.css";
 import { Topbar } from "./Topbar";
+import { getStoredNutritionistProfile } from "@/modules/nutritionist/infrastructure/storage/nutritionistProfileStorage";
 
 export interface NavigationItem {
   label: string;
@@ -24,6 +25,7 @@ export interface SharedLayoutProps {
   }[];
   showPageTitle?: boolean;
   userInitials?: string;
+  userAvatarUrl?: string;
   onSettingsClick?: () => void;
   onNotificationsClick?: () => void;
   onProfileClick?: () => void;
@@ -35,6 +37,9 @@ function isActive(currentPath: string, href: string) {
   if (currentPath === href) return true;
   if (href === "/nutritionist") {
     return currentPath.startsWith("/nutritionist/recent-logs");
+  }
+  if (href === "/nutritionist/patients") {
+    return currentPath.startsWith("/nutritionist/patients");
   }
   // Si es un padre, marca como activo si el currentPath comienza con ese href
   if (href === "/patients" || href === "/content") {
@@ -69,11 +74,18 @@ export function SharedLayout({
   topbarTabs = [],
   showPageTitle = true,
   userInitials = "SJ",
+  userAvatarUrl,
   onSettingsClick,
   onNotificationsClick,
   onProfileClick,
   onLogout,
 }: SharedLayoutProps) {
+  const storedProfile =
+    typeof window !== "undefined"
+      ? getStoredNutritionistProfile()
+      : null;
+  const resolvedAvatarUrl = userAvatarUrl ?? storedProfile?.profilePictureUrl;
+
   const handleLogout = () => {
     if (onLogout) {
       onLogout();
@@ -125,6 +137,7 @@ export function SharedLayout({
           breadcrumbs={breadcrumbs}
           tabs={topbarTabs}
           userInitials={userInitials}
+          userAvatarUrl={resolvedAvatarUrl}
           onSettingsClick={onSettingsClick ?? (() => onNavigate("/account-settings"))}
           onNotificationsClick={onNotificationsClick ?? (() => onNavigate("/notifications"))}
           onProfileClick={onProfileClick}

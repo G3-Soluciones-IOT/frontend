@@ -29,6 +29,10 @@ export default function App() {
     return <SignUpRoute onNavigate={navigate} />;
   }
 
+  if (path === "/sign-in") {
+    return <SignInRoute onNavigate={navigate} />;
+  }
+
   if (path === "/professional-profile") {
     return <NutritionistProfileRoute currentPath={path} onNavigate={navigate} />;
   }

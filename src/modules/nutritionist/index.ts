@@ -1,18 +1,13 @@
 // Domain
-export type {
-  ExperienceRange,
-  ProfessionalProfile,
-  Specialty,
-  VerificationStatus,
-} from "./domain/models/ProfessionalProfile";
+export type { ProfessionalProfile } from "./domain/models/ProfessionalProfile";
 export type { NutritionistRepository } from "./domain/repositories/NutritionistRepository";
 export {
   BioTooLongError,
-  MaxSpecialtiesReachedError,
   NutritionistDomainError,
 } from "./domain/errors/NutritionistDomainError";
 
 // Application DTOs
+export type { CreateProfessionalProfileInput } from "./application/dto/CreateProfessionalProfileInput";
 export type { UpdateProfessionalProfileInput } from "./application/dto/UpdateProfessionalProfileInput";
 
 // Infrastructure

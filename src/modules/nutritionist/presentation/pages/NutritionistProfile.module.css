@@ -219,6 +219,26 @@
   align-items: start;
 }
 
+.onboardingForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.onboardingGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.onboardingPreview {
+  padding: 18px;
+}
+
+.onboardingPreview .verificationBox {
+  margin-top: 12px;
+}
+
 .rightStack {
   display: flex;
   flex-direction: column;
@@ -230,7 +250,7 @@
   border: 1px solid var(--soft);
   border-radius: var(--radius);
   box-shadow: none;
-  padding: 24px;
+  padding: 18px;
 }
 
 .cardTitle {
@@ -417,8 +437,8 @@
 
 .formGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  grid-template-columns: 1fr;
+  gap: 14px;
 }
 
 .fieldGroup {
@@ -437,6 +457,26 @@
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
+}
+
+.fieldError {
+  color: #c0392b;
+  font-size: 0.72rem;
+}
+
+.toggleRow {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  font-size: 0.84rem;
+}
+
+.toggleRow input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--green);
 }
 
 .fieldInput,
@@ -570,11 +610,36 @@
   display: none;
 }
 
+.saveBarVisible {
+  margin-top: 18px;
+  display: flex;
+  justify-content: flex-end;
+}
+
 .saveBarInfo,
 .saveBarActions,
 .savedBadge,
 .btnSave {
   font-size: 0.82rem;
+}
+
+.btnSave {
+  min-width: 170px;
+  padding: 11px 18px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--green);
+  color: var(--white);
+  font-weight: 600;
+}
+
+.btnSave:hover:not(:disabled) {
+  background: var(--green-dark);
+}
+
+.btnSave:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 .spinner {

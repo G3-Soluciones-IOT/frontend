@@ -5,7 +5,7 @@ import type { SignInInput } from "../dto/SignInInput";
 export function signInUseCase(repository: AuthRepository) {
   return async (input: SignInInput): Promise<AuthSession> => {
     const trimmedInput: SignInInput = {
-      email: input.email.trim().toLowerCase(),
+      username: input.username.trim(),
       password: input.password,
     };
 

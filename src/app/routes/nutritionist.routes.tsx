@@ -16,6 +16,8 @@ export function NutritionistProfileRoute({ currentPath, onNavigate }: Nutritioni
       onNavigate={(href) => onNavigate(href)}
       onSignOut={() => {
         localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("session");
         onNavigate("/sign-in");
       }}
     />

@@ -409,6 +409,69 @@
 }
 
 /* ─── Row layout for name fields ──────────────────────── */
+.roleOptions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.roleOption {
+  min-height: 52px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  background: white;
+  border: 1.5px solid var(--cream-dark);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition),
+    color var(--transition),
+    background var(--transition);
+}
+
+.roleOption input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.roleOption:has(input:focus-visible) {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(16, 179, 76, 0.14);
+}
+
+.roleOptionSelected {
+  background: rgba(16, 179, 76, 0.08);
+  border-color: var(--primary-color);
+  color: var(--text-dark);
+  box-shadow: inset 0 0 0 1px rgba(16, 179, 76, 0.12);
+}
+
+.roleOptionIcon {
+  display: flex;
+  align-items: center;
+  color: currentColor;
+}
+
+.roleOptionText {
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1;
+  color: currentColor;
+}
+
+.roleOption:has(input:disabled) {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 .fieldRow {
   display: grid;
   grid-template-columns: 1fr 1fr;

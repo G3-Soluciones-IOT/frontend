@@ -18,6 +18,7 @@ export interface TopbarProps {
     active?: boolean;
   }[];
   userInitials?: string;
+  userAvatarUrl?: string;
   onSettingsClick?: () => void;
   onNotificationsClick?: () => void;
   onProfileClick?: () => void;
@@ -30,6 +31,7 @@ export function Topbar({
   breadcrumbs = [],
   tabs = [],
   userInitials = "SJ",
+  userAvatarUrl,
   onSettingsClick,
   onNotificationsClick,
   onProfileClick,
@@ -97,7 +99,11 @@ export function Topbar({
           aria-label="Open profile"
           onClick={handleProfileClick}
         >
-          {userInitials}
+          {userAvatarUrl ? (
+            <img src={userAvatarUrl} alt="" className={styles.avatarImage} />
+          ) : (
+            userInitials
+          )}
         </button>
       </div>
     </header>

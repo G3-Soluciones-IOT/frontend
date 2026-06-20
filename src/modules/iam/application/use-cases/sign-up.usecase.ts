@@ -28,8 +28,7 @@ export function signUpUseCase(repository: AuthRepository) {
 
     return repository.signUp({
       ...input,
-      email: input.email.trim().toLowerCase(),
-      fullName: input.fullName.trim(),
+      username: input.username.trim(),
     });
   };
 }

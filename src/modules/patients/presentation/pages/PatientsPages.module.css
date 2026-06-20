@@ -294,6 +294,111 @@
   opacity: 0.45;
 }
 
+.segmentedTabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  margin: 0 0 16px;
+  border: 1px solid #dbe4ee;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.segmentedTab {
+  min-width: 128px;
+  height: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #64748b;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.segmentedTabActive {
+  background: #ffffff;
+  color: #0f9f4b;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.statusAccepted,
+.statusPending {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 82px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.statusAccepted {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.statusPending {
+  background: #fff7db;
+  color: #b45309;
+}
+
+.actionGroup {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.primaryActionButton,
+.dangerActionButton {
+  min-width: 76px;
+  height: 34px;
+  border-radius: 9px;
+  padding: 0 12px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primaryActionButton {
+  border: 0;
+  background: #0f9f4b;
+  color: #ffffff;
+}
+
+.dangerActionButton {
+  border: 1px solid #fecaca;
+  background: #fff5f5;
+  color: #b91c1c;
+}
+
+.primaryActionButton:disabled,
+.dangerActionButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.emptyState,
+.errorText {
+  margin: 14px 0 4px;
+  padding: 14px 16px;
+  border-radius: 10px;
+}
+
+.emptyState {
+  background: #f8fafc;
+  color: #64748b;
+}
+
+.errorText {
+  background: #fff5f5;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
 .backButton {
   width: fit-content;
   border: 0;

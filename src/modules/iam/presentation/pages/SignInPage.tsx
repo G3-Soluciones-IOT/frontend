@@ -5,11 +5,11 @@ import styles from "../components/AuthLayout.module.css";
 import heroImg from "@/assets/SignImage.png";
 
 // ── Icons (inline SVG, zero dependencies) ──────────────────
-function MailIcon() {
+function UserIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="4" width="20" height="16" rx="2" />
-      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
     </svg>
   );
 }
@@ -47,18 +47,15 @@ interface SignInPageProps {
 export function SignInPage({ onSignIn, onNavigateToSignUp }: SignInPageProps) {
   const { execute, isLoading, error } = useSignIn();
   const [showPassword, setShowPassword] = useState(false);
-  const [fields, setFields] = useState({ email: "", password: "" });
-  const [fieldErrors, setFieldErrors] = useState({ email: "", password: "" });
+  const [fields, setFields] = useState({ username: "", password: "" });
+  const [fieldErrors, setFieldErrors] = useState({ username: "", password: "" });
 
   const validate = (): boolean => {
-    const errors = { email: "", password: "" };
+    const errors = { username: "", password: "" };
     let valid = true;
 
-    if (!fields.email) {
-      errors.email = "Email is required.";
-      valid = false;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email)) {
-      errors.email = "Enter a valid email address.";
+    if (!fields.username.trim()) {
+      errors.username = "Username is required.";
       valid = false;
     }
 
@@ -98,28 +95,28 @@ export function SignInPage({ onSignIn, onNavigateToSignUp }: SignInPageProps) {
       {error && <p className={styles.errorBanner}>{error}</p>}
 
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
-        {/* Email */}
+        {/* Username */}
         <div className={styles.fieldGroup}>
-          <label className={styles.fieldLabel} htmlFor="signin-email">
-            Email
+          <label className={styles.fieldLabel} htmlFor="signin-username">
+            Username
           </label>
           <div className={styles.fieldWrapper}>
             <span className={styles.fieldIcon}>
-              <MailIcon />
+              <UserIcon />
             </span>
             <input
-              id="signin-email"
-              type="email"
-              autoComplete="email"
-              placeholder="you@example.com"
-              className={`${styles.fieldInput} ${fieldErrors.email ? styles.hasError : ""}`}
-              value={fields.email}
-              onChange={handleChange("email")}
+              id="signin-username"
+              type="text"
+              autoComplete="username"
+              placeholder="Enter your username"
+              className={`${styles.fieldInput} ${fieldErrors.username ? styles.hasError : ""}`}
+              value={fields.username}
+              onChange={handleChange("username")}
               disabled={isLoading}
             />
           </div>
-          {fieldErrors.email && (
-            <span className={styles.fieldError}>{fieldErrors.email}</span>
+          {fieldErrors.username && (
+            <span className={styles.fieldError}>{fieldErrors.username}</span>
           )}
         </div>
 

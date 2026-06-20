@@ -15,14 +15,7 @@ function UserIcon() {
   );
 }
 
-function MailIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="4" width="20" height="16" rx="2" />
-      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-    </svg>
-  );
-}
+
 
 function LockIcon() {
   return (
@@ -61,8 +54,7 @@ function EyeIcon({ closed }: { closed: boolean }) {
 
 // ── Types ────────────────────────────────────────────────────
 interface FormFields {
-  fullName: string;
-  email: string;
+  username: string;
   password: string;
   confirmPassword: string;
   role: UserRole;
@@ -81,11 +73,10 @@ export function SignUpPage({ onSignUp, onNavigateToSignIn }: SignUpPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [fields, setFields] = useState<FormFields>({
-    fullName: "",
-    email: "",
+    username: "",
     password: "",
     confirmPassword: "",
-    role: "patient",
+    role: "ROLE_ADMIN",
   });
   const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
 
@@ -93,16 +84,8 @@ export function SignUpPage({ onSignUp, onNavigateToSignIn }: SignUpPageProps) {
     const errors: FormErrors = {};
     let valid = true;
 
-    if (!fields.fullName.trim()) {
-      errors.fullName = "Full name is required.";
-      valid = false;
-    }
-
-    if (!fields.email) {
-      errors.email = "Email is required.";
-      valid = false;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email)) {
-      errors.email = "Enter a valid email address.";
+    if (!fields.username.trim()) {
+      errors.username = "Username is required.";
       valid = false;
     }
 
@@ -153,75 +136,79 @@ export function SignUpPage({ onSignUp, onNavigateToSignIn }: SignUpPageProps) {
       {error && <p className={styles.errorBanner}>{error}</p>}
 
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
-        {/* Full name */}
+        {/* Username */}
         <div className={styles.fieldGroup}>
-          <label className={styles.fieldLabel} htmlFor="signup-name">
-            Full name
+          <label className={styles.fieldLabel} htmlFor="signup-username">
+            Username
           </label>
+
           <div className={styles.fieldWrapper}>
-            <span className={styles.fieldIcon}>
-              <UserIcon />
-            </span>
+    <span className={styles.fieldIcon}>
+      <UserIcon />
+    </span>
+
             <input
-              id="signup-name"
-              type="text"
-              autoComplete="name"
-              placeholder="Jane Doe"
-              className={`${styles.fieldInput} ${fieldErrors.fullName ? styles.hasError : ""}`}
-              value={fields.fullName}
-              onChange={handleChange("fullName")}
-              disabled={isLoading}
+                id="signup-username"
+                type="text"
+                autoComplete="username"
+                placeholder="Enter your username"
+                className={`${styles.fieldInput} ${
+                    fieldErrors.username ? styles.hasError : ""
+                }`}
+                value={fields.username}
+                onChange={handleChange("username")}
+                disabled={isLoading}
             />
           </div>
-          {fieldErrors.fullName && (
-            <span className={styles.fieldError}>{fieldErrors.fullName}</span>
+
+          {fieldErrors.username && (
+              <span className={styles.fieldError}>
+      {fieldErrors.username}
+    </span>
           )}
         </div>
 
-        {/* Email */}
-        <div className={styles.fieldGroup}>
-          <label className={styles.fieldLabel} htmlFor="signup-email">
-            Email
-          </label>
-          <div className={styles.fieldWrapper}>
-            <span className={styles.fieldIcon}>
-              <MailIcon />
-            </span>
-            <input
-              id="signup-email"
-              type="email"
-              autoComplete="email"
-              placeholder="you@example.com"
-              className={`${styles.fieldInput} ${fieldErrors.email ? styles.hasError : ""}`}
-              value={fields.email}
-              onChange={handleChange("email")}
-              disabled={isLoading}
-            />
-          </div>
-          {fieldErrors.email && (
-            <span className={styles.fieldError}>{fieldErrors.email}</span>
-          )}
-        </div>
+
 
         {/* Role */}
         <div className={styles.fieldGroup}>
-          <label className={styles.fieldLabel} htmlFor="signup-role">
+          <span className={styles.fieldLabel}>
             I am a
-          </label>
-          <div className={styles.fieldWrapper}>
-            <span className={styles.fieldIcon}>
-              <RoleIcon />
-            </span>
-            <select
-              id="signup-role"
-              className={styles.fieldSelect}
-              value={fields.role}
-              onChange={handleChange("role")}
-              disabled={isLoading}
-            >
-              <option value="patient">Patient</option>
-              <option value="nutritionist">Nutritionist</option>
-            </select>
+          </span>
+          <div className={styles.roleOptions}>
+            <label className={`${styles.roleOption} ${fields.role === "ROLE_ADMIN" ? styles.roleOptionSelected : ""}`}>
+              <input
+                type="radio"
+                name="signup-role"
+                value="ROLE_ADMIN"
+                checked={fields.role === "ROLE_ADMIN"}
+                onChange={handleChange("role")}
+                disabled={isLoading}
+              />
+              <span className={styles.roleOptionIcon}>
+                <RoleIcon />
+              </span>
+              <span className={styles.roleOptionText}>
+                Admin
+              </span>
+            </label>
+
+            <label className={`${styles.roleOption} ${fields.role === "ROLE_NUTRITIONIST" ? styles.roleOptionSelected : ""}`}>
+              <input
+                type="radio"
+                name="signup-role"
+                value="ROLE_NUTRITIONIST"
+                checked={fields.role === "ROLE_NUTRITIONIST"}
+                onChange={handleChange("role")}
+                disabled={isLoading}
+              />
+              <span className={styles.roleOptionIcon}>
+                <RoleIcon />
+              </span>
+              <span className={styles.roleOptionText}>
+                Nutritionist
+              </span>
+            </label>
           </div>
         </div>
 
