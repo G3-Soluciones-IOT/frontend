@@ -127,60 +127,75 @@ export function NutritionistPatientsPage({ currentPath, onNavigate }: Nutritioni
 
   return (
     <SharedLayout
-      title="Patients"
+      title="Patient Requests"
       currentPath={currentPath}
       onNavigate={onNavigate}
       navigationItems={navigationItems}
-      breadcrumbs={["Nutritionist", "Patients"]}
+      breadcrumbs={["Patients", "Requests"]}
+      showPageTitle={false}
     >
-      <div className={styles.stack}>
-        <div className={styles.statsGrid}>
-          <article className={`${styles.statCard} ${styles.statCardAccentAmber}`}>
-            <div>
-              <p className={styles.statLabel}>Pending Requests</p>
-              <p className={styles.statValue}>{pendingRequests.length}</p>
+      <div className={`${styles.stack} ${styles.requestsPage}`}>
+        <header className={styles.requestsHero}>
+          <div>
+            <h1>Patient Requests</h1>
+            <p>Review and manage new patient requests.</p>
+          </div>
+        </header>
+
+        <div className={styles.requestStatsGrid}>
+          <article className={`${styles.requestStatCard} ${styles.requestStatAmber}`}>
+            <div className={styles.requestStatIcon}>◷</div>
+            <div className={styles.requestStatBody}>
+              <p className={styles.requestStatLabel}>Pending Requests</p>
+              <p className={styles.requestStatValue}>{pendingRequests.length}</p>
+              <span>Awaiting your response</span>
             </div>
-            <div className={`${styles.statIcon} ${styles.iconAmber}`}>!</div>
+            <span className={styles.requestStatBadge}>!</span>
           </article>
 
-          <article className={`${styles.statCard} ${styles.statCardAccentGreen}`}>
-            <div>
-              <p className={styles.statLabel}>Accepted Patients</p>
-              <p className={styles.statValue}>{acceptedPatients.length}</p>
+          <article className={`${styles.requestStatCard} ${styles.requestStatGreen}`}>
+            <div className={styles.requestStatIcon}>✓</div>
+            <div className={styles.requestStatBody}>
+              <p className={styles.requestStatLabel}>Accepted Patients</p>
+              <p className={styles.requestStatValue}>{acceptedPatients.length}</p>
+              <span>Successfully added</span>
             </div>
-            <div className={`${styles.statIcon} ${styles.iconGreen}`}>+</div>
+            <span className={styles.requestStatBadge}>+</span>
           </article>
 
-          <article className={`${styles.statCard} ${styles.statCardAccentBlue}`}>
-            <div>
-              <p className={styles.statLabel}>Total Relations</p>
-              <p className={styles.statValue}>{relations.length}</p>
+          <article className={`${styles.requestStatCard} ${styles.requestStatBlue}`}>
+            <div className={styles.requestStatIcon}>#</div>
+            <div className={styles.requestStatBody}>
+              <p className={styles.requestStatLabel}>Total Relations</p>
+              <p className={styles.requestStatValue}>{relations.length}</p>
+              <span>All time relations</span>
             </div>
-            <div className={`${styles.statIcon} ${styles.iconBlue}`}>#</div>
+            <span className={styles.requestStatBadge}>#</span>
           </article>
         </div>
 
-        <section className={styles.panel}>
-          <div className={styles.panelHeader}>
-            <h2 className={`${styles.panelTitle} ${styles.panelTitleSm}`}>
-              Patient Requests
-            </h2>
-            <button type="button" className={styles.secondaryButton} onClick={loadRelations} disabled={loading}>
-              Refresh
-            </button>
-          </div>
+        <div className={styles.requestsToolbar}>
+          <label className={styles.requestSearchWrap}>
+            <span className={styles.searchIcon} aria-hidden="true" />
+            <input type="search" placeholder="Search patient by name or ID..." />
+          </label>
+          <button type="button" className={styles.requestRefreshButton} onClick={loadRelations} disabled={loading}>
+            ↻ Refresh
+          </button>
+        </div>
 
-          <div className={styles.segmentedTabs}>
+        <section className={`${styles.panel} ${styles.requestsTablePanel}`}>
+          <div className={styles.requestTabs}>
             <button
               type="button"
-              className={`${styles.segmentedTab} ${activeTab === "requests" ? styles.segmentedTabActive : ""}`}
+              className={`${styles.requestTab} ${activeTab === "requests" ? styles.requestTabActive : ""}`}
               onClick={() => setActiveTab("requests")}
             >
               Requests ({pendingRequests.length})
             </button>
             <button
               type="button"
-              className={`${styles.segmentedTab} ${activeTab === "patients" ? styles.segmentedTabActive : ""}`}
+              className={`${styles.requestTab} ${activeTab === "patients" ? styles.requestTabActive : ""}`}
               onClick={() => setActiveTab("patients")}
             >
               Patients ({acceptedPatients.length})
@@ -191,68 +206,80 @@ export function NutritionistPatientsPage({ currentPath, onNavigate }: Nutritioni
           {loading && <p className={styles.muted}>Loading patient relations...</p>}
 
           {!loading && (
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Patient</th>
-                  <th>Service</th>
-                  <th>Requested</th>
-                  <th>Scheduled</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {visibleRelations.map((relation) => {
-                  const patientName = patientNameFor(relation, patientUsers);
-                  const busy = actionId === relation.id;
+            <div className={styles.requestsTableScroll}>
+              <table className={`${styles.table} ${styles.requestsTable}`}>
+                <thead>
+                  <tr>
+                    <th>Patient</th>
+                    <th>Service</th>
+                    <th>Requested</th>
+                    <th>Scheduled</th>
+                    <th>Status</th>
+                    <th className={styles.alignCenter}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibleRelations.map((relation) => {
+                    const patientName = patientNameFor(relation, patientUsers);
+                    const busy = actionId === relation.id;
 
-                  return (
-                    <tr key={relation.id}>
-                      <td>
-                        <div className={styles.personCell}>
-                          <span className={styles.avatar}>{getInitials(patientName)}</span>
-                          <div>
-                            <span className={styles.personName}>{patientName}</span>
-                            <span className={styles.personSubtext}>Relation #{relation.id}</span>
+                    return (
+                      <tr key={relation.id}>
+                        <td>
+                          <div className={styles.personCell}>
+                            <span className={styles.requestAvatar}>{getInitials(patientName)}</span>
+                            <div>
+                              <span className={styles.personName}>{patientName}</span>
+                              <span className={styles.personSubtext}>Relation #{relation.id}</span>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td>{relation.serviceType || "-"}</td>
-                      <td className={styles.muted}>{formatDate(relation.requestedAt)}</td>
-                      <td className={styles.muted}>{formatDate(relation.scheduledAt || relation.startDate)}</td>
-                      <td>
-                        <span className={relation.accepted ? styles.statusAccepted : styles.statusPending}>
-                          {relation.accepted ? "Accepted" : "Pending"}
-                        </span>
-                      </td>
-                      <td>
-                        <div className={styles.actionGroup}>
-                          {!relation.accepted && (
+                        </td>
+                        <td>{relation.serviceType || "-"}</td>
+                        <td className={styles.requestDateCell}>
+                          <span className={styles.requestDateValue}>
+                            <span className={styles.calendarIcon} aria-hidden="true" />
+                            {formatDate(relation.requestedAt)}
+                          </span>
+                        </td>
+                        <td className={styles.requestDateCell}>
+                          <span className={styles.requestDateValue}>
+                            <span className={styles.calendarIcon} aria-hidden="true" />
+                            {formatDate(relation.scheduledAt || relation.startDate)}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={relation.accepted ? styles.statusAccepted : styles.statusPending}>
+                            {relation.accepted ? "Accepted" : "Pending"}
+                          </span>
+                        </td>
+                        <td>
+                          <div className={styles.requestActionGroup}>
+                            {!relation.accepted && (
+                              <button
+                                type="button"
+                                className={styles.primaryActionButton}
+                                onClick={() => approveRequest(relation.id)}
+                                disabled={busy}
+                              >
+                                {busy ? "Approving" : "Approve"}
+                              </button>
+                            )}
                             <button
                               type="button"
-                              className={styles.primaryActionButton}
-                              onClick={() => approveRequest(relation.id)}
+                              className={styles.requestRemoveButton}
+                              onClick={() => removeRelation(relation.id)}
                               disabled={busy}
                             >
-                              {busy ? "Approving" : "Approve"}
+                              {relation.accepted ? "Remove" : "Reject"}
                             </button>
-                          )}
-                          <button
-                            type="button"
-                            className={styles.dangerActionButton}
-                            onClick={() => removeRelation(relation.id)}
-                            disabled={busy}
-                          >
-                            {relation.accepted ? "Remove" : "Reject"}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           )}
 
           {!loading && visibleRelations.length === 0 && (
@@ -262,6 +289,18 @@ export function NutritionistPatientsPage({ currentPath, onNavigate }: Nutritioni
                 : "No accepted patients yet."}
             </p>
           )}
+
+          <div className={styles.requestsFooter}>
+            <span>Showing {visibleRelations.length > 0 ? 1 : 0} to {visibleRelations.length} of {visibleRelations.length} {activeTab === "requests" ? "requests" : "patients"}</span>
+            <div className={styles.requestsPager}>
+              <button type="button" disabled>‹</button>
+              <span>1</span>
+              <button type="button" disabled>›</button>
+              <select defaultValue="10">
+                <option value="10">10 / page</option>
+              </select>
+            </div>
+          </div>
         </section>
       </div>
     </SharedLayout>

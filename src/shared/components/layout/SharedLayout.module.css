@@ -61,6 +61,17 @@
   color: #ffffff;
 }
 
+.navItemStatic {
+  cursor: default;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.navItemStatic:hover {
+  background: transparent;
+  color: #ffffff;
+}
+
 .navItemActive {
   background: rgba(255, 255, 255, 0.08);
   color: #ffffff;

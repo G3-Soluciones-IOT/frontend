@@ -6,7 +6,7 @@ import { getStoredNutritionistProfile } from "@/modules/nutritionist/infrastruct
 
 export interface NavigationItem {
   label: string;
-  href: string;
+  href?: string;
   icon: ReactNode;
   group?: "root" | string;
 }
@@ -33,20 +33,21 @@ export interface SharedLayoutProps {
 }
 
 
-function isActive(currentPath: string, href: string) {
+function isActive(currentPath: string, href?: string) {
+  if (!href) return false;
   if (currentPath === href) return true;
   if (href === "/nutritionist") {
     return currentPath.startsWith("/nutritionist/recent-logs");
   }
   if (href === "/nutritionist/patients") {
-    return currentPath.startsWith("/nutritionist/patients");
+    return currentPath === "/nutritionist/patients" || currentPath === "/nutritionist/patients/overview";
+  }
+  if (href === "/nutritionist/patients/request") {
+    return currentPath.startsWith("/nutritionist/patients/request");
   }
   // Si es un padre, marca como activo si el currentPath comienza con ese href
   if (href === "/patients" || href === "/content") {
     return currentPath.startsWith(href);
-  }
-  if (href === "/nutritionist/patients/overview") {
-    return currentPath.startsWith("/nutritionist/patients");
   }
   if (href === "/nutritionist/subscriptions") {
     return currentPath.startsWith(href);
@@ -107,13 +108,27 @@ export function SharedLayout({
           {navigationItems.map((item) => {
             const active = isActive(currentPath, item.href);
             const nested = item.group && item.group !== "root";
+            const clickable = Boolean(item.href);
+
+            if (!clickable) {
+              return (
+                <div
+                  key={`${item.group ?? "root"}-${item.label}`}
+                  className={`${styles.navItem} ${styles.navItemStatic} ${nested ? styles.navItemNested : ""}`}
+                  title={item.label}
+                >
+                  {nested ? <span className={styles.navSpacer} /> : item.icon}
+                  <span>{item.label}</span>
+                </div>
+              );
+            }
 
             return (
               <button
                 key={item.href}
                 type="button"
                 className={`${styles.navItem} ${active ? styles.navItemActive : ""} ${nested ? styles.navItemNested : ""}`}
-                onClick={() => onNavigate(item.href)}
+                onClick={() => item.href && onNavigate(item.href)}
                 title={item.label}
               >
                 {nested ? <span className={styles.navSpacer} /> : item.icon}

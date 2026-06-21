@@ -16,7 +16,7 @@ export function PatientsRoute({ path, onNavigate }: PatientsRouteProps) {
     ? path.replace("/nutritionist", "")
     : path;
 
-  if (normalizedPath === "/patients") {
+  if (normalizedPath === "/patients" || normalizedPath === "/patients/request") {
     return <NutritionistPatientsPage currentPath={path} onNavigate={onNavigate} />;
   }
 
@@ -24,11 +24,11 @@ export function PatientsRoute({ path, onNavigate }: PatientsRouteProps) {
     return <PatientsDirectoryPage currentPath={path} onNavigate={onNavigate} />;
   }
 
-  if (normalizedPath === "/patients/michael-chen/tracking" || normalizedPath === "/patients/tracking") {
+  if (/^\/patients\/[^/]+\/tracking$/.test(normalizedPath) || normalizedPath === "/patients/tracking") {
     return <PatientTrackingPage currentPath={path} onNavigate={onNavigate} />;
   }
 
-  if (normalizedPath === "/patients/michael-chen") {
+  if (/^\/patients\/[^/]+$/.test(normalizedPath)) {
     return <PatientDetailPage currentPath={path} onNavigate={onNavigate} />;
   }
 

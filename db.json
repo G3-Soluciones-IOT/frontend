@@ -145,6 +145,112 @@
       "requestedAt": "2026-06-18T14:30:00.000Z"
     }
   ],
+  "userProfiles": [
+    {
+      "id": 1,
+      "userId": 5,
+      "gender": "MALE",
+      "height": 1.7,
+      "weight": 72,
+      "userScore": 86,
+      "birthDate": "2001-04-18",
+      "activityLevelId": 2,
+      "activityLevelName": "Moderate",
+      "objectiveId": 1,
+      "objectiveName": "Weight Loss",
+      "allergyNames": [
+        "Peanuts"
+      ]
+    },
+    {
+      "id": 2,
+      "userId": 4,
+      "gender": "FEMALE",
+      "height": 1.62,
+      "weight": 58,
+      "userScore": 78,
+      "birthDate": "2002-09-12",
+      "activityLevelId": 1,
+      "activityLevelName": "Light",
+      "objectiveId": 2,
+      "objectiveName": "Maintenance",
+      "allergyNames": []
+    }
+  ],
+  "trackings": [
+    {
+      "id": 1,
+      "userId": 5,
+      "date": "2026-06-21",
+      "consumedMacros": {
+        "id": 1,
+        "calories": 1850,
+        "carbs": 180,
+        "proteins": 140,
+        "fats": 65
+      },
+      "mealPlanEntries": [
+        {
+          "id": 1,
+          "recipeId": 10,
+          "mealPlanType": "BREAKFAST",
+          "dayNumber": 1
+        },
+        {
+          "id": 2,
+          "recipeId": 12,
+          "mealPlanType": "LUNCH",
+          "dayNumber": 1
+        }
+      ]
+    }
+  ],
+  "trackingGoals": [
+    {
+      "id": 1,
+      "userId": 5,
+      "targetMacros": {
+        "id": 2,
+        "calories": 2200,
+        "carbs": 220,
+        "proteins": 160,
+        "fats": 70
+      }
+    }
+  ],
+  "mealPlanEntries": [
+    {
+      "id": 1,
+      "trackingId": 1,
+      "recipeId": 10,
+      "mealPlanType": "BREAKFAST",
+      "dayNumber": 1
+    },
+    {
+      "id": 2,
+      "trackingId": 1,
+      "recipeId": 12,
+      "mealPlanType": "LUNCH",
+      "dayNumber": 1
+    },
+    {
+      "id": 3,
+      "trackingId": 1,
+      "recipeId": 14,
+      "mealPlanType": "DINNER",
+      "dayNumber": 1
+    }
+  ],
+  "consumedMacronutrients": [
+    {
+      "id": 1,
+      "trackingId": 1,
+      "calories": 1850,
+      "carbs": 180,
+      "proteins": 140,
+      "fats": 65
+    }
+  ],
   "dashboard": {
     "stats": {
       "activePatients": {
