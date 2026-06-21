@@ -195,6 +195,11 @@
   border-collapse: collapse;
 }
 
+.tableScroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
 .table th {
   padding: 12px 10px;
   border-bottom: 1px solid #dde5ee;

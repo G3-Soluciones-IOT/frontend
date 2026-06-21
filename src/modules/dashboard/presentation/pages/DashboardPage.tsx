@@ -12,6 +12,7 @@ import {
   getTrackingByUser,
   type TrackingResource,
 } from "@/modules/patients/infrastructure/api/nutritionistPatients.api";
+import { PatientIotAlertsTable } from "@/modules/patients/presentation/components/PatientIotAlertsTable";
 import { getStoredNutritionistProfile } from "@/modules/nutritionist/infrastructure/storage/nutritionistProfileStorage";
 import { AlertIcon, PatientsIcon, SparklesIcon, TrendIcon } from "../components/DashboardIcons";
 import styles from "./DashboardPage.module.css";
@@ -278,6 +279,8 @@ export function DashboardPage({ currentPath, onNavigate }: DashboardPageProps) {
             <button type="button" className={styles.linkFooter}>View all meal logs &rarr;</button>
           </article>
         </section>
+
+        <PatientIotAlertsTable onNavigate={onNavigate} />
       </div>
     </SharedLayout>
   );

@@ -57,12 +57,28 @@
       "id": 7
     },
     {
-      "username": "Magneto",
+      "username": "Vegeta ",
       "password": "12345678",
       "roles": [
         "ROLE_NUTRITIONIST"
       ],
       "id": 8
+    },
+    {
+      "username": "gohan",
+      "password": "12345678",
+      "roles": [
+        "ROLE_NUTRITIONIST"
+      ],
+      "id": 9
+    },
+    {
+      "username": "Charles",
+      "password": "12345678",
+      "roles": [
+        "ROLE_NUTRITIONIST"
+      ],
+      "id": 10
     }
   ],
   "nutritionists": [
@@ -122,15 +138,26 @@
       "id": 5
     },
     {
-      "id": "8",
-      "userId": "8",
+      "userId": "9",
+      "fullName": "Son Gohan",
+      "licenseNumber": "DFASS",
+      "specialty": "CLINICAL",
+      "bio": "DDDDDD",
+      "profilePictureUrl": "https://static.wikitide.net/deathbattlewiki/f/f5/Portrait.teengohan.png",
+      "acceptingNewPatients": true,
+      "yearsExperience": 10,
+      "id": 6
+    },
+    {
+      "userId": "10",
+      "fullName": "Charles Xavier",
       "licenseNumber": "DADAD",
       "specialty": "CLINICAL",
-      "fullName": "Magnus sss",
-      "bio": "sss",
-      "profilePictureUrl": "https://static0.srcdn.com/wordpress/wp-content/uploads/Michael-Fassbender-Magneto-X-Men-Days-of-Future-Past.jpg",
+      "bio": "ssssss",
+      "profilePictureUrl": "https://preview.redd.it/whats-your-opinion-on-james-mcavoys-professor-x-v0-kpngjvrx220c1.jpg?auto=webp&s=52c81945d0d7491ff22ba8444ab4f923737639ec",
       "acceptingNewPatients": true,
-      "yearsExperience": 1
+      "yearsExperience": 10,
+      "id": 7
     }
   ],
   "nutritionistPatients": [
