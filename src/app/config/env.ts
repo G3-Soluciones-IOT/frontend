@@ -1,7 +1,7 @@
 // Centraliza la configuración de entorno expuesta por Vite.
 // Usa la variable VITE_API_BASE_URL desde el archivo `.env` en la raíz
 // del proyecto (ej: VITE_API_BASE_URL=https://jameofit.duckdns.org)
-
+//
 const raw = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "https://jameofit.duckdns.org";
 
 // Normalizamos quitando la barra final para evitar // al concatenar rutas
