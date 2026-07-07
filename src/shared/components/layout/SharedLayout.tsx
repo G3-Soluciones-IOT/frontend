@@ -52,6 +52,9 @@ function isActive(currentPath: string, href?: string) {
   if (href === "/nutritionist/subscriptions") {
     return currentPath.startsWith(href);
   }
+  if (href.startsWith("/admin/")) {
+    return currentPath.startsWith(href);
+  }
   return false;
 }
 

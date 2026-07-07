@@ -1,5 +1,5 @@
 import type { NavigationItem } from "@/shared/components/layout";
-import { DashboardIcon, UsersIcon, MessageIcon, FileIcon, ChartIcon, ScreenIcon } from "./navigation-icons";
+import { DashboardIcon, UsersIcon, MessageIcon, FileIcon, ChartIcon } from "./navigation-icons";
 
 // Configuración de navegación por rol
 export const navigationConfig = {
@@ -12,10 +12,9 @@ export const navigationConfig = {
     { label: "Chat", href: "/communication/chat", icon: null, group: "communication" },
     { label: "Consultations", href: "/communication/consultations", icon: null, group: "communication" },
     { label: "Recommendations", href: "/communication/recommendations", icon: null, group: "communication" },
-    { label: "Content", href: "/content", icon: <FileIcon />, group: "root" },
-    { label: "Tips", href: "/content/tips", icon: null, group: "content" },
+    { label: "Recipes", href: "/nutritionist/recipes", icon: <FileIcon />, group: "root" },
+    { label: "Meal Plans", href: "/nutritionist/meal-plans", icon: <FileIcon />, group: "root" },
     { label: "Analytics", href: "/analytics", icon: <ChartIcon />, group: "root" },
-    { label: "Subscriptions", href: "/nutritionist/subscriptions", icon: <ScreenIcon />, group: "root" },
   ] as NavigationItem[],
 
   patient: [
@@ -28,10 +27,9 @@ export const navigationConfig = {
 
   admin: [
     { label: "Dashboard", href: "/admin", icon: <DashboardIcon />, group: "root" },
-    { label: "User Management", href: "/admin/users", icon: <UsersIcon />, group: "root" },
-    { label: "Content Library", href: "/admin/content", icon: <FileIcon />, group: "root" },
-    { label: "Settings", href: "/admin/settings", icon: <ScreenIcon />, group: "root" },
+    { label: "Management", icon: <UsersIcon />, group: "root" },
+    { label: "Users", href: "/admin/users", icon: null, group: "management" },
+    { label: "Recipes", href: "/admin/recipes", icon: null, group: "management" },
+    { label: "Meal Plans", href: "/admin/meal-plans", icon: null, group: "management" },
   ] as NavigationItem[],
 } as const;
-
-

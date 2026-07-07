@@ -1,4 +1,4 @@
-import { NutritionistProfilePage } from "@/modules/nutritionist";
+import { NutritionistMealPlansPage, NutritionistProfilePage, NutritionistRecipesPage } from "@/modules/nutritionist";
 import { SharedLayout } from "@/shared/components/layout";
 import { useNavigation } from "@/shared/hooks/useNavigation";
 
@@ -22,6 +22,14 @@ export function NutritionistProfileRoute({ currentPath, onNavigate }: Nutritioni
       }}
     />
   );
+}
+
+export function NutritionistRecipesRoute({ currentPath, onNavigate }: NutritionistProfileRouteProps) {
+  return <NutritionistRecipesPage currentPath={currentPath} onNavigate={onNavigate} />;
+}
+
+export function NutritionistMealPlansRoute({ currentPath, onNavigate }: NutritionistProfileRouteProps) {
+  return <NutritionistMealPlansPage currentPath={currentPath} onNavigate={onNavigate} />;
 }
 
 export function NutritionistShellRoute({ currentPath, onNavigate }: NutritionistProfileRouteProps) {

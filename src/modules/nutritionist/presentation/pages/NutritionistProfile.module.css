@@ -1,18 +1,20 @@
 @import url("https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap");
 
 :root {
-  --sidebar-bg: #293241;
-  --page-bg: #f7f8ff;
+  --sidebar-bg: #ffffff;
+  --page-bg: #f7fbf8;
   --white: #ffffff;
-  --green: #11b957;
-  --green-dark: #049846;
-  --blue: #0da1df;
-  --text: #151b2d;
-  --muted: #4f5b73;
-  --soft: #dbe3f0;
+  --green: #16a34a;
+  --green-dark: #047857;
+  --green-soft: #dcfce7;
+  --green-pale: #f0fdf4;
+  --blue: #0ea5e9;
+  --text: #0f172a;
+  --muted: #64748b;
+  --soft: #dbe7df;
   --field: #ffffff;
-  --field-muted: #d2d7de;
-  --radius: 10px;
+  --field-muted: #f8fafc;
+  --radius: 8px;
   --radius-sm: 8px;
   --tr: 0.2s ease;
 }
@@ -190,26 +192,39 @@
 
 .content {
   flex: 1;
-  max-width: 770px;
-  padding: 28px 24px 0;
+  max-width: 1180px;
+  padding: 28px 24px 42px;
 }
 
 .pageHeading {
-  margin-bottom: 26px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 22px;
+  padding: 26px 28px;
+  border: 1px solid #dceee4;
+  border-radius: var(--radius);
+  background:
+    radial-gradient(circle at 94% 18%, rgba(34, 197, 94, 0.18), transparent 26%),
+    linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+  box-shadow: 0 18px 44px rgba(15, 118, 73, 0.08);
 }
 
 .pageTitle {
-  margin: 0 0 4px;
+  position: relative;
+  margin: 0 0 8px;
   color: var(--text);
-  font-size: 1.78rem;
-  font-weight: 700;
+  font-size: clamp(1.8rem, 3vw, 2.45rem);
+  font-weight: 800;
   line-height: 1.1;
 }
 
 .pageSubtitle {
+  position: relative;
+  max-width: 620px;
   margin: 0;
   color: var(--muted);
-  font-size: 0.86rem;
+  font-size: 0.98rem;
+  line-height: 1.55;
 }
 
 .profileGrid {
@@ -222,17 +237,20 @@
 .onboardingForm {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
 }
 
 .onboardingGrid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
+  grid-template-columns: minmax(260px, 330px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
 }
 
 .onboardingPreview {
-  padding: 18px;
+  position: sticky;
+  top: 84px;
+  padding: 24px;
 }
 
 .onboardingPreview .verificationBox {
@@ -247,27 +265,27 @@
 
 .card {
   background: var(--white);
-  border: 1px solid var(--soft);
+  border: 1px solid #dceee4;
   border-radius: var(--radius);
-  box-shadow: none;
-  padding: 18px;
+  box-shadow: 0 16px 36px rgba(15, 118, 73, 0.08);
+  padding: 22px;
 }
 
 .cardTitle {
-  margin: 0 0 20px;
+  margin: 0 0 22px;
   padding-bottom: 16px;
-  border-bottom: 1px solid var(--soft);
+  border-bottom: 1px solid #e7f3eb;
   color: var(--text);
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 1.35rem;
-  font-weight: 500;
+  font-size: 1.25rem;
+  font-weight: 800;
   line-height: 1;
 }
 
 .cardTitle svg {
-  color: var(--blue);
+  color: var(--green);
 }
 
 .profileCard {
@@ -275,6 +293,9 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
+  background:
+    linear-gradient(180deg, rgba(240, 253, 244, 0.86) 0%, #ffffff 46%),
+    #ffffff;
 }
 
 .avatarWrap {
@@ -288,23 +309,22 @@
 
 .profileAvatar,
 .profileAvatarPlaceholder {
-  width: 92px;
-  height: 92px;
-  border: 0;
+  width: 122px;
+  height: 122px;
+  border: 5px solid #ffffff;
   border-radius: 50%;
   object-fit: cover;
+  box-shadow: 0 16px 34px rgba(15, 118, 73, 0.18);
 }
 
 .profileAvatarPlaceholder {
-  background:
-    radial-gradient(circle at 50% 28%, #eef3f6 0 13%, transparent 14%),
-    linear-gradient(145deg, #7a8d94, #d8e1e3);
-  color: #293241;
+  background: linear-gradient(135deg, #bbf7d0 0%, #f0fdf4 100%);
+  color: #047857;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.6rem;
-  font-weight: 700;
+  font-size: 2rem;
+  font-weight: 900;
 }
 
 .avatarEditBadge {
@@ -323,18 +343,62 @@
 }
 
 .profileName {
-  margin: 0 0 3px;
+  margin: 18px 0 4px;
   color: var(--text);
-  font-size: 1.22rem;
-  font-weight: 600;
+  font-size: 1.35rem;
+  font-weight: 800;
   line-height: 1.1;
 }
 
 .profileTitle {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
   margin: 0 0 18px;
-  color: #008bd0;
-  font-size: 0.82rem;
-  font-weight: 400;
+  padding: 0 11px;
+  border-radius: 999px;
+  background: var(--green-soft);
+  color: var(--green-dark);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.profileMetaGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+  margin: 2px 0 2px;
+}
+
+.profileMetaGrid div {
+  min-height: 72px;
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  padding: 12px 8px;
+  border: 1px solid #dceee4;
+  border-radius: var(--radius);
+  background: #f8fffb;
+}
+
+.profileMetaGrid strong {
+  max-width: 100%;
+  overflow: hidden;
+  color: #065f46;
+  font-size: 1.05rem;
+  font-weight: 900;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profileMetaGrid span {
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .profileCardDivider {
@@ -389,10 +453,10 @@
   width: 100%;
   box-sizing: border-box;
   margin-top: 20px;
-  padding: 18px;
-  border: 1px solid var(--soft);
+  padding: 16px;
+  border: 1px solid #dceee4;
   border-radius: var(--radius);
-  background: var(--white);
+  background: rgba(255, 255, 255, 0.78);
   text-align: left;
 }
 
@@ -402,8 +466,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 0.78rem;
-  font-weight: 500;
+  font-size: 0.82rem;
+  font-weight: 800;
 }
 
 .verifiedDot {
@@ -422,8 +486,9 @@
   align-items: center;
   gap: 12px;
   padding: 7px 0;
-  color: #313b4f;
+  color: #334155;
   font-size: 0.86rem;
+  font-weight: 600;
 }
 
 .verificationItem svg {
@@ -437,14 +502,14 @@
 
 .formGrid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
 }
 
 .fieldGroup {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .fieldGroupFull {
@@ -452,11 +517,11 @@
 }
 
 .fieldLabel {
-  color: #202838;
-  font-size: 0.62rem;
-  font-weight: 500;
-  letter-spacing: 0;
-  text-transform: none;
+  color: #475569;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .fieldError {
@@ -465,12 +530,17 @@
 }
 
 .toggleRow {
-  min-height: 42px;
+  min-height: 46px;
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 0 13px;
+  border: 1px solid #dbe7df;
+  border-radius: var(--radius-sm);
+  background: #f8fffb;
   color: var(--text);
   font-size: 0.84rem;
+  font-weight: 700;
 }
 
 .toggleRow input {
@@ -483,21 +553,22 @@
 .fieldSelect {
   width: 100%;
   box-sizing: border-box;
-  padding: 11px 14px;
-  border: 1.5px solid transparent;
+  min-height: 46px;
+  padding: 11px 13px;
+  border: 1px solid #dbe7df;
   border-radius: var(--radius-sm);
   outline: none;
   background: var(--field);
   color: var(--text);
   font-family: "Jost", sans-serif;
-  font-size: 0.84rem;
-  transition: border-color var(--tr), box-shadow var(--tr);
+  font-size: 0.92rem;
+  transition: border-color var(--tr), box-shadow var(--tr), background var(--tr);
 }
 
 .fieldInput:focus,
 .fieldSelect:focus {
-  border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(13, 161, 223, 0.12);
+  border-color: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
 }
 
 .fieldInput::placeholder {
@@ -505,9 +576,9 @@
 }
 
 .textarea {
-  min-height: 96px;
+  min-height: 132px;
   resize: vertical;
-  background: var(--field-muted);
+  background: var(--field);
   line-height: 1.45;
 }
 
@@ -611,9 +682,14 @@
 }
 
 .saveBarVisible {
-  margin-top: 18px;
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  margin-top: 2px;
+  padding: 14px 0 0;
   display: flex;
   justify-content: flex-end;
+  background: linear-gradient(180deg, rgba(247, 251, 248, 0), #f7fbf8 40%);
 }
 
 .saveBarInfo,
@@ -624,13 +700,14 @@
 }
 
 .btnSave {
-  min-width: 170px;
-  padding: 11px 18px;
+  min-width: 190px;
+  padding: 13px 18px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 8px;
   background: var(--green);
   color: var(--white);
-  font-weight: 600;
+  font-weight: 800;
+  box-shadow: 0 14px 26px rgba(22, 163, 74, 0.22);
 }
 
 .btnSave:hover:not(:disabled) {
@@ -658,12 +735,13 @@
 
 .errorBanner {
   margin: 0 0 16px;
-  padding: 10px 16px;
-  border: 1px solid rgba(192, 57, 43, 0.2);
+  padding: 12px 16px;
+  border: 1px solid #fecaca;
   border-radius: var(--radius-sm);
-  background: rgba(192, 57, 43, 0.07);
-  color: #c0392b;
+  background: #fff5f5;
+  color: #b42318;
   font-size: 0.83rem;
+  font-weight: 700;
 }
 
 .skeleton {
@@ -740,6 +818,14 @@
   .profileGrid,
   .formGrid {
     grid-template-columns: 1fr;
+  }
+
+  .onboardingGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .onboardingPreview {
+    position: static;
   }
 }
 

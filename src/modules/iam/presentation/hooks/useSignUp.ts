@@ -2,8 +2,10 @@ import { useState } from "react";
 import { HttpAuthRepository } from "../../infrastructure/repositories/HttpAuthRepository";
 import type { SignUpInput } from "../../application/dto/SignUpInput";
 import type { AuthSession } from "../../domain/models/User";
+import { signUpUseCase } from "../../application/use-cases/sign-up.usecase";
 
 const repository = new HttpAuthRepository();
+const signUp = signUpUseCase(repository);
 
 export function useSignUp() {
   const [isLoading, setIsLoading] = useState(false);
@@ -19,7 +21,7 @@ export function useSignUp() {
       setError(null);
 
       const result =
-          await repository.signUp(input);
+          await signUp(input);
 
       setSession(result);
 

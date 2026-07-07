@@ -132,10 +132,11 @@ export function NutritionistProfilePage({ currentPath = "/professional-profile",
     event.preventDefault();
     if (!validate()) return;
 
-    const id = getSessionUserId();
+    const userId = getSessionUserId();
+    const profileId = storedProfile?.id ?? userId;
     const updated = isCreateMode
-      ? await execute({ userId: id, ...form } satisfies CreateProfessionalProfileInput, "create")
-      : await execute({ id, ...form } satisfies UpdateProfessionalProfileInput, "update");
+      ? await execute({ userId, ...form } satisfies CreateProfessionalProfileInput, "create")
+      : await execute({ id: profileId, ...form } satisfies UpdateProfessionalProfileInput, "update");
 
     if (updated) {
       storeNutritionistProfile(updated);
@@ -173,6 +174,17 @@ export function NutritionistProfilePage({ currentPath = "/professional-profile",
             <p className={styles.profileTitle}>
               {form.acceptingNewPatients ? "Accepting new patients" : "Not accepting new patients"}
             </p>
+
+            <div className={styles.profileMetaGrid}>
+              <div>
+                <strong>{form.yearsExperience}</strong>
+                <span>Years</span>
+              </div>
+              <div>
+                <strong>{form.specialty || "-"}</strong>
+                <span>Specialty</span>
+              </div>
+            </div>
 
             <div className={styles.verificationBox}>
               <div className={styles.verificationTitle}>

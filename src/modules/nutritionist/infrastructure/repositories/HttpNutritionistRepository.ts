@@ -9,8 +9,10 @@ import axios from "axios";
 export class HttpNutritionistRepository implements NutritionistRepository {
   async getProfile(): Promise<ProfessionalProfile> {
     const session = JSON.parse(localStorage.getItem("session") || "null");
-    const id = session?.user?.id;
-    const { data } = await nutritionistApi.get<ProfessionalProfile>(`/${id}`);
+    const userId = session?.user?.id;
+    const { data } = await nutritionistApi.get<ProfessionalProfile>(
+      `/by-user?userId=${encodeURIComponent(String(userId))}`,
+    );
     return data;
   }
 

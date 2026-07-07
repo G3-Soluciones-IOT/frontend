@@ -13,18 +13,19 @@ import { API_BASE_URL, apiUrl } from "@/app/config/env.ts";
 interface AuthApiUser {
   id: number | string;
   username: string;
-  roles: string[];
+  roles?: string[];
   token?: string;
 }
 
 function toSession(user: AuthApiUser): AuthSession {
   const accessToken = user.token ?? `token-${user.id}`;
+  const roles = normalizeRoles(user.roles ?? rolesFromJwt(accessToken));
 
   return {
     user: {
       id: String(user.id),
       username: user.username,
-      roles: user.roles,
+      roles,
     },
     tokens: {
       accessToken,
@@ -32,6 +33,36 @@ function toSession(user: AuthApiUser): AuthSession {
       expiresIn: 3600,
     },
   };
+}
+
+function normalizeRoles(roles: string[] = []): string[] {
+  return roles.map((role) => role.startsWith("ROLE_") ? role : `ROLE_${role}`);
+}
+
+function rolesFromJwt(token: string): string[] {
+  const [, payload] = token.split(".");
+
+  if (!payload) return [];
+
+  try {
+    const normalizedPayload = payload
+      .replace(/-/g, "+")
+      .replace(/_/g, "/")
+      .padEnd(Math.ceil(payload.length / 4) * 4, "=");
+    const decodedPayload = JSON.parse(atob(normalizedPayload)) as {
+      roles?: string[];
+      authorities?: string[];
+      scope?: string;
+    };
+
+    if (Array.isArray(decodedPayload.roles)) return decodedPayload.roles;
+    if (Array.isArray(decodedPayload.authorities)) return decodedPayload.authorities;
+    if (typeof decodedPayload.scope === "string") return decodedPayload.scope.split(" ");
+  } catch {
+    return [];
+  }
+
+  return [];
 }
 
 export class HttpAuthRepository implements AuthRepository {
@@ -46,13 +77,26 @@ export class HttpAuthRepository implements AuthRepository {
         password: input.password,
       });
 
-      const session = toSession(data);
+      let session = toSession(data);
 
       this._persistTokens(session);
 
+      if (session.user.roles.length === 0) {
+        session = await this._hydrateSessionRoles(session);
+        this._persistTokens(session);
+      }
+
       return session;
-    } catch {
-      return this._signInWithJsonServer(input);
+    } catch (error) {
+      if (API_BASE_URL.includes("localhost:3001")) {
+        return this._signInWithJsonServer(input);
+      }
+
+      if (axios.isAxiosError(error) && [401, 403, 404].includes(error.response?.status ?? 0)) {
+        throw new InvalidCredentialsError();
+      }
+
+      throw error;
     }
   }
 
@@ -130,6 +174,23 @@ export class HttpAuthRepository implements AuthRepository {
     localStorage.setItem("accessToken", session.tokens.accessToken);
     localStorage.setItem("refreshToken", session.tokens.refreshToken);
     localStorage.setItem("session", JSON.stringify(session));
+  }
+
+  private async _hydrateSessionRoles(session: AuthSession): Promise<AuthSession> {
+    try {
+      const { data } = await axios.get<AuthApiUser>(apiUrl(`/api/v1/users/${session.user.id}`), {
+        headers: {
+          Authorization: `Bearer ${session.tokens.accessToken}`,
+        },
+      });
+
+      return toSession({
+        ...data,
+        token: session.tokens.accessToken,
+      });
+    } catch {
+      return session;
+    }
   }
 
   private async _signInWithJsonServer(input: SignInInput): Promise<AuthSession> {

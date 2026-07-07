@@ -1,0 +1,2833 @@
+.admin-users-page {
+  min-height: 100%;
+  padding: 24px;
+  background: #f7f9fc;
+}
+
+.admin-users-header {
+  margin-bottom: 18px;
+}
+
+.admin-users-title {
+  margin: 0;
+  color: #111827;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.admin-users-description {
+  max-width: 560px;
+  margin: 8px 0 0;
+  color: #667085;
+  font-size: 16px;
+}
+
+.admin-users-panel {
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e6eaf0;
+  border-radius: 8px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+}
+
+.admin-users-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 16px;
+  border-bottom: 1px solid #edf1f6;
+  background: #ffffff;
+}
+
+.admin-users-search {
+  width: min(360px, 100%);
+  height: 40px;
+  border: 1px solid #d8dee8;
+  border-radius: 6px;
+  background: #fbfcfe;
+  color: #111827;
+  padding: 0 12px;
+  font: inherit;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.admin-users-search:focus {
+  background: #ffffff;
+  border-color: #293241;
+  box-shadow: 0 0 0 3px rgba(41, 50, 65, 0.1);
+}
+
+.admin-users-filters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 4px;
+  background: #f2f5f9;
+  border-radius: 8px;
+}
+
+.admin-users-filter {
+  height: 32px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #475467;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.admin-users-filter:hover {
+  color: #111827;
+}
+
+.admin-users-filter-active {
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+}
+
+.admin-users-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-users-table {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.admin-users-table th {
+  padding: 13px 18px;
+  background: #fbfcfe;
+  border-bottom: 1px solid #edf1f6;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.admin-users-table td {
+  padding: 16px 18px;
+  border-bottom: 1px solid #f0f3f7;
+  color: #344054;
+  font-size: 15px;
+  vertical-align: middle;
+}
+
+.admin-users-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.admin-users-table tbody tr:hover {
+  background: #fafcff;
+}
+
+.admin-users-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.admin-users-name {
+  color: #101828;
+  font-weight: 600;
+}
+
+.admin-users-role {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border: 1px solid #dfe5ee;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #293241;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.admin-users-id {
+  color: #667085;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-users-view {
+  height: 34px;
+  border: 1px solid #d8dee8;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #111827;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.admin-users-view:hover {
+  border-color: #293241;
+  background: #293241;
+  color: #ffffff;
+}
+
+.admin-users-state {
+  padding: 22px;
+  color: #667085;
+}
+
+.admin-users-state-error {
+  color: #b42318;
+}
+
+@media (max-width: 720px) {
+  .admin-users-page {
+    padding: 16px;
+  }
+
+  .admin-users-title {
+    font-size: 24px;
+  }
+
+  .admin-users-toolbar {
+    align-items: stretch;
+  }
+
+  .admin-users-search,
+  .admin-users-filters {
+    width: 100%;
+  }
+}
+
+.admin-user-view-card {
+  width: min(960px, 100%);
+}
+
+.admin-patient-sections {
+  display: grid;
+  gap: 16px;
+  padding: 0 20px 20px;
+}
+
+.admin-patient-section {
+  border: 1px solid #e6eaf0;
+  border-radius: 8px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.admin-patient-section-title {
+  margin: 0;
+  padding: 14px 16px;
+  border-bottom: 1px solid #edf1f6;
+  background: #fbfcfe;
+  color: #111827;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.admin-patient-warning {
+  border: 1px solid #fedf89;
+  border-radius: 8px;
+  background: #fffbeb;
+  color: #92400e;
+  padding: 12px 14px;
+  font-size: 14px;
+}
+
+.admin-nutritionist-view {
+  display: grid;
+  gap: 18px;
+}
+
+.admin-nutritionist-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.admin-nutritionist-heading h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+.admin-nutritionist-heading p {
+  margin: 6px 0 0;
+  color: #667085;
+}
+
+.admin-nutritionist-top-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+.admin-nutritionist-profile-card,
+.admin-nutritionist-card,
+.admin-nutritionist-metric {
+  background: #ffffff;
+  border: 1px solid #e6eaf0;
+  border-radius: 8px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+}
+
+.admin-nutritionist-profile-card {
+  padding: 22px;
+  text-align: center;
+}
+
+.admin-nutritionist-avatar-wrap {
+  position: relative;
+  width: 132px;
+  margin: 0 auto 18px;
+}
+
+.admin-nutritionist-avatar {
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #edf1f6;
+}
+
+.admin-nutritionist-avatar-fallback {
+  display: grid;
+  place-items: center;
+  color: #53389e;
+  font-size: 36px;
+  font-weight: 800;
+}
+
+.admin-nutritionist-online {
+  position: absolute;
+  right: -4px;
+  bottom: 12px;
+  min-height: 24px;
+  padding: 3px 8px;
+  border: 2px solid #ffffff;
+  border-radius: 999px;
+  background: #dcfae6;
+  color: #067647;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.admin-nutritionist-offline {
+  background: #fee4e2;
+  color: #b42318;
+}
+
+.admin-nutritionist-profile-card h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 21px;
+  line-height: 1.25;
+}
+
+.admin-nutritionist-profile-card > p {
+  margin: 6px 0 22px;
+  color: #667085;
+  font-size: 14px;
+}
+
+.admin-nutritionist-account-list {
+  display: grid;
+  gap: 14px;
+  text-align: left;
+}
+
+.admin-nutritionist-account-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #667085;
+  font-size: 14px;
+}
+
+.admin-nutritionist-account-row strong {
+  color: #111827;
+  text-align: right;
+  word-break: break-word;
+}
+
+.admin-nutritionist-role-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: #ede7ff;
+  color: #53389e !important;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.admin-nutritionist-card {
+  overflow: hidden;
+}
+
+.admin-nutritionist-section-title,
+.admin-nutritionist-list-header,
+.admin-nutritionist-table-header {
+  padding: 18px 20px;
+  border-bottom: 1px solid #edf1f6;
+}
+
+.admin-nutritionist-section-title {
+  color: #111827;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.admin-nutritionist-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  padding: 18px 20px;
+}
+
+.admin-nutritionist-bio {
+  margin: 0 20px 20px;
+  padding-top: 18px;
+  border-top: 1px solid #edf1f6;
+}
+
+.admin-nutritionist-bio span {
+  display: block;
+  margin-bottom: 8px;
+  color: #667085;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.admin-nutritionist-bio p {
+  margin: 0;
+  color: #344054;
+  line-height: 1.55;
+}
+
+.admin-nutritionist-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.admin-nutritionist-metric {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 98px;
+  padding: 18px;
+}
+
+.admin-nutritionist-metric-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  font-weight: 900;
+}
+
+.admin-nutritionist-metric-purple {
+  background: #f4ebff;
+  color: #6941c6;
+}
+
+.admin-nutritionist-metric-amber {
+  background: #fef7c3;
+  color: #b54708;
+}
+
+.admin-nutritionist-metric-green {
+  background: #dcfae6;
+  color: #067647;
+}
+
+.admin-nutritionist-metric-blue {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.admin-nutritionist-metric strong {
+  display: block;
+  color: #111827;
+  font-size: 26px;
+  line-height: 1;
+}
+
+.admin-nutritionist-metric span {
+  display: block;
+  margin-top: 5px;
+  color: #344054;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.admin-nutritionist-metric p {
+  margin: 3px 0 0;
+  color: #667085;
+  font-size: 13px;
+}
+
+.admin-nutritionist-table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.admin-nutritionist-table-header h3,
+.admin-nutritionist-list-header h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 18px;
+}
+
+.admin-nutritionist-table-header p {
+  margin: 4px 0 0;
+  color: #667085;
+  font-size: 14px;
+}
+
+.admin-nutritionist-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-nutritionist-table {
+  width: 100%;
+  min-width: 860px;
+  border-collapse: collapse;
+}
+
+.admin-nutritionist-table th,
+.admin-nutritionist-table td {
+  padding: 14px 20px;
+  border-bottom: 1px solid #edf1f6;
+  text-align: left;
+}
+
+.admin-nutritionist-table th {
+  color: #667085;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.admin-nutritionist-table td {
+  color: #344054;
+  font-size: 14px;
+}
+
+.admin-status-active,
+.admin-status-pending {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.admin-status-active {
+  background: #dcfae6;
+  color: #067647;
+}
+
+.admin-status-pending {
+  background: #fef7c3;
+  color: #b54708;
+}
+
+.admin-nutritionist-footnote,
+.admin-nutritionist-empty {
+  padding: 16px 20px;
+  color: #667085;
+  font-size: 14px;
+}
+
+.admin-nutritionist-empty {
+  margin: 0;
+}
+
+.admin-nutritionist-bottom-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.admin-nutritionist-list {
+  display: grid;
+}
+
+.admin-nutritionist-list-item {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #edf1f6;
+}
+
+.admin-nutritionist-list-item:last-child {
+  border-bottom: 0;
+}
+
+.admin-nutritionist-list-icon {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 8px;
+  background: #dcfae6;
+  color: #067647;
+  font-weight: 900;
+}
+
+.admin-nutritionist-list-icon-blue {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.admin-nutritionist-list-item h4 {
+  margin: 0;
+  color: #111827;
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.admin-nutritionist-list-item p {
+  margin: 4px 0 0;
+  color: #667085;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.admin-nutritionist-list-meta {
+  display: grid;
+  gap: 6px;
+  justify-items: end;
+  color: #344054;
+  font-size: 13px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.admin-nutritionist-list-meta span {
+  color: #111827;
+  font-weight: 800;
+}
+
+.admin-nutritionist-list-meta small {
+  color: #667085;
+  font-size: 12px;
+}
+
+@media (max-width: 1040px) {
+  .admin-nutritionist-top-grid,
+  .admin-nutritionist-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-nutritionist-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-nutritionist-info-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-nutritionist-heading h2 {
+    font-size: 24px;
+  }
+
+  .admin-nutritionist-stats,
+  .admin-nutritionist-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-nutritionist-list-item {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .admin-nutritionist-list-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .admin-nutritionist-list-meta {
+    grid-column: 2;
+    justify-items: start;
+    text-align: left;
+    white-space: normal;
+  }
+}
+
+.admin-recipes-page {
+  display: grid;
+  gap: 18px;
+}
+
+.admin-recipes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.admin-recipes-header h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 30px;
+  line-height: 1.15;
+}
+
+.admin-recipes-header p {
+  margin: 6px 0 0;
+  color: #667085;
+  font-size: 16px;
+}
+
+.admin-recipes-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.admin-recipes-stat,
+.admin-recipes-main-card,
+.admin-recipes-detail-card {
+  background: #ffffff;
+  border: 1px solid #e6eaf0;
+  border-radius: 8px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+}
+
+.admin-recipes-stat {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 96px;
+  padding: 18px;
+}
+
+.admin-recipes-stat-icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  font-weight: 900;
+}
+
+.admin-recipes-stat-purple {
+  background: #f4ebff;
+  color: #6941c6;
+}
+
+.admin-recipes-stat-green {
+  background: #dcfae6;
+  color: #067647;
+}
+
+.admin-recipes-stat-amber {
+  background: #fef7c3;
+  color: #b54708;
+}
+
+.admin-recipes-stat-blue {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.admin-recipes-stat strong {
+  display: block;
+  color: #111827;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.admin-recipes-stat span {
+  display: block;
+  margin-top: 7px;
+  color: #475467;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.admin-recipes-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.admin-recipes-workspace-with-detail {
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 390px);
+}
+
+.admin-recipes-main-card,
+.admin-recipes-detail-card {
+  overflow: hidden;
+}
+
+.admin-recipes-filters {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.35fr) minmax(150px, 0.7fr) minmax(150px, 0.7fr) auto;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid #edf1f6;
+}
+
+.admin-recipes-filters input,
+.admin-recipes-filters select,
+.admin-recipes-clear {
+  height: 40px;
+  border: 1px solid #d8dee8;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #111827;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 14px;
+}
+
+.admin-recipes-filters input:focus,
+.admin-recipes-filters select:focus {
+  outline: none;
+  border-color: #293241;
+  box-shadow: 0 0 0 3px rgba(41, 50, 65, 0.1);
+}
+
+.admin-recipes-clear {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.admin-recipes-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-recipes-table {
+  width: 100%;
+  min-width: 920px;
+  border-collapse: collapse;
+}
+
+.admin-recipes-table th,
+.admin-recipes-table td {
+  padding: 15px 16px;
+  border-bottom: 1px solid #edf1f6;
+  text-align: left;
+}
+
+.admin-recipes-table th {
+  background: #fbfcfe;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.admin-recipes-table td {
+  color: #344054;
+  font-size: 14px;
+}
+
+.admin-recipes-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 230px;
+}
+
+.admin-recipes-thumb,
+.admin-recipes-detail-image {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 8px;
+  background: #f4ebff;
+  color: #6941c6;
+  font-weight: 900;
+}
+
+.admin-recipes-thumb {
+  width: 54px;
+  height: 46px;
+}
+
+.admin-recipes-name-cell strong {
+  display: block;
+  color: #111827;
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.admin-recipes-name-cell span {
+  display: block;
+  margin-top: 4px;
+  color: #667085;
+  font-size: 13px;
+}
+
+.admin-recipes-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.admin-recipes-pill-green {
+  background: #dcfae6;
+  color: #067647;
+}
+
+.admin-recipes-pill-amber {
+  background: #fef7c3;
+  color: #b54708;
+}
+
+.admin-recipes-pill-blue {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.admin-recipes-pill-red {
+  background: #fee4e2;
+  color: #b42318;
+}
+
+.admin-recipes-pill-gray {
+  background: #f2f4f7;
+  color: #475467;
+}
+
+.admin-recipes-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-recipes-actions button,
+.admin-recipes-detail-header button,
+.admin-recipes-detail-actions button {
+  height: 34px;
+  border: 1px solid #d8dee8;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #111827;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-recipes-actions button:last-child,
+.admin-recipes-detail-actions button {
+  border-color: #fecaca;
+  color: #b42318;
+}
+
+.admin-recipes-footnote,
+.admin-recipes-state {
+  padding: 16px;
+  color: #667085;
+  font-size: 14px;
+}
+
+.admin-recipes-warning {
+  border: 1px solid #fedf89;
+  border-radius: 8px;
+  background: #fffbeb;
+  color: #92400e;
+  padding: 12px 14px;
+  font-size: 14px;
+}
+
+.admin-recipes-detail-card {
+  position: sticky;
+  top: 78px;
+}
+
+.admin-recipes-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid #edf1f6;
+}
+
+.admin-recipes-detail-header h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 20px;
+}
+
+.admin-recipes-detail-title {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 16px;
+  padding: 16px;
+  align-items: center;
+}
+
+.admin-recipes-detail-image {
+  width: 112px;
+  height: 96px;
+  font-size: 32px;
+}
+
+.admin-recipes-detail-title h4 {
+  margin: 0 0 8px;
+  color: #111827;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.admin-recipes-detail-grid,
+.admin-recipes-detail-section,
+.admin-recipes-nutrition,
+.admin-recipes-detail-actions {
+  padding: 16px;
+  border-top: 1px solid #edf1f6;
+}
+
+.admin-recipes-detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 34px;
+  color: #667085;
+  font-size: 14px;
+}
+
+.admin-recipes-detail-row strong {
+  color: #111827;
+  text-align: right;
+}
+
+.admin-recipes-nutrition h4,
+.admin-recipes-detail-section h4 {
+  margin: 0 0 12px;
+  color: #111827;
+  font-size: 15px;
+}
+
+.admin-recipes-nutrition > div {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.admin-recipes-nutrition-box {
+  padding: 12px 8px;
+  border: 1px solid #e6eaf0;
+  border-radius: 8px;
+  background: #fbfcfe;
+  text-align: center;
+}
+
+.admin-recipes-nutrition-box strong {
+  display: block;
+  color: #111827;
+  font-size: 17px;
+}
+
+.admin-recipes-nutrition-box span {
+  display: block;
+  margin-top: 3px;
+  color: #667085;
+  font-size: 12px;
+}
+
+.admin-recipes-detail-section ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-recipes-detail-section li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #344054;
+  font-size: 14px;
+}
+
+.admin-recipes-detail-section p {
+  margin: 0;
+  color: #475467;
+  line-height: 1.5;
+}
+
+.admin-recipes-detail-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 1180px) {
+  .admin-recipes-workspace-with-detail {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-recipes-detail-card {
+    position: static;
+  }
+}
+
+@media (max-width: 920px) {
+  .admin-recipes-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-recipes-filters {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-recipes-header h2 {
+    font-size: 24px;
+  }
+
+  .admin-recipes-stats,
+  .admin-recipes-filters,
+  .admin-recipes-nutrition > div {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-recipes-detail-title {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-mealplans-page {
+  display: grid;
+  gap: 18px;
+}
+
+.admin-mealplans-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.admin-mealplans-header h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 30px;
+  line-height: 1.15;
+}
+
+.admin-mealplans-header p {
+  margin: 6px 0 0;
+  color: #667085;
+  font-size: 16px;
+}
+
+.admin-mealplans-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.admin-mealplans-stat,
+.admin-mealplans-main-card,
+.admin-mealplans-detail-card {
+  background: #ffffff;
+  border: 1px solid #e6eaf0;
+  border-radius: 8px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+}
+
+.admin-mealplans-stat {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 104px;
+  padding: 18px;
+}
+
+.admin-mealplans-stat-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  font-weight: 900;
+}
+
+.admin-mealplans-stat-purple {
+  background: #f4ebff;
+  color: #6941c6;
+}
+
+.admin-mealplans-stat-green {
+  background: #dcfae6;
+  color: #067647;
+}
+
+.admin-mealplans-stat-amber {
+  background: #fef7c3;
+  color: #b54708;
+}
+
+.admin-mealplans-stat-blue {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.admin-mealplans-stat strong {
+  display: block;
+  color: #111827;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.admin-mealplans-stat span {
+  display: block;
+  margin-top: 7px;
+  color: #344054;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.admin-mealplans-stat p {
+  margin: 4px 0 0;
+  color: #667085;
+  font-size: 13px;
+}
+
+.admin-mealplans-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.admin-mealplans-workspace-with-detail {
+  grid-template-columns: minmax(0, 1fr) minmax(330px, 400px);
+}
+
+.admin-mealplans-main-card,
+.admin-mealplans-detail-card {
+  overflow: hidden;
+}
+
+.admin-mealplans-filters {
+  display: grid;
+  grid-template-columns: minmax(240px, 1.35fr) minmax(160px, 0.7fr) minmax(150px, 0.7fr) auto;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid #edf1f6;
+}
+
+.admin-mealplans-filters input,
+.admin-mealplans-filters select,
+.admin-mealplans-clear {
+  height: 40px;
+  border: 1px solid #d8dee8;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #111827;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 14px;
+}
+
+.admin-mealplans-filters input:focus,
+.admin-mealplans-filters select:focus {
+  outline: none;
+  border-color: #293241;
+  box-shadow: 0 0 0 3px rgba(41, 50, 65, 0.1);
+}
+
+.admin-mealplans-clear {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.admin-mealplans-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-mealplans-table {
+  width: 100%;
+  min-width: 980px;
+  border-collapse: collapse;
+}
+
+.admin-mealplans-table th,
+.admin-mealplans-table td {
+  padding: 15px 16px;
+  border-bottom: 1px solid #edf1f6;
+  text-align: left;
+}
+
+.admin-mealplans-table th {
+  background: #fbfcfe;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.admin-mealplans-table td {
+  color: #344054;
+  font-size: 14px;
+}
+
+.admin-mealplans-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 250px;
+}
+
+.admin-mealplans-thumb,
+.admin-mealplans-detail-image {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 8px;
+  background: #fef7c3;
+  color: #b54708;
+  font-weight: 900;
+}
+
+.admin-mealplans-thumb {
+  width: 54px;
+  height: 46px;
+}
+
+.admin-mealplans-name-cell strong {
+  display: block;
+  color: #111827;
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.admin-mealplans-name-cell span {
+  display: block;
+  max-width: 280px;
+  margin-top: 4px;
+  color: #667085;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-mealplans-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.admin-mealplans-pill-purple {
+  background: #ede7ff;
+  color: #53389e;
+}
+
+.admin-mealplans-pill-green {
+  background: #dcfae6;
+  color: #067647;
+}
+
+.admin-mealplans-pill-amber {
+  background: #fef7c3;
+  color: #b54708;
+}
+
+.admin-mealplans-pill-blue {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.admin-mealplans-status-active,
+.admin-mealplans-status-inactive {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.admin-mealplans-status-active {
+  background: #dcfae6;
+  color: #067647;
+}
+
+.admin-mealplans-status-inactive {
+  background: #fee4e2;
+  color: #b42318;
+}
+
+.admin-mealplans-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-mealplans-actions button,
+.admin-mealplans-detail-header button,
+.admin-mealplans-detail-actions button {
+  height: 34px;
+  border: 1px solid #d8dee8;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #111827;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-mealplans-actions button:last-child,
+.admin-mealplans-detail-actions button {
+  border-color: #fecaca;
+  color: #b42318;
+}
+
+.admin-mealplans-footnote,
+.admin-mealplans-state {
+  padding: 16px;
+  color: #667085;
+  font-size: 14px;
+}
+
+.admin-mealplans-warning {
+  border: 1px solid #fedf89;
+  border-radius: 8px;
+  background: #fffbeb;
+  color: #92400e;
+  padding: 12px 14px;
+  font-size: 14px;
+}
+
+.admin-mealplans-detail-card {
+  position: sticky;
+  top: 78px;
+}
+
+.admin-mealplans-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid #edf1f6;
+}
+
+.admin-mealplans-detail-header h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 20px;
+}
+
+.admin-mealplans-detail-title {
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr);
+  gap: 16px;
+  padding: 16px;
+  align-items: center;
+}
+
+.admin-mealplans-detail-image {
+  width: 116px;
+  height: 98px;
+  font-size: 34px;
+}
+
+.admin-mealplans-detail-title h4 {
+  margin: 0 0 8px;
+  color: #111827;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.admin-mealplans-detail-section,
+.admin-mealplans-nutrition,
+.admin-mealplans-detail-actions {
+  padding: 16px;
+  border-top: 1px solid #edf1f6;
+}
+
+.admin-mealplans-detail-section h4,
+.admin-mealplans-nutrition h4 {
+  margin: 0 0 12px;
+  color: #111827;
+  font-size: 15px;
+}
+
+.admin-mealplans-detail-row,
+.admin-mealplans-tags-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 34px;
+  color: #667085;
+  font-size: 14px;
+}
+
+.admin-mealplans-detail-row strong {
+  color: #111827;
+  text-align: right;
+}
+
+.admin-mealplans-tags-row {
+  align-items: flex-start;
+}
+
+.admin-mealplans-tags-row > div {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.admin-mealplans-tags-row strong {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: #f2f4f7;
+  color: #344054;
+  font-size: 12px;
+}
+
+.admin-mealplans-nutrition > div {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.admin-mealplans-nutrition-box {
+  padding: 12px 8px;
+  border: 1px solid #e6eaf0;
+  border-radius: 8px;
+  background: #fbfcfe;
+  text-align: center;
+}
+
+.admin-mealplans-nutrition-box strong {
+  display: block;
+  color: #111827;
+  font-size: 17px;
+}
+
+.admin-mealplans-nutrition-box span {
+  display: block;
+  margin-top: 3px;
+  color: #667085;
+  font-size: 12px;
+}
+
+.admin-mealplans-entry-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-mealplans-entry-list li {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  color: #667085;
+  font-size: 14px;
+}
+
+.admin-mealplans-entry-list strong {
+  color: #111827;
+  font-weight: 700;
+}
+
+.admin-mealplans-entry-list em {
+  min-width: 46px;
+  border-radius: 999px;
+  background: #f4ebff;
+  color: #6941c6;
+  padding: 3px 8px;
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.admin-mealplans-detail-section p {
+  margin: 0;
+  color: #667085;
+  font-size: 14px;
+}
+
+.admin-mealplans-detail-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 1180px) {
+  .admin-mealplans-workspace-with-detail {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-mealplans-detail-card {
+    position: static;
+  }
+}
+
+@media (max-width: 920px) {
+  .admin-mealplans-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-mealplans-filters {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-mealplans-header h2 {
+    font-size: 24px;
+  }
+
+  .admin-mealplans-stats,
+  .admin-mealplans-filters,
+  .admin-mealplans-nutrition > div {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-mealplans-detail-title,
+  .admin-mealplans-entry-list li {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-dashboard-page {
+  display: grid;
+  gap: 16px;
+}
+
+.admin-dashboard-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.admin-dashboard-header h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 30px;
+  line-height: 1.15;
+}
+
+.admin-dashboard-header p {
+  margin: 8px 0 0;
+  color: #667085;
+  font-size: 16px;
+}
+
+.admin-dashboard-card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.admin-dashboard-metric,
+.admin-dashboard-panel {
+  background: #ffffff;
+  border: 1px solid #e6eaf0;
+  border-radius: 8px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+}
+
+.admin-dashboard-metric {
+  position: relative;
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) 92px;
+  gap: 14px;
+  align-items: center;
+  min-height: 116px;
+  padding: 18px;
+  overflow: hidden;
+}
+
+.admin-dashboard-metric-icon {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+}
+
+.admin-dashboard-metric-icon svg {
+  width: 29px;
+  height: 29px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.admin-dashboard-metric-purple {
+  background: #f4ebff;
+  color: #6941c6;
+}
+
+.admin-dashboard-metric-green {
+  background: #dcfae6;
+  color: #067647;
+}
+
+.admin-dashboard-metric-blue {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.admin-dashboard-metric-amber {
+  background: #fef7c3;
+  color: #b54708;
+}
+
+.admin-dashboard-metric-rose {
+  background: #ffe4ec;
+  color: #e11d48;
+}
+
+.admin-dashboard-metric-emerald {
+  background: #ccfbef;
+  color: #0f766e;
+}
+
+.admin-dashboard-metric-indigo {
+  background: #e0e7ff;
+  color: #4f46e5;
+}
+
+.admin-dashboard-metric-orange {
+  background: #ffedd5;
+  color: #ea580c;
+}
+
+.admin-dashboard-metric span {
+  display: block;
+  color: #344054;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.admin-dashboard-metric strong {
+  display: block;
+  margin-top: 7px;
+  color: #111827;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.admin-dashboard-metric p {
+  margin: 10px 0 0;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.admin-dashboard-sparkline {
+  align-self: end;
+  width: 92px;
+  height: 34px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.7;
+}
+
+.admin-dashboard-sparkline-purple {
+  color: #a855f7;
+}
+
+.admin-dashboard-sparkline-green,
+.admin-dashboard-sparkline-emerald {
+  color: #22c55e;
+}
+
+.admin-dashboard-sparkline-blue,
+.admin-dashboard-sparkline-indigo {
+  color: #60a5fa;
+}
+
+.admin-dashboard-sparkline-amber,
+.admin-dashboard-sparkline-orange {
+  color: #f59e0b;
+}
+
+.admin-dashboard-sparkline-rose {
+  color: #fb7185;
+}
+
+.admin-dashboard-tables {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.95fr) minmax(360px, 1fr) minmax(360px, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.admin-dashboard-panel {
+  overflow: hidden;
+}
+
+.admin-dashboard-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid #edf1f6;
+}
+
+.admin-dashboard-panel-header h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 17px;
+}
+
+.admin-dashboard-panel-header button {
+  border: 0;
+  background: transparent;
+  color: #6941c6;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.admin-dashboard-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-dashboard-table {
+  width: 100%;
+  min-width: 420px;
+  border-collapse: collapse;
+}
+
+.admin-dashboard-table th,
+.admin-dashboard-table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid #edf1f6;
+  text-align: left;
+}
+
+.admin-dashboard-table th {
+  color: #667085;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.admin-dashboard-table td {
+  color: #344054;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.admin-dashboard-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.admin-dashboard-pill,
+.admin-dashboard-status-active,
+.admin-dashboard-status-inactive {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.admin-dashboard-pill {
+  background: #edf4ff;
+  color: #2563eb;
+}
+
+.admin-dashboard-status-active {
+  background: #dcfae6;
+  color: #067647;
+}
+
+.admin-dashboard-status-inactive {
+  background: #fee4e2;
+  color: #b42318;
+}
+
+.admin-dashboard-warning {
+  border: 1px solid #fedf89;
+  border-radius: 8px;
+  background: #fffbeb;
+  color: #92400e;
+  padding: 12px 14px;
+  font-size: 14px;
+}
+
+.admin-dashboard-state {
+  padding: 22px;
+  border: 1px solid #e6eaf0;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #667085;
+}
+
+@media (max-width: 1240px) {
+  .admin-dashboard-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-dashboard-tables {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .admin-dashboard-header h2 {
+    font-size: 24px;
+  }
+
+  .admin-dashboard-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-dashboard-metric {
+    grid-template-columns: 58px minmax(0, 1fr);
+  }
+
+  .admin-dashboard-sparkline {
+    display: none;
+  }
+}
+
+.admin-recipes-create-button,
+.nutritionist-recipes-submit {
+  border: 0;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-recipes-create-button {
+  padding: 10px 16px;
+}
+
+.admin-recipes-create-button:hover,
+.nutritionist-recipes-submit:hover {
+  background: #1d4ed8;
+}
+
+.nutritionist-recipes-panel {
+  min-width: 360px;
+}
+
+.nutritionist-recipes-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.nutritionist-recipes-field,
+.nutritionist-recipes-ingredients {
+  display: grid;
+  gap: 8px;
+}
+
+.nutritionist-recipes-field-full,
+.nutritionist-recipes-ingredients,
+.nutritionist-recipes-submit {
+  grid-column: 1 / -1;
+}
+
+.nutritionist-recipes-form-grid {
+  display: contents;
+}
+
+.nutritionist-recipes-form span,
+.nutritionist-recipes-section-header h4 {
+  margin: 0;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.nutritionist-recipes-form input,
+.nutritionist-recipes-form textarea,
+.nutritionist-recipes-form select {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0f172a;
+  font: inherit;
+  padding: 11px 13px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.nutritionist-recipes-form input:focus,
+.nutritionist-recipes-form textarea:focus,
+.nutritionist-recipes-form select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.nutritionist-recipes-form textarea {
+  min-height: 118px;
+  resize: vertical;
+}
+
+.nutritionist-recipes-ingredients {
+  padding: 18px;
+  border: 1px solid #e6eaf0;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.nutritionist-recipes-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.nutritionist-recipes-section-header button {
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 800;
+  cursor: pointer;
+  padding: 9px 14px;
+}
+
+.nutritionist-recipes-ingredient-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 0.95fr) 118px;
+  gap: 14px;
+  align-items: end;
+  padding: 14px;
+  border: 1px solid #e6eaf0;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.nutritionist-recipes-ingredient-row .nutritionist-recipes-field {
+  min-width: 0;
+}
+
+.nutritionist-recipes-remove {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fff5f5;
+  color: #b42318;
+  font-weight: 800;
+  cursor: pointer;
+  padding: 0 14px;
+}
+
+.nutritionist-recipes-remove:hover {
+  background: #fee4e2;
+}
+
+.nutritionist-recipes-remove:disabled,
+.nutritionist-recipes-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.nutritionist-recipes-submit {
+  justify-self: end;
+  min-width: 180px;
+  padding: 13px 18px;
+}
+
+.nutritionist-recipes-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: stretch;
+  background: rgba(15, 23, 42, 0.6);
+  padding: 28px;
+}
+
+.nutritionist-recipes-modal,
+.nutritionist-recipes-modal * {
+  box-sizing: border-box;
+}
+
+.nutritionist-recipes-modal-content {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  width: min(1040px, 100%);
+  max-height: calc(100vh - 56px);
+  margin: auto;
+  overflow: hidden;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24);
+}
+
+.nutritionist-recipes-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid #edf1f6;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.nutritionist-recipes-modal-header h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 22px;
+}
+
+.nutritionist-recipes-modal-header p {
+  margin: 4px 0 0;
+  color: #667085;
+  font-size: 14px;
+}
+
+.nutritionist-recipes-modal-header button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #111827;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.nutritionist-recipes-modal-body {
+  min-height: 0;
+  overflow: auto;
+  padding: 24px;
+}
+
+.nutritionist-recipes-modal-body .nutritionist-recipes-form {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+@media (max-width: 720px) {
+  .nutritionist-recipes-modal {
+    padding: 0;
+  }
+
+  .nutritionist-recipes-modal-content {
+    width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .nutritionist-recipes-form-grid,
+  .nutritionist-recipes-ingredient-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.nutritionist-mealplans-page {
+  display: grid;
+  gap: 18px;
+}
+
+.nutritionist-mealplans-hero,
+.nutritionist-mealplans-card,
+.nutritionist-mealplans-detail,
+.nutritionist-mealplans-stat {
+  border: 1px solid #dfeee6;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 16px 36px rgba(15, 118, 73, 0.08);
+}
+
+.nutritionist-mealplans-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(236, 253, 245, 0.95) 0%, rgba(255, 255, 255, 0.98) 58%);
+}
+
+.nutritionist-mealplans-hero span {
+  color: #047857;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nutritionist-mealplans-hero h2 {
+  margin: 7px 0 0;
+  color: #0f172a;
+  font-size: 30px;
+  line-height: 1.1;
+}
+
+.nutritionist-mealplans-hero p {
+  max-width: 620px;
+  margin: 8px 0 0;
+  color: #64748b;
+}
+
+.nutritionist-mealplans-hero button,
+.nutritionist-mealplans-submit {
+  border: 0;
+  border-radius: 8px;
+  background: #16a34a;
+  color: #ffffff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.nutritionist-mealplans-hero button {
+  padding: 12px 17px;
+  white-space: nowrap;
+}
+
+.nutritionist-mealplans-hero button:hover,
+.nutritionist-mealplans-submit:hover {
+  background: #15803d;
+}
+
+.nutritionist-mealplans-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.nutritionist-mealplans-stat {
+  padding: 18px;
+}
+
+.nutritionist-mealplans-stat strong {
+  display: block;
+  color: #065f46;
+  font-size: 30px;
+  line-height: 1;
+}
+
+.nutritionist-mealplans-stat span {
+  display: block;
+  margin-top: 9px;
+  color: #0f172a;
+  font-weight: 900;
+}
+
+.nutritionist-mealplans-stat p {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.nutritionist-mealplans-warning,
+.nutritionist-mealplans-state {
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-size: 14px;
+}
+
+.nutritionist-mealplans-warning {
+  border: 1px solid #fed7aa;
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+.nutritionist-mealplans-state {
+  color: #64748b;
+}
+
+.nutritionist-mealplans-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.nutritionist-mealplans-workspace-detail {
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 420px);
+}
+
+.nutritionist-mealplans-card,
+.nutritionist-mealplans-detail {
+  overflow: hidden;
+}
+
+.nutritionist-mealplans-toolbar {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(190px, 0.35fr) auto;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid #edf7f0;
+  background: #fbfefd;
+}
+
+.nutritionist-mealplans-toolbar input,
+.nutritionist-mealplans-toolbar select,
+.nutritionist-mealplans-toolbar button {
+  height: 42px;
+  border: 1px solid #dbe7df;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0f172a;
+  font: inherit;
+  padding: 0 12px;
+}
+
+.nutritionist-mealplans-toolbar input:focus,
+.nutritionist-mealplans-toolbar select:focus,
+.nutritionist-mealplans-field input:focus,
+.nutritionist-mealplans-field textarea:focus,
+.nutritionist-mealplans-field select:focus {
+  outline: none;
+  border-color: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
+}
+
+.nutritionist-mealplans-toolbar button {
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.nutritionist-mealplans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 14px;
+  padding: 16px;
+}
+
+.nutritionist-mealplans-plan {
+  display: grid;
+  gap: 15px;
+  border: 1px solid #e1efe8;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 16px;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.nutritionist-mealplans-plan:hover {
+  border-color: #86efac;
+  box-shadow: 0 14px 28px rgba(22, 163, 74, 0.1);
+  transform: translateY(-2px);
+}
+
+.nutritionist-mealplans-plan-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.nutritionist-mealplans-plan h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 18px;
+}
+
+.nutritionist-mealplans-plan p {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  margin: 5px 0 0;
+  overflow: hidden;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.nutritionist-mealplans-badge-active,
+.nutritionist-mealplans-badge-muted {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  border-radius: 999px;
+  padding: 0 9px;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.nutritionist-mealplans-badge-active {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.nutritionist-mealplans-badge-muted {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.nutritionist-mealplans-macros {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.nutritionist-mealplans-macros div {
+  border: 1px solid #e1efe8;
+  border-radius: 8px;
+  background: #f8fffb;
+  padding: 10px 8px;
+  text-align: center;
+}
+
+.nutritionist-mealplans-macros strong {
+  display: block;
+  color: #064e3b;
+  font-size: 14px;
+}
+
+.nutritionist-mealplans-macros span {
+  display: block;
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.nutritionist-mealplans-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.nutritionist-mealplans-tags strong,
+.nutritionist-mealplans-tags span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 25px;
+  border-radius: 999px;
+  padding: 0 9px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.nutritionist-mealplans-tags strong {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.nutritionist-mealplans-tags span {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.nutritionist-mealplans-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.nutritionist-mealplans-actions button,
+.nutritionist-mealplans-detail-header button,
+.nutritionist-mealplans-detail-actions button {
+  height: 36px;
+  border: 1px solid #dbe7df;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0f172a;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.nutritionist-mealplans-actions button:last-child,
+.nutritionist-mealplans-detail-actions button {
+  border-color: #fecaca;
+  color: #b42318;
+}
+
+.nutritionist-mealplans-detail {
+  position: sticky;
+  top: 78px;
+}
+
+.nutritionist-mealplans-detail-header,
+.nutritionist-mealplans-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.nutritionist-mealplans-detail-header {
+  padding: 16px;
+  border-bottom: 1px solid #edf7f0;
+}
+
+.nutritionist-mealplans-detail-header h3,
+.nutritionist-mealplans-modal-header h3 {
+  margin: 0;
+  color: #0f172a;
+}
+
+.nutritionist-mealplans-detail-title {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  padding: 16px;
+}
+
+.nutritionist-mealplans-detail-title > span {
+  display: grid;
+  place-items: center;
+  width: 74px;
+  height: 74px;
+  border-radius: 8px;
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 26px;
+  font-weight: 900;
+}
+
+.nutritionist-mealplans-detail-title h4 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 20px;
+}
+
+.nutritionist-mealplans-detail-title p,
+.nutritionist-mealplans-detail-section p {
+  margin: 5px 0 0;
+  color: #64748b;
+}
+
+.nutritionist-mealplans-detail-section,
+.nutritionist-mealplans-detail-actions {
+  padding: 16px;
+  border-top: 1px solid #edf7f0;
+}
+
+.nutritionist-mealplans-detail-section h4 {
+  margin: 0 0 12px;
+  color: #0f172a;
+  font-size: 15px;
+}
+
+.nutritionist-mealplans-detail-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 32px;
+  color: #64748b;
+}
+
+.nutritionist-mealplans-detail-row strong {
+  color: #0f172a;
+  text-align: right;
+}
+
+.nutritionist-mealplans-entry-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nutritionist-mealplans-entry-list li {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.nutritionist-mealplans-entry-list strong {
+  color: #0f172a;
+}
+
+.nutritionist-mealplans-entry-list em {
+  border-radius: 999px;
+  background: #ecfdf5;
+  color: #047857;
+  padding: 3px 8px;
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.nutritionist-mealplans-detail-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.nutritionist-mealplans-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  background: rgba(15, 23, 42, 0.6);
+}
+
+.nutritionist-mealplans-modal,
+.nutritionist-mealplans-modal * {
+  box-sizing: border-box;
+}
+
+.nutritionist-mealplans-modal-content {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  width: min(1080px, 100%);
+  max-height: calc(100vh - 56px);
+  overflow: hidden;
+  border: 1px solid #dbe7df;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.25);
+}
+
+.nutritionist-mealplans-modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #edf7f0;
+  background: linear-gradient(180deg, #ffffff 0%, #f7fef9 100%);
+}
+
+.nutritionist-mealplans-modal-header p {
+  margin: 4px 0 0;
+  color: #64748b;
+}
+
+.nutritionist-mealplans-modal-header button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #dbe7df;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0f172a;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.nutritionist-mealplans-modal-body {
+  min-height: 0;
+  overflow: auto;
+  padding: 24px;
+}
+
+.nutritionist-mealplans-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.nutritionist-mealplans-field,
+.nutritionist-mealplans-entry-editor {
+  display: grid;
+  gap: 8px;
+}
+
+.nutritionist-mealplans-field-full,
+.nutritionist-mealplans-toggle,
+.nutritionist-mealplans-entry-editor,
+.nutritionist-mealplans-submit {
+  grid-column: 1 / -1;
+}
+
+.nutritionist-mealplans-field span,
+.nutritionist-mealplans-entry-header h4 {
+  margin: 0;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.nutritionist-mealplans-field input,
+.nutritionist-mealplans-field textarea,
+.nutritionist-mealplans-field select {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid #dbe7df;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0f172a;
+  font: inherit;
+  padding: 11px 13px;
+  outline: none;
+}
+
+.nutritionist-mealplans-field textarea {
+  min-height: 112px;
+  resize: vertical;
+}
+
+.nutritionist-mealplans-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #0f172a;
+  font-weight: 800;
+}
+
+.nutritionist-mealplans-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: #16a34a;
+}
+
+.nutritionist-mealplans-entry-editor {
+  border: 1px solid #dfeee6;
+  border-radius: 8px;
+  background: #f8fffb;
+  padding: 18px;
+}
+
+.nutritionist-mealplans-entry-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.nutritionist-mealplans-entry-header button {
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  background: #ecfdf5;
+  color: #047857;
+  font-weight: 900;
+  cursor: pointer;
+  padding: 9px 13px;
+}
+
+.nutritionist-mealplans-entry-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(130px, 0.55fr) 92px 112px;
+  gap: 12px;
+  align-items: end;
+  border: 1px solid #dfeee6;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 14px;
+}
+
+.nutritionist-mealplans-entry-row button {
+  min-height: 46px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fff5f5;
+  color: #b42318;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.nutritionist-mealplans-entry-row button:disabled,
+.nutritionist-mealplans-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.nutritionist-mealplans-submit {
+  justify-self: end;
+  min-width: 190px;
+  padding: 13px 18px;
+}
+
+@media (max-width: 1180px) {
+  .nutritionist-mealplans-workspace-detail {
+    grid-template-columns: 1fr;
+  }
+
+  .nutritionist-mealplans-detail {
+    position: static;
+  }
+}
+
+@media (max-width: 820px) {
+  .nutritionist-mealplans-hero,
+  .nutritionist-mealplans-plan-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .nutritionist-mealplans-stats,
+  .nutritionist-mealplans-toolbar,
+  .nutritionist-mealplans-form,
+  .nutritionist-mealplans-entry-row {
+    grid-template-columns: 1fr;
+  }
+
+  .nutritionist-mealplans-macros {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .nutritionist-mealplans-modal {
+    padding: 0;
+  }
+
+  .nutritionist-mealplans-modal-content {
+    max-height: 100vh;
+    border-radius: 0;
+  }
+}

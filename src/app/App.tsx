@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
+import "./App.css";
 import { AccountSettingsRoute } from "./routes/account-settings.routes";
 import { SignInRoute, SignUpRoute } from "./routes/auth.routes";
 import { CommunicationRoute } from "./routes/communication.routes";
 import { DashboardRoute } from "./routes/dashboard.routes";
-import { NutritionistProfileRoute, NutritionistShellRoute } from "./routes/nutritionist.routes";
+import { NutritionistMealPlansRoute, NutritionistProfileRoute, NutritionistRecipesRoute, NutritionistShellRoute } from "./routes/nutritionist.routes";
 import { AdminRoute } from "./routes/admin.routes";
 import { isNutritionistShellPath } from "@/shared/utils/isNutritionistShellPath";
 import { NotificationsRoute } from "./routes/notifications.routes";
@@ -47,6 +48,14 @@ export default function App() {
 
   if (path === "/nutritionist" || path === "/nutritionist/recent-logs") {
     return <DashboardRoute currentPath={path} onNavigate={navigate} />;
+  }
+
+  if (path.startsWith("/nutritionist/recipes")) {
+    return <NutritionistRecipesRoute currentPath={path} onNavigate={navigate} />;
+  }
+
+  if (path.startsWith("/nutritionist/meal-plans")) {
+    return <NutritionistMealPlansRoute currentPath={path} onNavigate={navigate} />;
   }
 
   if (path.startsWith("/patients") || path.startsWith("/nutritionist/patients")) {

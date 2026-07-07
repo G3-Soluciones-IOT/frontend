@@ -15,5 +15,7 @@ export { HttpNutritionistRepository } from "./infrastructure/repositories/HttpNu
 
 // Presentation
 export { NutritionistProfilePage } from "./presentation/pages/NutritionistProfilePage";
+export { NutritionistRecipesPage } from "./presentation/pages/NutritionistRecipesPage";
+export { NutritionistMealPlansPage } from "./presentation/pages/NutritionistMealPlansPage";
 export { useNutritionistProfile } from "./presentation/hooks/useNutritionistProfile";
 export { useUpdateProfile } from "./presentation/hooks/useUpdateProfile";
