@@ -237,6 +237,228 @@
       "fats": 65
     }
   ],
+  "categories": [
+    {
+      "id": 1,
+      "name": "Breakfast"
+    },
+    {
+      "id": 2,
+      "name": "Lunch"
+    },
+    {
+      "id": 3,
+      "name": "Dinner"
+    }
+  ],
+  "recipetypes": [
+    {
+      "id": 1,
+      "name": "Main Dish"
+    },
+    {
+      "id": 2,
+      "name": "Snack"
+    },
+    {
+      "id": 3,
+      "name": "Smoothie"
+    }
+  ],
+  "ingredients": [
+    {
+      "id": 1,
+      "name": "Chicken breast",
+      "calories": 165,
+      "proteins": 31,
+      "fats": 3.6,
+      "carbohydrates": 0
+    },
+    {
+      "id": 2,
+      "name": "Brown rice",
+      "calories": 111,
+      "proteins": 2.6,
+      "fats": 0.9,
+      "carbohydrates": 23
+    },
+    {
+      "id": 3,
+      "name": "Greek yogurt",
+      "calories": 59,
+      "proteins": 10,
+      "fats": 0.4,
+      "carbohydrates": 3.6
+    },
+    {
+      "id": 4,
+      "name": "Banana",
+      "calories": 89,
+      "proteins": 1.1,
+      "fats": 0.3,
+      "carbohydrates": 23
+    }
+  ],
+  "recipes": [
+    {
+      "id": 10,
+      "name": "Protein Yogurt Bowl",
+      "description": "Greek yogurt with banana for a light high-protein breakfast.",
+      "preparationTime": 10,
+      "difficulty": "Easy",
+      "categoryId": 1,
+      "categoryName": "Breakfast",
+      "recipeTypeId": 2,
+      "recipeTypeName": "Snack",
+      "createdByNutritionistId": 1,
+      "nutritionistName": "Valentino Sandoval",
+      "assignedToProfileId": 1,
+      "ingredients": [
+        {
+          "ingredient": {
+            "id": 3,
+            "name": "Greek yogurt"
+          },
+          "amountGrams": 200
+        },
+        {
+          "ingredient": {
+            "id": 4,
+            "name": "Banana"
+          },
+          "amountGrams": 120
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "Chicken Rice Lunch",
+      "description": "Balanced lunch with chicken breast and brown rice.",
+      "preparationTime": 30,
+      "difficulty": "Medium",
+      "categoryId": 2,
+      "categoryName": "Lunch",
+      "recipeTypeId": 1,
+      "recipeTypeName": "Main Dish",
+      "createdByNutritionistId": 1,
+      "nutritionistName": "Valentino Sandoval",
+      "assignedToProfileId": 1,
+      "ingredients": [
+        {
+          "ingredient": {
+            "id": 1,
+            "name": "Chicken breast"
+          },
+          "amountGrams": 180
+        },
+        {
+          "ingredient": {
+            "id": 2,
+            "name": "Brown rice"
+          },
+          "amountGrams": 150
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "name": "Recovery Smoothie",
+      "description": "Quick smoothie option for post-workout recovery.",
+      "preparationTime": 8,
+      "difficulty": "Easy",
+      "categoryId": 3,
+      "categoryName": "Dinner",
+      "recipeTypeId": 3,
+      "recipeTypeName": "Smoothie",
+      "createdByNutritionistId": 1,
+      "nutritionistName": "Valentino Sandoval",
+      "assignedToProfileId": null,
+      "ingredients": [
+        {
+          "ingredient": {
+            "id": 3,
+            "name": "Greek yogurt"
+          },
+          "amountGrams": 150
+        },
+        {
+          "ingredient": {
+            "id": 4,
+            "name": "Banana"
+          },
+          "amountGrams": 100
+        }
+      ]
+    }
+  ],
+  "mealPlans": [
+    {
+      "id": 1,
+      "nutritionistUserId": 1,
+      "name": "Weight Loss Starter",
+      "description": "Simple weekly structure focused on moderate calories and high protein.",
+      "calories": 1800,
+      "carbs": 170,
+      "proteins": 140,
+      "fats": 55,
+      "profileId": 1,
+      "category": "Weight Loss",
+      "isCurrent": true,
+      "tags": [
+        "weight loss",
+        "balanced"
+      ],
+      "entries": [
+        {
+          "id": 1,
+          "recipeId": 10,
+          "mealPlanType": "BREAKFAST",
+          "day": 1,
+          "mealPlanId": 1
+        },
+        {
+          "id": 2,
+          "recipeId": 12,
+          "mealPlanType": "LUNCH",
+          "day": 1,
+          "mealPlanId": 1
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "nutritionistUserId": 1,
+      "name": "Muscle Gain Template",
+      "description": "Higher calorie plan for patients focused on lean muscle gain.",
+      "calories": 2400,
+      "carbs": 260,
+      "proteins": 170,
+      "fats": 75,
+      "profileId": 1,
+      "category": "Muscle Gain",
+      "isCurrent": true,
+      "tags": [
+        "muscle gain",
+        "high protein"
+      ],
+      "entries": [
+        {
+          "id": 3,
+          "recipeId": 12,
+          "mealPlanType": "LUNCH",
+          "day": 1,
+          "mealPlanId": 2
+        },
+        {
+          "id": 4,
+          "recipeId": 14,
+          "mealPlanType": "DINNER",
+          "day": 1,
+          "mealPlanId": 2
+        }
+      ]
+    }
+  ],
   "dashboard": {
     "stats": {
       "activePatients": {

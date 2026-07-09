@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { apiUrl } from "@/app/config/env";
+import { API_BASE_URL, apiUrl } from "@/app/config/env";
 import styles from "../../pages/PatientsPages.module.css";
 
 interface PatientPlansRecipesTabProps {
@@ -15,6 +15,7 @@ interface MealPlanEntry {
   id?: number | string;
   recipeId?: number | string;
   day?: number;
+  dayNumber?: number;
   mealPlanType?: number | string;
   mealPlanId?: number | string;
 }
@@ -50,6 +51,7 @@ interface Recipe {
   difficulty?: string;
   categoryName?: string;
   recipeTypeName?: string;
+  assignedToProfileId?: number | string | null;
   ingredients?: RecipeIngredient[];
 }
 
@@ -85,6 +87,54 @@ async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+function isLocalMockApi() {
+  return API_BASE_URL.includes("localhost:3001");
+}
+
+async function updateLocalResource<T extends { id: number | string }>(collection: string, id: number | string, changes: Partial<T>) {
+  const current = await fetchJson<T>(`/${collection}/${encodeURIComponent(String(id))}`);
+  return fetchJson<T>(`/${collection}/${encodeURIComponent(String(id))}`, {
+    method: "PUT",
+    body: JSON.stringify({ ...current, ...changes }),
+  });
+}
+
+async function getAssignedMealPlans(profileId: number | string) {
+  if (isLocalMockApi()) {
+    return fetchJson<MealPlan[]>(`/mealPlans?profileId=${encodeURIComponent(String(profileId))}`);
+  }
+
+  return fetchJson<MealPlan[]>(`/api/v1/meal-plan/profile/${encodeURIComponent(String(profileId))}`);
+}
+
+async function getAssignedRecipes(profileId: number | string) {
+  if (isLocalMockApi()) {
+    return fetchJson<Recipe[]>(`/recipes?assignedToProfileId=${encodeURIComponent(String(profileId))}`);
+  }
+
+  return fetchJson<Recipe[]>(`/api/v1/recipes/profile/${encodeURIComponent(String(profileId))}`);
+}
+
+async function getLibraryMealPlans(nutritionistUserId?: number | string) {
+  if (!nutritionistUserId) return [] as MealPlan[];
+
+  if (isLocalMockApi()) {
+    return fetchJson<MealPlan[]>(`/mealPlans?nutritionistUserId=${encodeURIComponent(String(nutritionistUserId))}`).catch(() => []);
+  }
+
+  return fetchJson<MealPlan[]>(`/api/v1/meal-plan/nutritionists/${encodeURIComponent(String(nutritionistUserId))}`).catch(() => []);
+}
+
+async function getLibraryRecipes(nutritionistUserId?: number | string) {
+  if (!nutritionistUserId) return [] as Recipe[];
+
+  if (isLocalMockApi()) {
+    return fetchJson<Recipe[]>(`/recipes?createdByNutritionistId=${encodeURIComponent(String(nutritionistUserId))}`).catch(() => []);
+  }
+
+  return fetchJson<Recipe[]>(`/api/v1/recipes/nutritionists/${encodeURIComponent(String(nutritionistUserId))}/templates`).catch(() => []);
+}
+
 function formatKcal(value?: number) {
   return value === undefined ? "-" : `${value.toLocaleString("en-US")} kcal`;
 }
@@ -99,6 +149,15 @@ function ingredientCount(recipe: Recipe) {
   return `${count} ingredient${count === 1 ? "" : "s"}`;
 }
 
+function mealTypeLabel(value?: number | string) {
+  const normalized = String(value ?? "").toLowerCase();
+  if (normalized === "0" || normalized === "breakfast") return "Breakfast";
+  if (normalized === "1" || normalized === "lunch") return "Lunch";
+  if (normalized === "2" || normalized === "dinner") return "Dinner";
+  if (normalized === "3" || normalized === "snack") return "Snack";
+  return value === undefined ? "Meal" : String(value);
+}
+
 export function PatientPlansRecipesTab({ patientUserId, profileId }: PatientPlansRecipesTabProps) {
   const nutritionistUserId = getSessionUser()?.id;
   const [assignedMealPlans, setAssignedMealPlans] = useState<MealPlan[]>([]);
@@ -107,6 +166,7 @@ export function PatientPlansRecipesTab({ patientUserId, profileId }: PatientPlan
   const [libraryRecipes, setLibraryRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [assigningKey, setAssigningKey] = useState<string | null>(null);
+  const [selectedMealPlan, setSelectedMealPlan] = useState<MealPlan | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -119,6 +179,13 @@ export function PatientPlansRecipesTab({ patientUserId, profileId }: PatientPlan
     () => new Set(assignedRecipes.map((recipe) => String(recipe.id))),
     [assignedRecipes],
   );
+
+  const recipesById = useMemo(() => {
+    return [...assignedRecipes, ...libraryRecipes].reduce<Record<string, Recipe>>((nextMap, recipe) => {
+      nextMap[String(recipe.id)] = recipe;
+      return nextMap;
+    }, {});
+  }, [assignedRecipes, libraryRecipes]);
 
   const loadPlansAndRecipes = async () => {
     if (!profileId) {
@@ -134,14 +201,10 @@ export function PatientPlansRecipesTab({ patientUserId, profileId }: PatientPlan
       setError(null);
 
       const [nextAssignedPlans, nextAssignedRecipes, nextLibraryPlans, nextLibraryRecipes] = await Promise.all([
-        fetchJson<MealPlan[]>(`/api/v1/meal-plan/profile/${encodeURIComponent(String(profileId))}`),
-        fetchJson<Recipe[]>(`/api/v1/recipes/profile/${encodeURIComponent(String(profileId))}`),
-        nutritionistUserId
-          ? fetchJson<MealPlan[]>(`/api/v1/meal-plan/nutritionists/${encodeURIComponent(String(nutritionistUserId))}`).catch(() => [])
-          : Promise.resolve([] as MealPlan[]),
-        nutritionistUserId
-          ? fetchJson<Recipe[]>(`/api/v1/recipes/nutritionists/${encodeURIComponent(String(nutritionistUserId))}/templates`).catch(() => [])
-          : Promise.resolve([] as Recipe[]),
+        getAssignedMealPlans(profileId),
+        getAssignedRecipes(profileId),
+        getLibraryMealPlans(nutritionistUserId),
+        getLibraryRecipes(nutritionistUserId),
       ]);
 
       setAssignedMealPlans(Array.isArray(nextAssignedPlans) ? nextAssignedPlans : []);
@@ -166,7 +229,13 @@ export function PatientPlansRecipesTab({ patientUserId, profileId }: PatientPlan
     setSuccess(null);
 
     try {
-      if (profileId) {
+      if (profileId && isLocalMockApi()) {
+        if (target === "mealPlan") {
+          await updateLocalResource<MealPlan>("mealPlans", itemId, { profileId: Number(profileId) });
+        } else {
+          await updateLocalResource<Recipe>("recipes", itemId, { assignedToProfileId: Number(profileId) } as Partial<Recipe>);
+        }
+      } else if (profileId) {
         const path = target === "mealPlan"
           ? `/api/v1/meal-plan/${encodeURIComponent(String(itemId))}/assign-to-profile/${encodeURIComponent(String(profileId))}`
           : `/api/v1/recipes/${encodeURIComponent(String(itemId))}/assign-to-profile/${encodeURIComponent(String(profileId))}`;
@@ -200,9 +269,9 @@ export function PatientPlansRecipesTab({ patientUserId, profileId }: PatientPlan
 
       <div className={styles.patientPlansStats}>
         <PlanStat label="Assigned Meal Plans" value={assignedMealPlans.length} />
-        <PlanStat label="Assigned Recipes" value={assignedRecipes.length} />
+        <PlanStat label="Extra Recipes" value={assignedRecipes.length} />
         <PlanStat label="Meal Plan Library" value={libraryMealPlans.length} />
-        <PlanStat label="Recipe Library" value={libraryRecipes.length} />
+        <PlanStat label="Extra Recipe Library" value={libraryRecipes.length} />
       </div>
 
       {loading ? (
@@ -217,7 +286,11 @@ export function PatientPlansRecipesTab({ patientUserId, profileId }: PatientPlan
               </div>
               <div className={styles.patientPlansList}>
                 {assignedMealPlans.map((plan) => (
-                  <MealPlanCard key={plan.id} plan={plan} assigned />
+                  <AssignedMealPlanRow
+                    key={plan.id}
+                    plan={plan}
+                    onView={() => setSelectedMealPlan(plan)}
+                  />
                 ))}
                 {assignedMealPlans.length === 0 && <p className={styles.emptyState}>No meal plans assigned.</p>}
               </div>
@@ -225,7 +298,7 @@ export function PatientPlansRecipesTab({ patientUserId, profileId }: PatientPlan
 
             <section className={styles.patientPlansBlock}>
               <div className={styles.patientPlansBlockHeader}>
-                <h3>Assigned Recipes</h3>
+                <h3>Assigned Extra Recipes</h3>
                 <span>{assignedRecipes.length}</span>
               </div>
               <div className={styles.patientPlansList}>
@@ -264,7 +337,7 @@ export function PatientPlansRecipesTab({ patientUserId, profileId }: PatientPlan
 
             <section className={styles.patientPlansBlock}>
               <div className={styles.patientPlansBlockHeader}>
-                <h3>Available Recipes</h3>
+                <h3>Available Extra Recipes</h3>
                 <span>{libraryRecipes.length}</span>
               </div>
               <div className={styles.patientPlansList}>
@@ -282,10 +355,18 @@ export function PatientPlansRecipesTab({ patientUserId, profileId }: PatientPlan
                     />
                   );
                 })}
-                {libraryRecipes.length === 0 && <p className={styles.emptyState}>No recipe templates found.</p>}
+                {libraryRecipes.length === 0 && <p className={styles.emptyState}>No extra recipe templates found.</p>}
               </div>
             </section>
           </div>
+
+          {selectedMealPlan && (
+            <MealPlanDetailModal
+              plan={selectedMealPlan}
+              recipesById={recipesById}
+              onClose={() => setSelectedMealPlan(null)}
+            />
+          )}
         </>
       )}
     </section>
@@ -297,6 +378,100 @@ function PlanStat({ label, value }: { label: string; value: number }) {
     <article>
       <span>{label}</span>
       <strong>{value}</strong>
+    </article>
+  );
+}
+
+function AssignedMealPlanRow({
+  plan,
+  onView,
+}: {
+  plan: MealPlan;
+  onView: () => void;
+}) {
+  return (
+    <article className={styles.assignedPlanRow}>
+      <div>
+        <strong>{plan.name || "Untitled meal plan"}</strong>
+        <span>{plan.category || "General"} - {plan.entries?.length ?? 0} entries</span>
+      </div>
+      <button type="button" className={styles.iconButton} onClick={onView} aria-label={`View ${plan.name || "meal plan"}`}>
+        <EyeIcon />
+      </button>
+    </article>
+  );
+}
+
+function MealPlanDetailModal({
+  plan,
+  recipesById,
+  onClose,
+}: {
+  plan: MealPlan;
+  recipesById: Record<string, Recipe>;
+  onClose: () => void;
+}) {
+  return (
+    <div className={styles.planModalBackdrop} role="presentation" onMouseDown={onClose}>
+      <section
+        className={styles.planModal}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="assigned-plan-title"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <header className={styles.planModalHeader}>
+          <div>
+            <span>{plan.category || "Meal Plan"}</span>
+            <h3 id="assigned-plan-title">{plan.name || "Untitled meal plan"}</h3>
+            <p>{plan.description || "-"}</p>
+          </div>
+          <button type="button" className={styles.iconButton} onClick={onClose} aria-label="Close meal plan details">
+            <CloseIcon />
+          </button>
+        </header>
+
+        <div className={styles.planModalMacros}>
+          <MacroBox label="Calories" value={formatKcal(plan.calories)} />
+          <MacroBox label="Carbs" value={plan.carbs === undefined ? "-" : `${plan.carbs} g`} />
+          <MacroBox label="Protein" value={plan.proteins === undefined ? "-" : `${plan.proteins} g`} />
+          <MacroBox label="Fats" value={plan.fats === undefined ? "-" : `${plan.fats} g`} />
+        </div>
+
+        <section className={styles.planModalSection}>
+          <h4>Assigned Recipes In This Plan</h4>
+          <div className={styles.planEntryList}>
+            {(plan.entries ?? []).map((entry) => {
+              const recipe = entry.recipeId ? recipesById[String(entry.recipeId)] : undefined;
+              return (
+                <article key={`${entry.id ?? entry.recipeId}-${entry.day ?? entry.dayNumber ?? "day"}`} className={styles.planEntryItem}>
+                  <span>{mealTypeLabel(entry.mealPlanType)}</span>
+                  <div>
+                    <strong>{recipe?.name || `Recipe #${entry.recipeId ?? "-"}`}</strong>
+                    <small>Day {entry.day ?? entry.dayNumber ?? "-"}</small>
+                  </div>
+                  <em>{recipe?.preparationTime === undefined ? "-" : `${recipe.preparationTime} min`}</em>
+                </article>
+              );
+            })}
+            {(plan.entries ?? []).length === 0 && <p className={styles.emptyState}>No recipes listed in this plan.</p>}
+          </div>
+        </section>
+
+        <section className={styles.planModalSection}>
+          <h4>Tags</h4>
+          <p>{formatTags(plan.tags)}</p>
+        </section>
+      </section>
+    </div>
+  );
+}
+
+function MacroBox({ label, value }: { label: string; value: string }) {
+  return (
+    <article>
+      <strong>{value}</strong>
+      <span>{label}</span>
     </article>
   );
 }
@@ -335,6 +510,24 @@ function MealPlanCard({
         </button>
       )}
     </article>
+  );
+}
+
+function EyeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden>
+      <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden>
+      <path d="m6 6 12 12" />
+      <path d="M18 6 6 18" />
+    </svg>
   );
 }
 

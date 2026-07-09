@@ -1,4 +1,4 @@
-import { DashboardPage } from "@/modules/dashboard";
+import { AnalyticsPage, DashboardPage } from "@/modules/dashboard";
 
 interface DashboardRouteProps {
   currentPath: string;
@@ -7,4 +7,8 @@ interface DashboardRouteProps {
 
 export function DashboardRoute({ currentPath, onNavigate }: DashboardRouteProps) {
   return <DashboardPage currentPath={currentPath} onNavigate={onNavigate} />;
+}
+
+export function AnalyticsRoute({ currentPath, onNavigate }: DashboardRouteProps) {
+  return <AnalyticsPage currentPath={currentPath} onNavigate={onNavigate} />;
 }

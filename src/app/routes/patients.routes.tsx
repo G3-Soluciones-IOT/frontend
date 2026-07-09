@@ -1,6 +1,5 @@
 import {
   PatientDetailPage,
-  PatientTrackingPage,
   NutritionistPatientsPage,
   PatientsDirectoryPage,
   PatientsOverviewPage,
@@ -22,10 +21,6 @@ export function PatientsRoute({ path, onNavigate }: PatientsRouteProps) {
 
   if (normalizedPath === "/patients/directory") {
     return <PatientsDirectoryPage currentPath={path} onNavigate={onNavigate} />;
-  }
-
-  if (/^\/patients\/[^/]+\/tracking$/.test(normalizedPath) || normalizedPath === "/patients/tracking") {
-    return <PatientTrackingPage currentPath={path} onNavigate={onNavigate} />;
   }
 
   if (/^\/patients\/[^/]+$/.test(normalizedPath)) {

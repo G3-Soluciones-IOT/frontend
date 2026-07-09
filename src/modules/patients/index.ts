@@ -17,5 +17,4 @@ export type {
 export { PatientsOverviewPage } from "./presentation/pages/PatientsOverviewPage";
 export { PatientsDirectoryPage } from "./presentation/pages/PatientsDirectoryPage";
 export { PatientDetailPage } from "./presentation/pages/PatientDetailPage";
-export { PatientTrackingPage } from "./presentation/pages/PatientTrackingPage";
 export { NutritionistPatientsPage } from "./presentation/pages/NutritionistPatientsPage";

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { apiUrl } from "@/app/config/env";
+import { API_BASE_URL, apiUrl } from "@/app/config/env";
 import { SharedLayout } from "@/shared/components/layout";
 import { useNavigation } from "@/shared/hooks/useNavigation";
 import {
@@ -21,14 +21,18 @@ interface NutritionistProfile {
 interface PatientProfile {
   id: number | string;
   name?: string;
+  username?: string;
+  fullName?: string;
   email?: string;
   birthDate?: string;
   profilePictureUrl?: string;
   userProfileId?: number | string;
+  userId?: number | string;
 }
 
 interface PatientNutritionProfile {
   id?: number | string;
+  userId?: number | string;
   gender?: string;
   height?: number;
   weight?: number;
@@ -52,6 +56,14 @@ interface ActivityOption {
   name: string;
 }
 
+interface LocalUser {
+  id: number | string;
+  username?: string;
+  fullName?: string;
+  email?: string;
+  profilePictureUrl?: string;
+}
+
 interface DirectoryRow {
   relation: NutritionistPatientRelation;
   profile?: PatientProfile;
@@ -66,6 +78,10 @@ function getSessionUserId() {
 function authHeaders(): HeadersInit {
   const token = localStorage.getItem("accessToken");
   return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+function isLocalMockApi() {
+  return API_BASE_URL.includes("localhost:3001");
 }
 
 async function fetchJson<T>(path: string): Promise<T> {
@@ -85,15 +101,59 @@ function firstItem<T>(data: T | T[]) {
 }
 
 async function getNutritionistProfileByUser(userId: number | string) {
+  if (isLocalMockApi()) {
+    const params = new URLSearchParams({ userId: String(userId) });
+    const nutritionists = await fetchJson<NutritionistProfile[]>(`/nutritionists?${params.toString()}`);
+    const nutritionist = nutritionists[0];
+
+    if (!nutritionist) {
+      throw new Error(`No local nutritionist found for user ${userId}.`);
+    }
+
+    return nutritionist;
+  }
+
   return fetchJson<NutritionistProfile>(`/api/v1/nutritionists/by-user?userId=${encodeURIComponent(String(userId))}`);
 }
 
 async function getPatientProfile(patientUserId: number | string) {
+  if (isLocalMockApi()) {
+    const [users, userProfiles] = await Promise.all([
+      fetchJson<LocalUser[]>("/users"),
+      fetchJson<PatientNutritionProfile[]>("/userProfiles").catch(() => []),
+    ]);
+    const user = users.find((item) => String(item.id) === String(patientUserId));
+    const nutritionProfile = userProfiles.find((item) => String(item.userId) === String(patientUserId));
+
+    if (!user && !nutritionProfile) return undefined;
+
+    return {
+      id: user?.id ?? patientUserId,
+      userId: user?.id ?? patientUserId,
+      userProfileId: nutritionProfile?.id,
+      name: user?.fullName ?? user?.username ?? `Patient #${patientUserId}`,
+      username: user?.username,
+      fullName: user?.fullName,
+      email: user?.email,
+      birthDate: nutritionProfile?.birthDate,
+      profilePictureUrl: user?.profilePictureUrl,
+    } satisfies PatientProfile;
+  }
+
   const profileData = await fetchJson<PatientProfile | PatientProfile[]>(`/api/v1/profiles/${patientUserId}`);
   return firstItem(profileData) ?? undefined;
 }
 
-async function getPatientNutritionProfile(userProfileId?: number | string) {
+async function getPatientNutritionProfile(userProfileId?: number | string, patientUserId?: number | string) {
+  if (!userProfileId && !patientUserId) return undefined;
+
+  if (isLocalMockApi()) {
+    const userProfiles = await fetchJson<PatientNutritionProfile[]>("/userProfiles");
+    return userProfiles.find((item) => String(item.id) === String(userProfileId))
+      ?? userProfiles.find((item) => String(item.userId) === String(patientUserId))
+      ?? undefined;
+  }
+
   if (!userProfileId) return undefined;
 
   const nutritionProfileData = await fetchJson<PatientNutritionProfile | PatientNutritionProfile[]>(
@@ -101,6 +161,44 @@ async function getPatientNutritionProfile(userProfileId?: number | string) {
   );
 
   return firstItem(nutritionProfileData) ?? undefined;
+}
+
+async function getObjectiveOptions() {
+  if (!isLocalMockApi()) {
+    return fetchJson<ObjectiveOption[]>("/api/v1/objectives").catch(() => []);
+  }
+
+  const profiles = await fetchJson<PatientNutritionProfile[]>("/userProfiles").catch(() => []);
+  const byName = new Map<string, ObjectiveOption>();
+
+  profiles.forEach((profile) => {
+    if (!profile.objectiveName) return;
+    byName.set(normalize(profile.objectiveName), {
+      id: profile.objectiveId ?? profile.objectiveName,
+      objectiveName: profile.objectiveName,
+    });
+  });
+
+  return Array.from(byName.values());
+}
+
+async function getActivityOptions() {
+  if (!isLocalMockApi()) {
+    return fetchJson<ActivityOption[]>("/api/v1/activity-levels").catch(() => []);
+  }
+
+  const profiles = await fetchJson<PatientNutritionProfile[]>("/userProfiles").catch(() => []);
+  const byName = new Map<string, ActivityOption>();
+
+  profiles.forEach((profile) => {
+    if (!profile.activityLevelName) return;
+    byName.set(normalize(profile.activityLevelName), {
+      id: profile.activityLevelId ?? profile.activityLevelName,
+      name: profile.activityLevelName,
+    });
+  });
+
+  return Array.from(byName.values());
 }
 
 function getInitials(name: string) {
@@ -116,7 +214,7 @@ function getInitials(name: string) {
 }
 
 function patientName(row: DirectoryRow) {
-  return row.profile?.name || `Patient #${row.relation.patientUserId}`;
+  return row.profile?.name || row.profile?.fullName || row.profile?.username || `Patient #${row.relation.patientUserId}`;
 }
 
 function normalize(value?: string) {
@@ -227,15 +325,14 @@ export function PatientsDirectoryPage({ currentPath, onNavigate }: PatientsDirec
 
       const [relationItems, objectiveItems, activityItems] = await Promise.all([
         getNutritionistPatientRelations(nutritionist.id),
-        fetchJson<ObjectiveOption[]>("/api/v1/objectives").catch(() => []),
-        fetchJson<ActivityOption[]>("/api/v1/activity-levels").catch(() => []),
+        getObjectiveOptions(),
+        getActivityOptions(),
       ]);
 
-      const accepted = relationItems.filter((relation) => relation.accepted);
       const rowResults = await Promise.allSettled(
-        accepted.map(async (relation) => {
+        relationItems.map(async (relation) => {
           const profile = await getPatientProfile(relation.patientUserId).catch(() => undefined);
-          const nutritionProfile = await getPatientNutritionProfile(profile?.userProfileId).catch(() => undefined);
+          const nutritionProfile = await getPatientNutritionProfile(profile?.userProfileId, relation.patientUserId).catch(() => undefined);
           return { relation, profile, nutritionProfile } satisfies DirectoryRow;
         }),
       );

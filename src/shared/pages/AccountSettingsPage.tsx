@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { SharedLayout } from "@/shared/components/layout";
 import { useNavigation } from "@/shared/hooks/useNavigation";
+import { appLanguages, type AppLanguage } from "@/shared/i18n/language";
+import { useI18n } from "@/shared/i18n/useI18n";
+import type { TranslationKey } from "@/shared/i18n/translations";
 import styles from "./AccountSettingsPage.module.css";
 
 interface AccountSettingsPageProps {
@@ -19,6 +22,36 @@ function WarningIcon() {
   );
 }
 
+function UserIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21a8 8 0 0 0-16 0" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  );
+}
+
+function LockIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect width="18" height="11" x="3" y="11" rx="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  );
+}
+
+function PreferencesIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3v18" />
+      <path d="M4 8h8" />
+      <path d="M12 16h8" />
+      <circle cx="17" cy="8" r="3" />
+      <circle cx="7" cy="16" r="3" />
+    </svg>
+  );
+}
+
 export function AccountSettingsPage({
   currentPath,
   onNavigate,
@@ -31,11 +64,13 @@ export function AccountSettingsPage({
     () => localStorage.getItem("mockAuthPassword") ?? "admin"
   );
   const [newPassword, setNewPassword] = useState("");
+  const { language, setLanguage, t } = useI18n();
+  const [theme, setTheme] = useState<TranslationKey>("account.theme.system");
   const [statusMessage, setStatusMessage] = useState("");
 
   const updateEmail = () => {
     localStorage.setItem("mockAuthEmail", email);
-    setStatusMessage("Email updated locally.");
+    setStatusMessage(t("account.status.emailUpdated"));
   };
 
   const updatePassword = () => {
@@ -43,7 +78,11 @@ export function AccountSettingsPage({
     localStorage.setItem("mockAuthPassword", passwordToSave);
     setCurrentPassword(passwordToSave);
     setNewPassword("");
-    setStatusMessage("Password updated locally.");
+    setStatusMessage(t("account.status.passwordUpdated"));
+  };
+
+  const updateLanguage = (nextLanguage: AppLanguage) => {
+    setLanguage(nextLanguage);
   };
 
   return (
@@ -54,81 +93,131 @@ export function AccountSettingsPage({
       navigationItems={useNavigation()}
       breadcrumbs={["Account Settings"]}
       onSettingsClick={() => onNavigate("/account-settings")}
+      showPageTitle={false}
     >
-      <div className={styles.header}>
-        <p>Manage your professional profile and security preferences.</p>
-      </div>
-
-      {statusMessage && <p className={styles.statusMessage}>{statusMessage}</p>}
-
-      <div className={styles.stack}>
-        <section className={styles.card}>
-          <div className={styles.cardHeaderStack}>
-            <h2>Security Settings</h2>
-            <p>Update your email and manage your password.</p>
+      <div className={styles.pageShell}>
+        <section className={styles.hero}>
+          <div>
+            <span>{t("account.center")}</span>
+            <h1>{t("account.title")}</h1>
+            <p>{t("account.hero.description")}</p>
           </div>
+          <div className={styles.profileBadge}>
+            <UserIcon />
+            <strong>{email}</strong>
+          </div>
+        </section>
 
-          <div className={styles.divider} />
+        {statusMessage && <p className={styles.statusMessage}>{statusMessage}</p>}
 
-          <label className={styles.field}>
-            <span>Email Address</span>
-            <div className={styles.inlineAction}>
-              <input
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-              />
-              <button type="button" className={styles.secondaryButton} onClick={updateEmail}>
-                Update Email
+        <div className={styles.settingsGrid}>
+          <section className={styles.card}>
+            <div className={styles.cardHeaderStack}>
+                <span className={styles.cardIcon}><LockIcon /></span>
+                <div>
+                  <h2>{t("account.security.title")}</h2>
+                  <p>{t("account.security.description")}</p>
+                </div>
+              </div>
+
+            <div className={styles.divider} />
+
+            <label className={styles.field}>
+              <span>{t("account.email.label")}</span>
+              <div className={styles.inlineAction}>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                />
+                <button type="button" className={styles.secondaryButton} onClick={updateEmail}>
+                  {t("account.email.update")}
+                </button>
+              </div>
+            </label>
+
+            <div className={styles.divider} />
+
+            <div className={styles.passwordFields}>
+              <label className={styles.field}>
+                <span>{t("account.password.current")}</span>
+                <input
+                  type="password"
+                  value={currentPassword}
+                  onChange={(event) => setCurrentPassword(event.target.value)}
+                />
+              </label>
+
+              <label className={styles.field}>
+                <span>{t("account.password.new")}</span>
+                <input
+                  type="password"
+                  placeholder={t("account.password.placeholder")}
+                  value={newPassword}
+                  onChange={(event) => setNewPassword(event.target.value)}
+                />
+              </label>
+
+              <button type="button" className={styles.primaryButton} onClick={updatePassword}>
+                {t("account.password.change")}
               </button>
             </div>
-          </label>
+          </section>
 
-          <div className={styles.divider} />
+          <aside className={styles.sideStack}>
+            <section className={`${styles.card} ${styles.preferencesCard}`}>
+              <div className={styles.cardHeaderStack}>
+                <span className={styles.cardIcon}><PreferencesIcon /></span>
+                <div>
+                  <h2>{t("account.preferences.title")}</h2>
+                </div>
+              </div>
 
-          <div className={styles.passwordFields}>
-            <label className={styles.field}>
-              <span>Current Password</span>
-              <input
-                type="password"
-                value={currentPassword}
-                onChange={(event) => setCurrentPassword(event.target.value)}
-              />
-            </label>
+              <label className={styles.field}>
+                <span>{t("account.language.label")}</span>
+                <select value={language} onChange={(event) => updateLanguage(event.target.value as AppLanguage)}>
+                  {appLanguages.map((appLanguage) => (
+                    <option key={appLanguage}>{appLanguage}</option>
+                  ))}
+                </select>
+              </label>
 
-            <label className={styles.field}>
-              <span>New Password</span>
-              <input
-                type="password"
-                placeholder="Enter new password"
-                value={newPassword}
-                onChange={(event) => setNewPassword(event.target.value)}
-              />
-            </label>
+              <div className={styles.preferenceGroup}>
+                <span>{t("account.theme.label")}</span>
+                <div className={styles.segmentedControl}>
+                  {(["account.theme.light", "account.theme.dark", "account.theme.system"] as TranslationKey[]).map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      className={theme === option ? styles.segmentActive : ""}
+                      onClick={() => setTheme(option)}
+                    >
+                      {t(option)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </section>
 
-            <button type="button" className={styles.primaryButton} onClick={updatePassword}>
-              Change Password
-            </button>
-          </div>
-        </section>
+            <section className={`${styles.card} ${styles.dangerCard}`}>
+              <div className={styles.dangerHeader}>
+                <WarningIcon />
+                <h2>{t("account.danger.title")}</h2>
+              </div>
+              <p>{t("account.danger.description")}</p>
 
-        <section className={`${styles.card} ${styles.dangerCard}`}>
-          <div className={styles.dangerHeader}>
-            <WarningIcon />
-            <h2>Danger Zone</h2>
-          </div>
-          <p>Actions in this section are sensitive and affect your active session.</p>
-
-          <div className={styles.logoutBox}>
-            <div>
-              <strong>Log Out</strong>
-              <span>End your current session across all devices.</span>
-            </div>
-            <button type="button" className={styles.dangerButton} onClick={onLogout}>
-              Log Out Securely
-            </button>
-          </div>
-        </section>
+              <div className={styles.logoutBox}>
+                <div>
+                  <strong>{t("account.logout.title")}</strong>
+                  <span>{t("account.logout.description")}</span>
+                </div>
+                <button type="button" className={styles.dangerButton} onClick={onLogout}>
+                  {t("account.logout.button")}
+                </button>
+              </div>
+            </section>
+          </aside>
+        </div>
       </div>
     </SharedLayout>
   );

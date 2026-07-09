@@ -47,7 +47,6 @@ function profileForPatient(profiles: UserProfileResource[], patientId: string) {
 
 export function PatientDetailPage({ currentPath, onNavigate }: PatientDetailPageProps) {
   const patientId = currentPath.split("/").filter(Boolean).at(-1) || patientDetail.id;
-  const trackingPath = `/nutritionist/patients/${patientId}/tracking`;
   const [activeTab, setActiveTab] = useState<PatientDetailTab>("overview");
   const [profile, setProfile] = useState<UserProfileResource | null>(null);
   const [patientUser, setPatientUser] = useState<PatientUserSummary | null>(null);
@@ -130,7 +129,7 @@ export function PatientDetailPage({ currentPath, onNavigate }: PatientDetailPage
           )}
 
           {activeTab === "tracking" && (
-            <PatientTrackingTab patientId={patientId} onOpenFullTracking={() => onNavigate(trackingPath)} />
+            <PatientTrackingTab patientId={patientId} />
           )}
 
           {activeTab === "iot" && (

@@ -1,8 +1,9 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import logo from "@/assets/LogoJameoFit.png";
 import styles from "./SharedLayout.module.css";
 import { Topbar } from "./Topbar";
 import { getStoredNutritionistProfile } from "@/modules/nutritionist/infrastructure/storage/nutritionistProfileStorage";
+import { getStoredLanguage, LANGUAGE_CHANGE_EVENT, type AppLanguage } from "@/shared/i18n/language";
 
 export interface NavigationItem {
   label: string;
@@ -32,6 +33,91 @@ export interface SharedLayoutProps {
   onLogout?: () => void;
 }
 
+const logoutLabels: Record<AppLanguage, string> = {
+  English: "Log Out",
+  Spanish: "Salir",
+  Portuguese: "Sair",
+};
+
+const layoutTranslations: Record<AppLanguage, Record<string, string>> = {
+  English: {},
+  Spanish: {
+    Dashboard: "Panel",
+    Overview: "Resumen",
+    "Recent Logs": "Registros Recientes",
+    Patients: "Pacientes",
+    "Patient Directory": "Directorio de Pacientes",
+    "Patients Overview": "Resumen de Pacientes",
+    "Patient Requests": "Solicitudes de Pacientes",
+    Directory: "Directorio",
+    Requests: "Solicitudes",
+    Request: "Solicitudes",
+    Communication: "Comunicacion",
+    Chat: "Chat",
+    Consultations: "Consultas",
+    Recommendations: "Recomendaciones",
+    Nutritionist: "Nutricionista",
+    Recipes: "Recetas",
+    "Meal Plans": "Planes de Comida",
+    Analytics: "Analiticas",
+    Notifications: "Notificaciones",
+    "Account Settings": "Configuracion de Cuenta",
+    "My Profile": "Mi Perfil",
+    Subscriptions: "Suscripciones",
+    "Plans & Pricing": "Planes y Precios",
+    Content: "Contenido",
+    Tips: "Consejos",
+    "Tips Library": "Biblioteca de Consejos",
+    Admin: "Admin",
+    Management: "Gestion",
+    Users: "Usuarios",
+    "User Details": "Detalles de Usuario",
+    "Edit User": "Editar Usuario",
+    "Create User": "Crear Usuario",
+    New: "Nuevo",
+    Edit: "Editar",
+  },
+  Portuguese: {
+    Dashboard: "Painel",
+    Overview: "Resumo",
+    "Recent Logs": "Registros Recentes",
+    Patients: "Pacientes",
+    "Patient Directory": "Diretorio de Pacientes",
+    "Patients Overview": "Resumo de Pacientes",
+    "Patient Requests": "Solicitacoes de Pacientes",
+    Directory: "Diretorio",
+    Requests: "Solicitacoes",
+    Request: "Solicitacoes",
+    Communication: "Comunicacao",
+    Chat: "Chat",
+    Consultations: "Consultas",
+    Recommendations: "Recomendacoes",
+    Nutritionist: "Nutricionista",
+    Recipes: "Receitas",
+    "Meal Plans": "Planos Alimentares",
+    Analytics: "Analiticas",
+    Notifications: "Notificacoes",
+    "Account Settings": "Configuracoes da Conta",
+    "My Profile": "Meu Perfil",
+    Subscriptions: "Assinaturas",
+    "Plans & Pricing": "Planos e Precos",
+    Content: "Conteudo",
+    Tips: "Dicas",
+    "Tips Library": "Biblioteca de Dicas",
+    Admin: "Admin",
+    Management: "Gestao",
+    Users: "Usuarios",
+    "User Details": "Detalhes do Usuario",
+    "Edit User": "Editar Usuario",
+    "Create User": "Criar Usuario",
+    New: "Novo",
+    Edit: "Editar",
+  },
+};
+
+function translateLayoutText(text: string, language: AppLanguage) {
+  return layoutTranslations[language][text] ?? text;
+}
 
 function isActive(currentPath: string, href?: string) {
   if (!href) return false;
@@ -84,11 +170,31 @@ export function SharedLayout({
   onProfileClick,
   onLogout,
 }: SharedLayoutProps) {
+  const [language, setLanguage] = useState<AppLanguage>(getStoredLanguage);
   const storedProfile =
     typeof window !== "undefined"
       ? getStoredNutritionistProfile()
       : null;
   const resolvedAvatarUrl = userAvatarUrl ?? storedProfile?.profilePictureUrl;
+
+  useEffect(() => {
+    const updateLanguage = () => setLanguage(getStoredLanguage());
+
+    window.addEventListener("storage", updateLanguage);
+    window.addEventListener(LANGUAGE_CHANGE_EVENT, updateLanguage);
+
+    return () => {
+      window.removeEventListener("storage", updateLanguage);
+      window.removeEventListener(LANGUAGE_CHANGE_EVENT, updateLanguage);
+    };
+  }, []);
+
+  const translatedTitle = translateLayoutText(title, language);
+  const translatedBreadcrumbs = breadcrumbs.map((breadcrumb) => translateLayoutText(breadcrumb, language));
+  const translatedTabs = topbarTabs.map((tab) => ({
+    ...tab,
+    label: translateLayoutText(tab.label, language),
+  }));
 
   const handleLogout = () => {
     if (onLogout) {
@@ -142,18 +248,18 @@ export function SharedLayout({
         </nav>
 
         <div className={styles.sidebarFooter}>
-          <button type="button" className={styles.logoutButton} onClick={handleLogout} aria-label="Cerrar sesión">
+          <button type="button" className={styles.logoutButton} onClick={handleLogout} aria-label={logoutLabels[language]}>
             <LogOutIcon />
-            <span>Salir</span>
+            <span>{logoutLabels[language]}</span>
           </button>
         </div>
       </aside>
 
       <main className={styles.main}>
         <Topbar
-          title={title}
-          breadcrumbs={breadcrumbs}
-          tabs={topbarTabs}
+          title={translatedTitle}
+          breadcrumbs={translatedBreadcrumbs}
+          tabs={translatedTabs}
           userInitials={userInitials}
           userAvatarUrl={resolvedAvatarUrl}
           onSettingsClick={onSettingsClick ?? (() => onNavigate("/account-settings"))}
@@ -164,7 +270,7 @@ export function SharedLayout({
         />
 
         <section className={styles.content}>
-          {showPageTitle && <h1 className={styles.pageTitle}>{title}</h1>}
+          {showPageTitle && <h1 className={styles.pageTitle}>{translatedTitle}</h1>}
           {children}
         </section>
       </main>

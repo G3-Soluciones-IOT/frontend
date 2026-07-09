@@ -3,7 +3,7 @@ import "./App.css";
 import { AccountSettingsRoute } from "./routes/account-settings.routes";
 import { SignInRoute, SignUpRoute } from "./routes/auth.routes";
 import { CommunicationRoute } from "./routes/communication.routes";
-import { DashboardRoute } from "./routes/dashboard.routes";
+import { AnalyticsRoute, DashboardRoute } from "./routes/dashboard.routes";
 import { NutritionistMealPlansRoute, NutritionistProfileRoute, NutritionistRecipesRoute, NutritionistShellRoute } from "./routes/nutritionist.routes";
 import { AdminRoute } from "./routes/admin.routes";
 import { isNutritionistShellPath } from "@/shared/utils/isNutritionistShellPath";
@@ -48,6 +48,10 @@ export default function App() {
 
   if (path === "/nutritionist" || path === "/nutritionist/recent-logs") {
     return <DashboardRoute currentPath={path} onNavigate={navigate} />;
+  }
+
+  if (path === "/analytics") {
+    return <AnalyticsRoute currentPath={path} onNavigate={navigate} />;
   }
 
   if (path.startsWith("/nutritionist/recipes")) {

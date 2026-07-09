@@ -2,15 +2,16 @@ import { useEffect, useState, type ReactNode } from "react";
 import { apiUrl } from "@/app/config/env";
 import { SharedLayout } from "@/shared/components/layout";
 import { useNavigation } from "@/shared/hooks/useNavigation";
-import {
-  dashboardSummary,
-  todayConsultations,
-} from "../../infrastructure/mock/dashboard.mock";
+import { dashboardSummary } from "../../infrastructure/mock/dashboard.mock";
 import {
   getNutritionistPatientRelations,
   getPatientUserSummaries,
   getTrackingByUser,
+  getTrackingProgressByUser,
+  type MacroResource,
+  type NutritionistPatientRelation,
   type TrackingResource,
+  type TrackingProgressResource,
 } from "@/modules/patients/infrastructure/api/nutritionistPatients.api";
 import { PatientIotAlertsTable } from "@/modules/patients/presentation/components/PatientIotAlertsTable";
 import {
@@ -18,7 +19,7 @@ import {
   storeNutritionistProfile,
 } from "@/modules/nutritionist/infrastructure/storage/nutritionistProfileStorage";
 import type { ProfessionalProfile } from "@/modules/nutritionist/domain/models/ProfessionalProfile";
-import { AlertIcon, PatientsIcon, SparklesIcon, TrendIcon } from "../components/DashboardIcons";
+import { AlertIcon, SparklesIcon, TrendIcon } from "../components/DashboardIcons";
 import styles from "./DashboardPage.module.css";
 
 interface DashboardPageProps {
@@ -43,6 +44,39 @@ interface NutritionTrackingRow {
   patientName: string;
   tracking: TrackingResource;
 }
+
+interface PatientProfilePreview {
+  id?: number | string;
+  name?: string;
+  fullName?: string;
+  username?: string;
+}
+
+interface AttentionPatient {
+  id: string;
+  patientName: string;
+  initials: string;
+  lowestMetric: string;
+  lowestPercentage: number;
+  metrics: Array<{
+    label: string;
+    percentage: number;
+  }>;
+}
+
+interface RecentPatientRequest {
+  id: string;
+  patientName: string;
+  initials: string;
+  requestedAt?: string;
+  serviceType: string;
+  accepted: boolean;
+}
+
+type DashboardTrackingProgress = TrackingProgressResource | {
+  consumed?: MacroResource;
+  target?: MacroResource;
+};
 
 interface DashboardLibraryItem {
   id?: number | string;
@@ -99,6 +133,22 @@ async function fetchDashboardJson<T>(path: string): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+function firstItem<T>(data: T | T[]) {
+  return Array.isArray(data) ? data[0] ?? null : data;
+}
+
+async function getPatientProfileName(userId: number | string, fallbackName: string) {
+  try {
+    const profileData = await fetchDashboardJson<PatientProfilePreview | PatientProfilePreview[]>(
+      `/api/v1/profiles/${encodeURIComponent(String(userId))}`,
+    );
+    const profile = firstItem(profileData);
+    return profile?.name || profile?.fullName || profile?.username || fallbackName;
+  } catch {
+    return fallbackName;
+  }
+}
+
 async function getNutritionistDisplayName(user: SessionUser | null) {
   if (!user?.id) return "Nutritionist";
 
@@ -128,6 +178,22 @@ function formatTrackingDate(date: string) {
   }).format(new Date(date));
 }
 
+function formatShortDate(value?: string) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "2-digit",
+  }).format(date);
+}
+
+function requestTime(request: RecentPatientRequest) {
+  const time = request.requestedAt ? new Date(request.requestedAt).getTime() : 0;
+  return Number.isNaN(time) ? 0 : time;
+}
+
 function getInitials(name: string) {
   return name
     .split(/\s+/)
@@ -138,12 +204,78 @@ function getInitials(name: string) {
     .toUpperCase();
 }
 
+function trackingTime(row: NutritionTrackingRow) {
+  const time = new Date(row.tracking.date).getTime();
+  return Number.isNaN(time) ? 0 : time;
+}
+
 function isPendingRelation(relation: { accepted?: boolean; status?: string }) {
   if (typeof relation.status === "string") {
     return relation.status.trim().toUpperCase() === "PENDING";
   }
 
   return relation.accepted === false;
+}
+
+function metricPercentage(consumed?: number, target?: number) {
+  if (!target || !Number.isFinite(target)) return 0;
+  return Math.max(0, Math.min(100, Math.round(((consumed ?? 0) / target) * 100)));
+}
+
+function getProgressMetrics(progress: DashboardTrackingProgress) {
+  const consumed = "consumed" in progress ? progress.consumed : undefined;
+  const target = "target" in progress ? progress.target : undefined;
+  const normalized = "calories" in progress ? progress : null;
+
+  return [
+    {
+      label: "Calories",
+      percentage: normalized?.calories?.percentage ?? metricPercentage(consumed?.calories, target?.calories),
+    },
+    {
+      label: "Protein",
+      percentage: normalized?.proteins?.percentage ?? metricPercentage(consumed?.proteins, target?.proteins),
+    },
+    {
+      label: "Carbs",
+      percentage: normalized?.carbs?.percentage ?? metricPercentage(consumed?.carbs, target?.carbs),
+    },
+    {
+      label: "Fats",
+      percentage: normalized?.fats?.percentage ?? metricPercentage(consumed?.fats, target?.fats),
+    },
+  ];
+}
+
+function buildAttentionPatient(patientName: string, patientId: number | string, progress: DashboardTrackingProgress) {
+  const metrics = getProgressMetrics(progress);
+  const lowest = metrics.reduce((currentLowest, metric) =>
+    metric.percentage < currentLowest.percentage ? metric : currentLowest,
+  );
+
+  if (lowest.percentage >= 70) return null;
+
+  return {
+    id: String(patientId),
+    patientName,
+    initials: getInitials(patientName),
+    lowestMetric: lowest.label,
+    lowestPercentage: lowest.percentage,
+    metrics,
+  } satisfies AttentionPatient;
+}
+
+async function buildRecentRequest(relation: NutritionistPatientRelation, fallbackName: string) {
+  const patientName = await getPatientProfileName(relation.patientUserId, fallbackName);
+
+  return {
+    id: String(relation.id),
+    patientName,
+    initials: getInitials(patientName),
+    requestedAt: relation.requestedAt,
+    serviceType: relation.serviceType,
+    accepted: relation.accepted,
+  } satisfies RecentPatientRequest;
 }
 
 function UsersMetricIcon() {
@@ -241,9 +373,10 @@ function MetricCard({
 }
 
 export function DashboardPage({ currentPath, onNavigate }: DashboardPageProps) {
-  const [activePatients, setActivePatients] = useState(0);
   const [nutritionistName, setNutritionistName] = useState("Nutritionist");
   const [trackingRows, setTrackingRows] = useState<NutritionTrackingRow[]>([]);
+  const [attentionPatients, setAttentionPatients] = useState<AttentionPatient[]>([]);
+  const [recentRequests, setRecentRequests] = useState<RecentPatientRequest[]>([]);
   const [metrics, setMetrics] = useState<DashboardMetrics>({
     myPatients: 0,
     pendingRequests: 0,
@@ -281,9 +414,12 @@ export function DashboardPage({ currentPath, onNavigate }: DashboardPageProps) {
               if (!tracking) return null;
 
               const patient = users.find((user) => String(user.id) === String(relation.patientUserId));
+              const fallbackName = patient?.fullName || patient?.username || `Patient #${relation.patientUserId}`;
+              const patientName = await getPatientProfileName(relation.patientUserId, fallbackName);
+
               return {
                 id: String(tracking.id),
-                patientName: patient?.fullName || patient?.username || `Patient #${relation.patientUserId}`,
+                patientName,
                 tracking,
               };
             } catch {
@@ -291,9 +427,29 @@ export function DashboardPage({ currentPath, onNavigate }: DashboardPageProps) {
             }
           })
         );
+        const attentionRows = await Promise.all(
+          acceptedRelations.map(async (relation) => {
+            try {
+              const progress = await getTrackingProgressByUser(relation.patientUserId);
+              if (!progress) return null;
+
+              const patient = users.find((user) => String(user.id) === String(relation.patientUserId));
+              const patientName = patient?.fullName || patient?.username || `Patient #${relation.patientUserId}`;
+              return buildAttentionPatient(patientName, relation.patientUserId, progress as DashboardTrackingProgress);
+            } catch {
+              return null;
+            }
+          })
+        );
+        const requestRows = await Promise.all(
+          relations.map(async (relation) => {
+            const patient = users.find((user) => String(user.id) === String(relation.patientUserId));
+            const fallbackName = patient?.fullName || patient?.username || `Patient #${relation.patientUserId}`;
+            return buildRecentRequest(relation, fallbackName);
+          }),
+        );
 
         if (mounted) {
-          setActivePatients(acceptedRelations.length);
           setMetrics({
             myPatients: acceptedRelations.length,
             pendingRequests: relations.filter(isPendingRelation).length,
@@ -301,12 +457,27 @@ export function DashboardPage({ currentPath, onNavigate }: DashboardPageProps) {
             mealPlans: Array.isArray(mealPlans) ? mealPlans.length : 0,
           });
           setNutritionistName(displayName);
-          setTrackingRows(rows.filter((row): row is NutritionTrackingRow => Boolean(row)).slice(0, 4));
+          setTrackingRows(
+            rows
+              .filter((row): row is NutritionTrackingRow => Boolean(row))
+              .sort((first, second) => trackingTime(second) - trackingTime(first))
+              .slice(0, 4),
+          );
+          setAttentionPatients(
+            attentionRows
+              .filter((row): row is AttentionPatient => Boolean(row))
+              .sort((first, second) => first.lowestPercentage - second.lowestPercentage)
+              .slice(0, 3),
+          );
+          setRecentRequests(
+            requestRows
+              .sort((first, second) => requestTime(second) - requestTime(first))
+              .slice(0, 4),
+          );
         }
       } catch {
         const displayName = await getNutritionistDisplayName(sessionUser);
         if (mounted) {
-          setActivePatients(0);
           setMetrics({
             myPatients: 0,
             pendingRequests: 0,
@@ -315,6 +486,8 @@ export function DashboardPage({ currentPath, onNavigate }: DashboardPageProps) {
           });
           setNutritionistName(displayName);
           setTrackingRows([]);
+          setAttentionPatients([]);
+          setRecentRequests([]);
         }
       }
     };
@@ -409,62 +582,91 @@ export function DashboardPage({ currentPath, onNavigate }: DashboardPageProps) {
             </div>
           </article>
 
-          <article className={styles.activePatientsPanel}>
-            <button
-              type="button"
-              className={styles.requestsButton}
-              onClick={() => onNavigate("/nutritionist/patients/request")}
-            >
-              View Requests
+          <article className={styles.attentionPanel}>
+            <div className={styles.attentionHeader}>
+              <span className={styles.attentionIcon}>
+                <AlertIcon />
+              </span>
+              <div>
+                <h2>Patients Needing Attention</h2>
+                <p>Nutrition progress below target thresholds.</p>
+              </div>
+            </div>
+
+            <div className={styles.attentionSummary}>
+              <strong>{attentionPatients.length}</strong>
+              <span>patients below 70%</span>
+            </div>
+
+            <div className={styles.attentionList}>
+              {attentionPatients.map((patient) => (
+                <article key={patient.id} className={styles.attentionItem}>
+                  <span className={styles.attentionAvatar}>{patient.initials}</span>
+                  <div className={styles.attentionBody}>
+                    <div className={styles.attentionItemHeader}>
+                      <strong>{patient.patientName}</strong>
+                      <em>{patient.lowestPercentage}%</em>
+                    </div>
+                    <p>{patient.lowestMetric} needs review</p>
+                    <div className={styles.attentionProgress}>
+                      <span style={{ width: `${patient.lowestPercentage}%` }} />
+                    </div>
+                  </div>
+                </article>
+              ))}
+
+              {!attentionPatients.length && (
+                <div className={styles.attentionEmpty}>
+                  <strong>All patients on track</strong>
+                  <span>No accepted patient is below the nutrition threshold.</span>
+                </div>
+              )}
+            </div>
+
+            <button type="button" className={styles.attentionAction} onClick={() => onNavigate("/nutritionist/patients/directory")}>
+              Review patients
               <span aria-hidden="true">&rarr;</span>
             </button>
-            <div className={styles.activePatientIcon}>
-              <PatientsIcon />
-            </div>
-            <p className={styles.activePatientLabel}>Active Patients</p>
-            <strong>{activePatients}</strong>
-            <span className={styles.realLabel}>Active Patients (Real)</span>
-            <p className={styles.trendText}>&uarr; 5% from last week (Real)</p>
-            <svg className={styles.sparkline} viewBox="0 0 180 80" aria-hidden="true">
-              <path d="M5 62 C30 34, 42 44, 55 28 S82 52, 96 38 S120 20, 135 32 S158 50, 175 16" />
-            </svg>
           </article>
         </section>
 
         <section className={styles.bottomGrid}>
-          <article className={styles.panel}>
+          <article className={`${styles.panel} ${styles.recentRequestsPanel}`}>
             <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>Today&apos;s Consultations (Mock)</h2>
-              <button type="button" className={styles.outlineButton}>View All</button>
+              <h2 className={styles.panelTitle}>Recent Patient Requests</h2>
+              <button type="button" className={styles.outlineButton} onClick={() => onNavigate("/nutritionist/patients/request")}>
+                View All
+              </button>
             </div>
-            <div className={styles.consultationList}>
-              {todayConsultations.map((consultation) => (
-                <div className={styles.consultationItem} key={consultation.id}>
-                  <span className={`${styles.consultationAvatar} ${consultation.tone === "blue" ? styles.avatarBlue : styles.avatarSlate}`}>
-                    {consultation.initials}
-                  </span>
-                  <div>
-                    <p className={styles.consultationName}>{consultation.patientName}</p>
-                    <p className={styles.consultationMeta}>
-                      {consultation.time} &middot; {consultation.modality}
-                    </p>
+            <div className={styles.requestPreviewList}>
+              {recentRequests.map((request) => (
+                <article className={styles.requestPreviewItem} key={request.id}>
+                  <span className={styles.requestPreviewAvatar}>{request.initials}</span>
+                  <div className={styles.requestPreviewBody}>
+                    <strong>{request.patientName}</strong>
+                    <span>Requested: {formatShortDate(request.requestedAt)}</span>
+                    <small>{request.serviceType.replaceAll("_", " ")}</small>
                   </div>
-                  <span className={styles.upcomingPill}>{consultation.status ?? "Confirmed"}</span>
-                </div>
+                  <span className={request.accepted ? styles.requestStatusAccepted : styles.requestStatusPending}>
+                    {request.accepted ? "Accepted" : "Pending"}
+                  </span>
+                </article>
               ))}
+              {!recentRequests.length && (
+                <div className={styles.emptyTableState}>No recent patient requests found.</div>
+              )}
             </div>
-            <button type="button" className={styles.linkFooter}>View all consultations &rarr;</button>
           </article>
 
-          <article className={styles.panel}>
+          <article className={`${styles.panel} ${styles.recentTrackingPanel}`}>
             <div className={styles.panelHeader}>
               <h2 className={styles.panelTitle}>Recent Nutrition Tracking (Real)</h2>
-              <button type="button" className={styles.outlineButton} onClick={() => onNavigate("/nutritionist/recent-logs")}>
+              <button type="button" className={styles.outlineButton} onClick={() => onNavigate("/nutritionist/patients/directory")}>
                 View All
               </button>
             </div>
             <div className={styles.tableWrap}>
-              <table className={styles.mealTable}>
+              <table className={`${styles.mealTable} ${styles.recentTrackingTable}`}>
                 <thead>
                   <tr>
                     <th>Patient</th>
@@ -501,7 +703,9 @@ export function DashboardPage({ currentPath, onNavigate }: DashboardPageProps) {
                 </tbody>
               </table>
             </div>
-            <button type="button" className={styles.linkFooter}>View all meal logs &rarr;</button>
+            <button type="button" className={styles.linkFooter} onClick={() => onNavigate("/nutritionist/patients/directory")}>
+              View all patients &rarr;
+            </button>
           </article>
         </section>
 

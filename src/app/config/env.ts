@@ -2,7 +2,7 @@
 // Usa la variable VITE_API_BASE_URL desde el archivo `.env` en la raíz
 // del proyecto (ej: VITE_API_BASE_URL=https://jameofit.duckdns.org)
 //
-const raw = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "https://jameofit.duckdns.org";
+const raw = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "http://localhost:3001";
 
 // Normalizamos quitando la barra final para evitar // al concatenar rutas
 export const API_BASE_URL = raw.replace(/\/$/, "");

@@ -161,6 +161,13 @@
   gap: 16px;
 }
 
+.hydrationVisualGrid {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.75fr) minmax(0, 1.25fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
 .trackingBlock {
   display: grid;
   gap: 14px;
@@ -175,6 +182,249 @@
   margin: 0;
   color: #0f172a;
   font-size: 1.05rem;
+}
+
+.trackingVisualCard {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  border: 1px solid #dfe8ef;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 16px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+}
+
+.trackingVisualHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.trackingVisualHeader h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.trackingVisualHeader p {
+  margin: 3px 0 0;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.trackingHeaderIcon {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.trackingHeaderIconBlue {
+  background: #eaf4ff;
+  color: #0f78d4;
+}
+
+.trackingHeaderIconAmber {
+  background: #fff5df;
+  color: #d97706;
+}
+
+.goalMetricGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.goalMetricTile {
+  display: grid;
+  place-items: center;
+  min-height: 78px;
+  padding: 12px;
+  border: 1px solid #e0e8ef;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  text-align: center;
+}
+
+.goalMetricTile strong {
+  color: #0f68d8;
+  font-size: 1.15rem;
+  line-height: 1.15;
+}
+
+.goalMetricTile strong span {
+  font-size: 0.78rem;
+}
+
+.goalMetricTile small,
+.trackingCardFootnote {
+  color: #64748b;
+  font-size: 0.76rem;
+}
+
+.trackingCardFootnote {
+  display: block;
+}
+
+.trackingMealTableClean {
+  width: 100%;
+  min-width: 440px;
+  border-collapse: collapse;
+  overflow: hidden;
+}
+
+.trackingMealTableClean th,
+.trackingMealTableClean td {
+  padding: 11px 10px;
+  border-bottom: 1px solid #edf2f7;
+  color: #0f172a;
+  text-align: left;
+}
+
+.trackingMealTableClean th {
+  background: #f7fbff;
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.trackingMealTableClean tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.mealTypeCell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+}
+
+.mealTypeCell i {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff5df;
+  color: #d97706;
+  font-size: 0.72rem;
+  font-style: normal;
+}
+
+.waterFocus {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  text-align: center;
+}
+
+.waterFocus > strong {
+  color: #0f68d8;
+  font-size: 1.45rem;
+  line-height: 1.1;
+}
+
+.waterFocus > strong span,
+.waterFocus small {
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.waterRing {
+  width: 126px;
+  height: 126px;
+  display: grid;
+  place-items: center;
+  margin-top: 10px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle closest-side, #ffffff 68%, transparent 69%),
+    conic-gradient(#4b97f3 var(--progress), #e7edf4 0);
+}
+
+.waterRing div {
+  display: grid;
+  gap: 4px;
+  text-align: center;
+}
+
+.waterRing strong {
+  color: #0f68d8;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.waterRing span {
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.weeklyHydrationStats {
+  display: grid;
+  gap: 8px;
+}
+
+.weeklyHydrationStats div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.weeklyHydrationStats span {
+  color: #475569;
+  font-size: 0.82rem;
+}
+
+.weeklyHydrationStats strong {
+  color: #0f68d8;
+  font-size: 0.92rem;
+}
+
+.weeklyHydrationStats div:last-child strong {
+  color: #f97316;
+}
+
+.weeklyHydrationBars {
+  height: 118px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  align-items: end;
+  padding-top: 8px;
+  border-top: 1px solid #edf2f7;
+}
+
+.weeklyHydrationBars div {
+  height: 100%;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: end;
+  justify-items: center;
+}
+
+.weeklyHydrationBars span {
+  width: 100%;
+  max-width: 22px;
+  min-height: 12px;
+  display: block;
+  border-radius: 5px 5px 0 0;
+  background: linear-gradient(180deg, #7bb8ff 0%, #b7d8ff 100%);
+}
+
+.weeklyHydrationBars small {
+  color: #64748b;
+  font-size: 0.72rem;
 }
 
 .trackingProgressRow {
@@ -358,6 +608,64 @@
   gap: 12px;
 }
 
+.assignedPlanRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  min-height: 58px;
+  padding: 11px 12px;
+  border: 1px solid #e4f3ea;
+  border-radius: 8px;
+  background: #fbfffd;
+}
+
+.assignedPlanRow strong {
+  display: block;
+  overflow: hidden;
+  color: #0f172a;
+  font-size: 0.95rem;
+  font-weight: 900;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.assignedPlanRow span {
+  display: block;
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.iconButton {
+  width: 38px;
+  height: 38px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid #bde8cd;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #087a3b;
+  cursor: pointer;
+}
+
+.iconButton:hover {
+  border-color: #0f9f4b;
+  background: #ecfdf5;
+}
+
+.iconButton svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .patientPlanItem {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -441,6 +749,153 @@
   padding: 0 9px;
 }
 
+.planModalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(15, 23, 42, 0.42);
+}
+
+.planModal {
+  width: min(760px, 100%);
+  max-height: min(760px, calc(100vh - 44px));
+  display: grid;
+  gap: 16px;
+  overflow: auto;
+  border: 1px solid #dbe7df;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 20px;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.22);
+}
+
+.planModalHeader {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: start;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e4f3ea;
+}
+
+.planModalHeader span {
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #047857;
+  font-size: 0.74rem;
+  font-weight: 900;
+  padding: 0 9px;
+}
+
+.planModalHeader h3 {
+  margin: 10px 0 6px;
+  color: #0f172a;
+  font-size: 1.35rem;
+  line-height: 1.15;
+}
+
+.planModalHeader p,
+.planModalSection p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.planModalMacros {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.planModalMacros article {
+  display: grid;
+  gap: 6px;
+  min-height: 72px;
+  padding: 12px;
+  border: 1px solid #e4f3ea;
+  border-radius: 8px;
+  background: #f7fffb;
+}
+
+.planModalMacros strong {
+  color: #064e3b;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.planModalMacros span {
+  color: #64748b;
+  font-size: 0.74rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.planModalSection {
+  display: grid;
+  gap: 10px;
+}
+
+.planModalSection h4 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1rem;
+}
+
+.planEntryList {
+  display: grid;
+  gap: 9px;
+}
+
+.planEntryItem {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  min-height: 58px;
+  padding: 11px 12px;
+  border: 1px solid #e4f3ea;
+  border-radius: 8px;
+  background: #fbfffd;
+}
+
+.planEntryItem > span {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 28px;
+  border-radius: 999px;
+  background: #eefbf3;
+  color: #047857;
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.planEntryItem strong {
+  display: block;
+  color: #0f172a;
+  line-height: 1.25;
+}
+
+.planEntryItem small {
+  display: block;
+  margin-top: 3px;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.planEntryItem em {
+  color: #475569;
+  font-style: normal;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 @media (max-width: 980px) {
   .patientOverviewGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -449,6 +904,7 @@
   .trackingSummaryGrid,
   .dailyGoalGrid,
   .trackingContentGrid,
+  .hydrationVisualGrid,
   .patientPlansGrid {
     grid-template-columns: 1fr;
   }
@@ -472,12 +928,25 @@
     grid-template-columns: 1fr;
   }
 
+  .goalMetricGrid {
+    grid-template-columns: 1fr;
+  }
+
   .patientPlansStats {
     grid-template-columns: 1fr;
   }
 
   .patientPlanItem {
     grid-template-columns: 1fr;
+  }
+
+  .planModalMacros,
+  .planEntryItem {
+    grid-template-columns: 1fr;
+  }
+
+  .planModal {
+    padding: 16px;
   }
 }
 

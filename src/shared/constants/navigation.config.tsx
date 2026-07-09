@@ -12,8 +12,9 @@ export const navigationConfig = {
     { label: "Chat", href: "/communication/chat", icon: null, group: "communication" },
     { label: "Consultations", href: "/communication/consultations", icon: null, group: "communication" },
     { label: "Recommendations", href: "/communication/recommendations", icon: null, group: "communication" },
-    { label: "Recipes", href: "/nutritionist/recipes", icon: <FileIcon />, group: "root" },
-    { label: "Meal Plans", href: "/nutritionist/meal-plans", icon: <FileIcon />, group: "root" },
+    { label: "Nutrition Library", icon: <FileIcon />, group: "root" },
+    { label: "Recipes", href: "/nutritionist/recipes", icon: null, group: "nutrition-library" },
+    { label: "Meal Plans", href: "/nutritionist/meal-plans", icon: null, group: "nutrition-library" },
     { label: "Analytics", href: "/analytics", icon: <ChartIcon />, group: "root" },
   ] as NavigationItem[],
 
