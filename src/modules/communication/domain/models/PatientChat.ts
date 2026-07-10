@@ -4,7 +4,9 @@ export type ChatMessageStatus = "SENT" | "DELIVERED" | "READ";
 
 export interface ChatPatient {
   id: string;
+  userId: string;
   name: string;
+  nickName?: string;
   initials: string;
   avatarTone: "photo" | "green" | "blue";
   connectionStatus: PatientConnectionStatus;
@@ -35,4 +37,5 @@ export interface PatientChat {
   preview: string;
   lastActivityLabel: string;
   messages: ChatMessage[];
+  canChat?: boolean;
 }

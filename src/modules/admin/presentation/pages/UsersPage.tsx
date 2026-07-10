@@ -6,6 +6,7 @@ import { apiUrl } from "@/app/config/env";
 interface User {
   id: number | string;
   username: string;
+  fullName?: string;
   roles?: string[];
   role?: string;
 }
@@ -18,9 +19,9 @@ interface UsersPageProps {
 type RoleFilter = "all" | "patients" | "nutritionists" | "admins";
 
 const filters: Array<{ key: RoleFilter; label: string }> = [
-  { key: "all", label: "All" },
-  { key: "patients", label: "Patients" },
-  { key: "nutritionists", label: "Nutritionists" },
+  { key: "all", label: "Todos" },
+  { key: "patients", label: "Pacientes" },
+  { key: "nutritionists", label: "Nutricionistas" },
   { key: "admins", label: "Admins" },
 ];
 
@@ -32,6 +33,14 @@ function normalizeRole(user: User) {
   return getPrimaryRole(user).replace(/^ROLE_/, "").trim().toUpperCase();
 }
 
+function roleLabel(user: User) {
+  const role = normalizeRole(user);
+  if (role === "PATIENT") return "Patient";
+  if (role === "NUTRITIONIST") return "Nutritionist";
+  if (role === "ADMIN") return "Admin";
+  return role || "-";
+}
+
 function matchesFilter(user: User, filter: RoleFilter) {
   const role = normalizeRole(user);
 
@@ -39,6 +48,11 @@ function matchesFilter(user: User, filter: RoleFilter) {
   if (filter === "patients") return role === "PATIENT";
   if (filter === "nutritionists") return role === "NUTRITIONIST";
   return role === "ADMIN";
+}
+
+function getInitial(user: User) {
+  const source = user.fullName || user.username || String(user.id);
+  return source.trim().charAt(0).toUpperCase() || "U";
 }
 
 function getAuthHeaders(): HeadersInit {
@@ -100,6 +114,22 @@ export function UsersPage({ currentPath, onNavigate }: UsersPageProps) {
     });
   }, [users, search, roleFilter]);
 
+  const filterCards = useMemo(
+    () => filters.map((filter) => ({
+      ...filter,
+      count: users.filter((user) => matchesFilter(user, filter.key)).length,
+      detail:
+        filter.key === "all"
+          ? "Cuentas registradas"
+          : filter.key === "patients"
+            ? "Usuarios con seguimiento"
+            : filter.key === "nutritionists"
+              ? "Profesionales activos"
+              : "Acceso administrativo",
+    })),
+    [users],
+  );
+
   return (
     <SharedLayout
       title="Users"
@@ -109,40 +139,71 @@ export function UsersPage({ currentPath, onNavigate }: UsersPageProps) {
       breadcrumbs={["Admin", "Management", "Users"]}
     >
       <div className="admin-users-page">
-        <section className="admin-users-header">
+        <header className="admin-users-header">
           <div>
+            <span className="admin-users-eyebrow">Administracion de cuentas</span>
             <h2 className="admin-users-title">Users</h2>
             <p className="admin-users-description">
-              Permitir al administrador gestionar todas las cuentas registradas.
+              Gestiona administradores, nutricionistas y pacientes desde una vista centralizada.
             </p>
           </div>
+          <button type="button" className="admin-users-create" onClick={() => onNavigate("/admin/users/new")}>
+            Nuevo usuario
+          </button>
+        </header>
+
+        <section className="admin-users-stats" aria-label="User role filters">
+          {filterCards.map((filter) => {
+            const active = roleFilter === filter.key;
+
+            return (
+              <button
+                key={filter.key}
+                type="button"
+                className={`admin-users-stat ${active ? "admin-users-stat-active" : ""}`}
+                onClick={() => setRoleFilter(filter.key)}
+                aria-pressed={active}
+              >
+                <span>{filter.label}</span>
+                <strong>{filter.count}</strong>
+                <small>{filter.detail}</small>
+              </button>
+            );
+          })}
         </section>
 
         <section className="admin-users-panel">
-          <div className="admin-users-toolbar">
-            <input
-              type="search"
-              placeholder="Search users..."
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              className="admin-users-search"
-            />
+          <div className="admin-users-panel-header">
+            <div>
+              <h3>Listado de usuarios</h3>
+              <p>{filteredUsers.length} resultados</p>
+            </div>
 
-            <div className="admin-users-filters" aria-label="User role filters">
-              {filters.map((filter) => {
-                const active = roleFilter === filter.key;
+            <div className="admin-users-toolbar">
+              <input
+                type="search"
+                placeholder="Buscar por usuario o ID..."
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                className="admin-users-search"
+              />
 
-                return (
-                  <button
-                    key={filter.key}
-                    type="button"
-                    onClick={() => setRoleFilter(filter.key)}
-                    className={`admin-users-filter ${active ? "admin-users-filter-active" : ""}`}
-                  >
-                    {filter.label}
-                  </button>
-                );
-              })}
+              <div className="admin-users-filters" aria-label="User role filters">
+                {filters.map((filter) => {
+                  const active = roleFilter === filter.key;
+
+                  return (
+                    <button
+                      key={filter.key}
+                      type="button"
+                      onClick={() => setRoleFilter(filter.key)}
+                      className={`admin-users-filter ${active ? "admin-users-filter-active" : ""}`}
+                    >
+                      {filter.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
@@ -154,20 +215,28 @@ export function UsersPage({ currentPath, onNavigate }: UsersPageProps) {
               <table className="admin-users-table">
                 <thead>
                   <tr>
-                    <th>Username</th>
-                    <th>Role</th>
-                    <th>Account ID</th>
-                    <th>Actions</th>
+                    <th>Usuario</th>
+                    <th>Rol</th>
+                    <th>ID de cuenta</th>
+                    <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredUsers.map((user) => (
                     <tr key={user.id}>
                       <td>
-                        <span className="admin-users-name">{user.username || "-"}</span>
+                        <div className="admin-users-person">
+                          <span className="admin-users-avatar">{getInitial(user)}</span>
+                          <div>
+                            <strong>{user.fullName || user.username || "-"}</strong>
+                            <span>Cuenta JameoFit</span>
+                          </div>
+                        </div>
                       </td>
                       <td>
-                        <span className="admin-users-role">{normalizeRole(user) || "-"}</span>
+                        <span className={`admin-users-role admin-users-role-${normalizeRole(user).toLowerCase()}`}>
+                          {roleLabel(user)}
+                        </span>
                       </td>
                       <td>
                         <span className="admin-users-id">#{user.id}</span>
@@ -178,7 +247,7 @@ export function UsersPage({ currentPath, onNavigate }: UsersPageProps) {
                           className="admin-users-view"
                           onClick={() => onNavigate(`/admin/users/${user.id}`)}
                         >
-                          View
+                          Ver detalle
                         </button>
                       </td>
                     </tr>

@@ -148,6 +148,268 @@
   padding: 0 20px 20px;
 }
 
+.patientIotTab {
+  display: grid;
+  gap: 16px;
+  padding: 0 20px 20px;
+}
+
+.iotSubtitle {
+  margin: 5px 0 0;
+  color: #64748b;
+  font-size: 0.86rem;
+}
+
+.iotDateControl {
+  display: inline-grid;
+  gap: 5px;
+  color: #475569;
+  font-size: 0.74rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.iotDateControl input {
+  height: 38px;
+  border: 1px solid #d8e5dc;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0f172a;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 0 10px;
+  text-transform: none;
+}
+
+.iotStatsGrid,
+.iotMainGrid {
+  display: grid;
+  gap: 16px;
+}
+
+.iotStatsGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.iotMainGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.iotStatCard {
+  display: grid;
+  gap: 8px;
+  min-height: 112px;
+  border: 1px solid #dfeee6;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 16px;
+  box-shadow: 0 10px 24px rgba(15, 118, 73, 0.05);
+}
+
+.iotStatCard span {
+  color: #64748b;
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.iotStatCard strong {
+  color: #0f172a;
+  font-size: 1.55rem;
+  line-height: 1.05;
+}
+
+.iotStatCard p {
+  margin: 0;
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+.iotStatgreen {
+  border-top: 3px solid #16a34a;
+}
+
+.iotStatgreen p {
+  color: #047857;
+}
+
+.iotStatblue {
+  border-top: 3px solid #0ea5e9;
+}
+
+.iotStatblue p {
+  color: #0369a1;
+}
+
+.iotStatamber {
+  border-top: 3px solid #f59e0b;
+}
+
+.iotStatamber p {
+  color: #b45309;
+}
+
+.iotStatpurple {
+  border-top: 3px solid #8b5cf6;
+}
+
+.iotStatpurple p {
+  color: #6d28d9;
+}
+
+.iotHydrationFocus {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 20px;
+  align-items: center;
+}
+
+.iotHydrationNumbers {
+  display: grid;
+  gap: 8px;
+}
+
+.iotHydrationNumbers strong,
+.iotScaleFocus strong {
+  color: #0f172a;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.iotHydrationNumbers span,
+.iotScaleFocus small {
+  color: #64748b;
+  font-weight: 700;
+}
+
+.iotHydrationNumbers p,
+.iotScaleFocus p {
+  margin: 0;
+  color: #047857;
+  font-weight: 900;
+}
+
+.iotScaleFocus {
+  display: grid;
+  align-content: center;
+  gap: 10px;
+  min-height: 160px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #fffaf0 0%, #ffffff 100%);
+  border: 1px solid #fde6b8;
+  padding: 18px;
+}
+
+.iotScaleFocus strong span {
+  color: #64748b;
+  font-size: 1rem;
+}
+
+.iotTable {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+}
+
+.iotTable th,
+.iotTable td {
+  padding: 12px 10px;
+  border-bottom: 1px solid #edf2f7;
+  color: #0f172a;
+  text-align: left;
+}
+
+.iotTable th {
+  background: #f7fbff;
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.iotStatusActive,
+.iotStatusInactive {
+  display: inline-flex;
+  align-items: center;
+  min-height: 25px;
+  border-radius: 999px;
+  padding: 0 10px;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.iotStatusActive {
+  background: #dcfce7;
+  color: #047857;
+}
+
+.iotStatusInactive {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.iotHistoryList,
+.iotHydrationTimeline {
+  display: grid;
+  gap: 10px;
+}
+
+.iotHistoryList article {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  min-height: 60px;
+  border: 1px solid #edf2f7;
+  border-radius: 8px;
+  background: #fbfdff;
+  padding: 10px 12px;
+}
+
+.iotHistoryList article > span {
+  display: inline-flex;
+  justify-content: center;
+  border-radius: 999px;
+  background: #fff5df;
+  color: #b45309;
+  font-weight: 900;
+  padding: 7px 10px;
+}
+
+.iotHistoryList strong,
+.iotHydrationTimeline strong {
+  display: block;
+  color: #0f172a;
+  text-transform: capitalize;
+}
+
+.iotHistoryList small,
+.iotHydrationTimeline span,
+.iotHydrationTimeline p {
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.iotHydrationTimeline {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.iotHydrationTimeline article {
+  display: grid;
+  gap: 8px;
+  border: 1px solid #dfeee6;
+  border-radius: 8px;
+  background: #f8fffb;
+  padding: 13px;
+}
+
+.iotHydrationTimeline p {
+  margin: 0;
+}
+
 .trackingSummaryGrid,
 .dailyGoalGrid {
   display: grid;
@@ -905,6 +1167,9 @@
   .dailyGoalGrid,
   .trackingContentGrid,
   .hydrationVisualGrid,
+  .iotStatsGrid,
+  .iotMainGrid,
+  .iotHydrationTimeline,
   .patientPlansGrid {
     grid-template-columns: 1fr;
   }
@@ -930,6 +1195,12 @@
 
   .goalMetricGrid {
     grid-template-columns: 1fr;
+  }
+
+  .iotHydrationFocus {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
   }
 
   .patientPlansStats {

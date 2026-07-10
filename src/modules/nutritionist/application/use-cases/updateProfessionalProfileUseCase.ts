@@ -4,6 +4,10 @@ import type { UpdateProfessionalProfileInput } from "../dto/UpdateProfessionalPr
 import type { ProfessionalProfile } from "../../domain/models/ProfessionalProfile";
 import { BioTooLongError } from "../../domain/errors/NutritionistDomainError";
 
+function normalizeSpecialty(specialty?: string) {
+  return specialty?.trim().toUpperCase() ?? "";
+}
+
 export function createProfessionalProfileUseCase(repository: NutritionistRepository) {
   return async (input: CreateProfessionalProfileInput): Promise<ProfessionalProfile> => {
     if (input.bio.length > 500) throw new BioTooLongError();
@@ -12,7 +16,7 @@ export function createProfessionalProfileUseCase(repository: NutritionistReposit
       ...input,
       fullName: input.fullName.trim(),
       licenseNumber: input.licenseNumber.trim(),
-      specialty: input.specialty.trim(),
+      specialty: normalizeSpecialty(input.specialty),
       profilePictureUrl: input.profilePictureUrl.trim(),
       yearsExperience: Number(input.yearsExperience),
     });
@@ -27,7 +31,7 @@ export function updateProfessionalProfileUseCase(repository: NutritionistReposit
       ...input,
       fullName: input.fullName.trim(),
       licenseNumber: input.licenseNumber?.trim(),
-      specialty: input.specialty?.trim(),
+      specialty: normalizeSpecialty(input.specialty),
       profilePictureUrl: input.profilePictureUrl.trim(),
       yearsExperience: Number(input.yearsExperience),
     });

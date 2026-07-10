@@ -93,6 +93,7 @@ export function NutritionistProfilePage({ currentPath = "/professional-profile",
   const isCreateMode = !isProfileCompleted;
   const [form, setForm] = useState<ProfileForm>(() => getStoredProfile() ?? emptyForm);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof ProfileForm, string>>>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const userInitials = useMemo(() => getInitials(form.fullName), [form.fullName]);
   const bioCount = form.bio.length;
@@ -130,9 +131,15 @@ export function NutritionistProfilePage({ currentPath = "/professional-profile",
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    setSubmitError(null);
     if (!validate()) return;
 
     const userId = getSessionUserId();
+    if (!String(userId).trim()) {
+      setSubmitError("Could not resolve your user ID. Please sign out and sign in again.");
+      return;
+    }
+
     const profileId = storedProfile?.id ?? userId;
     const updated = isCreateMode
       ? await execute({ userId, ...form } satisfies CreateProfessionalProfileInput, "create")
@@ -159,7 +166,7 @@ export function NutritionistProfilePage({ currentPath = "/professional-profile",
         </p>
       </div>
 
-      {saveError && <p className={styles.errorBanner}>{saveError}</p>}
+      {(saveError || submitError) && <p className={styles.errorBanner}>{saveError || submitError}</p>}
 
       <form className={styles.onboardingForm} onSubmit={handleSubmit}>
         <div className={styles.onboardingGrid}>
@@ -287,5 +294,5 @@ export function NutritionistProfilePage({ currentPath = "/professional-profile",
     );
   }
 
-  return <AuthLayout imageSrc={heroImg}>{profileContent}</AuthLayout>;
+  return <AuthLayout imageSrc={heroImg} variant="wide">{profileContent}</AuthLayout>;
 }

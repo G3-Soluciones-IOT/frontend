@@ -6,6 +6,30 @@ import { nutritionistApi } from "../api/nutritionist.api";
 import { API_BASE_URL, apiUrl } from "@/app/config/env";
 import axios from "axios";
 
+function normalizeApiId(id: number | string) {
+  if (typeof id === "number") return id;
+
+  const trimmed = id.trim();
+  if (trimmed && /^\d+$/.test(trimmed)) {
+    return Number(trimmed);
+  }
+
+  return trimmed;
+}
+
+function toCreatePayload(input: CreateProfessionalProfileInput): CreateProfessionalProfileInput {
+  return {
+    userId: normalizeApiId(input.userId),
+    fullName: input.fullName,
+    licenseNumber: input.licenseNumber,
+    specialty: input.specialty,
+    yearsExperience: input.yearsExperience,
+    acceptingNewPatients: input.acceptingNewPatients,
+    bio: input.bio,
+    profilePictureUrl: input.profilePictureUrl,
+  };
+}
+
 export class HttpNutritionistRepository implements NutritionistRepository {
   async getProfile(): Promise<ProfessionalProfile> {
     const session = JSON.parse(localStorage.getItem("session") || "null");
@@ -21,15 +45,18 @@ export class HttpNutritionistRepository implements NutritionistRepository {
       return this._createProfileInJsonServer(input);
     }
 
+    const payload = toCreatePayload(input);
+    console.info("[nutritionist:createProfile] POST payload", payload);
+
     try {
-      const { data } = await nutritionistApi.post<ProfessionalProfile>("", input);
+      const { data } = await nutritionistApi.post<ProfessionalProfile>("", payload);
       return data;
     } catch (error) {
       if (!axios.isAxiosError(error) || error.response?.status !== 404 || !API_BASE_URL.includes("localhost:3001")) {
         throw error;
       }
 
-      return this._createProfileInJsonServer(input);
+      return this._createProfileInJsonServer(payload);
     }
   }
 

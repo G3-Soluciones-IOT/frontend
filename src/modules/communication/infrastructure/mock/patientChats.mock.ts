@@ -8,6 +8,7 @@ export const mockPatientChats: PatientChat[] = [
     id: "chat-michael-chen",
     patient: {
       id: "michael-chen",
+      userId: "12",
       name: "Michael Chen",
       initials: "MC",
       avatarTone: "photo",
@@ -51,6 +52,7 @@ export const mockPatientChats: PatientChat[] = [
     id: "chat-sarah-jenkins",
     patient: {
       id: "sarah-jenkins",
+      userId: "18",
       name: "Sarah Jenkins",
       initials: "SJ",
       avatarTone: "green",
@@ -74,6 +76,7 @@ export const mockPatientChats: PatientChat[] = [
     id: "chat-david-johnson",
     patient: {
       id: "david-johnson",
+      userId: "25",
       name: "David Johnson",
       initials: "DJ",
       avatarTone: "blue",
@@ -98,6 +101,7 @@ export const mockPatientChats: PatientChat[] = [
 export const availableChatPatients = [
   {
     id: "emma-watson",
+    userId: "30",
     name: "Emma Watson",
     initials: "EW",
     avatarTone: "green",

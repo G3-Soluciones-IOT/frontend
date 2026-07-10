@@ -24,6 +24,7 @@ const navigationTranslations: Record<AppLanguage, Record<string, string>> = {
     Appointments: "Citas",
     Management: "Gestion",
     Users: "Usuarios",
+    Ingredients: "Ingredientes",
   },
   Portuguese: {
     Dashboard: "Painel",
@@ -43,6 +44,7 @@ const navigationTranslations: Record<AppLanguage, Record<string, string>> = {
     Appointments: "Consultas",
     Management: "Gestao",
     Users: "Usuarios",
+    Ingredients: "Ingredientes",
   },
 };
 

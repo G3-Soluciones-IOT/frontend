@@ -68,6 +68,24 @@
   display: grid;
 }
 
+.systemNotice {
+  margin: 0 16px 12px;
+  border: 1px solid #b9e7cb;
+  border-radius: 8px;
+  background: #ecfdf3;
+  color: #136b36;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.35;
+  padding: 10px 12px;
+}
+
+.systemNoticeError {
+  border-color: #f3c7c7;
+  background: #fff1f1;
+  color: #a12b2b;
+}
+
 .conversationItem {
   min-height: 81px;
   display: flex;
@@ -255,6 +273,28 @@
   display: flex;
   align-items: center;
   gap: 15px;
+}
+
+.wsBadge {
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  padding: 0 10px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.wsConnected {
+  background: #e9fcef;
+  color: #119447;
+}
+
+.wsDisconnected {
+  background: #f8fafc;
+  color: #64748b;
 }
 
 .threadActions button {
@@ -825,5 +865,13 @@
   .threadPane {
     min-height: 680px;
     border-right: 0;
+  }
+
+  .threadHeader {
+    padding: 0 14px;
+  }
+
+  .wsBadge {
+    display: none;
   }
 }

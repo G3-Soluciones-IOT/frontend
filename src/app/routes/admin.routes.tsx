@@ -3,6 +3,7 @@ import { EditUserPage } from "@/modules/admin/presentation/pages/EditUserPage";
 import { UserViewPage } from "@/modules/admin/presentation/pages/UserViewPage";
 import { AdminRecipesPage } from "@/modules/admin/presentation/pages/AdminRecipesPage";
 import { AdminMealPlansPage } from "@/modules/admin/presentation/pages/AdminMealPlansPage";
+import { AdminIngredientsPage } from "@/modules/admin/presentation/pages/AdminIngredientsPage";
 import { AdminDashboardPage } from "@/modules/admin/presentation/pages/AdminDashboardPage";
 import { SharedLayout } from "@/shared/components/layout";
 import { useNavigation } from "@/shared/hooks/useNavigation";
@@ -16,7 +17,6 @@ interface AdminRouteProps {
 
 const adminPlaceholders: Record<string, string> = {
   "/admin/profiles": "Profiles",
-  "/admin/ingredients": "Ingredients",
   "/admin/categories": "Categories",
   "/admin/recipe-types": "Recipe Types",
   "/admin/objectives": "Objectives",
@@ -58,6 +58,10 @@ export function AdminRoute({ currentPath, onNavigate }: AdminRouteProps) {
 
   if (currentPath === "/admin/meal-plans") {
 	return <AdminMealPlansPage currentPath={currentPath} onNavigate={onNavigate} />;
+  }
+
+  if (currentPath === "/admin/ingredients") {
+	return <AdminIngredientsPage currentPath={currentPath} onNavigate={onNavigate} />;
   }
 
   const placeholderTitle = adminPlaceholders[currentPath];

@@ -8,10 +8,9 @@ export const navigationConfig = {
     { label: "Patients", icon: <UsersIcon />, group: "root" },
     { label: "Directory", href: "/nutritionist/patients/directory", icon: null, group: "patients" },
     { label: "Request", href: "/nutritionist/patients/request", icon: null, group: "patients" },
-    { label: "Communication", href: "/communication", icon: <MessageIcon />, group: "root" },
+    { label: "Communication", icon: <MessageIcon />, group: "root" },
     { label: "Chat", href: "/communication/chat", icon: null, group: "communication" },
     { label: "Consultations", href: "/communication/consultations", icon: null, group: "communication" },
-    { label: "Recommendations", href: "/communication/recommendations", icon: null, group: "communication" },
     { label: "Nutrition Library", icon: <FileIcon />, group: "root" },
     { label: "Recipes", href: "/nutritionist/recipes", icon: null, group: "nutrition-library" },
     { label: "Meal Plans", href: "/nutritionist/meal-plans", icon: null, group: "nutrition-library" },
@@ -32,5 +31,6 @@ export const navigationConfig = {
     { label: "Users", href: "/admin/users", icon: null, group: "management" },
     { label: "Recipes", href: "/admin/recipes", icon: null, group: "management" },
     { label: "Meal Plans", href: "/admin/meal-plans", icon: null, group: "management" },
+    { label: "Ingredients", href: "/admin/ingredients", icon: null, group: "management" },
   ] as NavigationItem[],
 } as const;

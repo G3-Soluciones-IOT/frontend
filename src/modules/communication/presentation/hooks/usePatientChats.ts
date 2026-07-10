@@ -1,6 +1,18 @@
-import { useMemo, useState } from "react";
-import type { ChatAttachment, ChatMessage, ChatPatient, PatientChat } from "../../domain/models/PatientChat";
-import { availableChatPatients, demoIncomingMessage, demoOutgoingMessage, mockPatientChats } from "../../infrastructure/mock/patientChats.mock";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { getStoredNutritionistProfile } from "@/modules/nutritionist/infrastructure/storage/nutritionistProfileStorage";
+import { getAuthSession } from "@/shared/utils/authSession";
+import type { ChatAttachment, ChatMessage, ChatPatient, PatientChat, PatientConnectionStatus } from "../../domain/models/PatientChat";
+import {
+  chatApi,
+  type ChatMessageResource,
+  type ChatNotificationResource,
+  type ChatUserResource,
+  type ChatValidateResource,
+  type ChatUserExistsResource,
+} from "../../infrastructure/api/chat.api";
+import { StompClient } from "../../infrastructure/api/stompClient";
+
+type ConnectionStatus = "CONNECTING" | "CONNECTED" | "DISCONNECTED";
 
 function formatFileSize(size: number) {
   if (size < 1024 * 1024) return `${Math.max(1, Math.round(size / 1024))} KB`;
@@ -8,49 +20,255 @@ function formatFileSize(size: number) {
 }
 
 function toPreview(message: ChatMessage) {
-  if (message.attachments?.length) return `Evidence attached: ${message.attachments[0].name}`;
+  if (message.attachments?.length) return `Evidencia adjunta: ${message.attachments[0].name}`;
   return message.text;
 }
 
+function getInitials(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "P";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+}
+
+function formatMessageTime(timestamp?: string | null) {
+  if (!timestamp) return "Ahora";
+
+  const date = new Date(timestamp);
+  if (Number.isNaN(date.getTime())) return "Ahora";
+
+  return new Intl.DateTimeFormat("es-PE", {
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
+function formatLastActivity(messages: ChatMessage[]) {
+  return messages.at(-1)?.time ?? "Nuevo";
+}
+
+function toConnectionStatus(status?: ChatUserResource["status"]): PatientConnectionStatus {
+  return status === "ONLINE" ? "ONLINE" : "OFFLINE";
+}
+
+function toPatient(userId: number | string, onlineUser?: ChatUserResource): ChatPatient {
+  const id = String(userId);
+  const name = onlineUser?.fullName || onlineUser?.nickName || `Paciente #${id}`;
+  const connectionStatus = toConnectionStatus(onlineUser?.status);
+
+  return {
+    id,
+    userId: id,
+    name,
+    nickName: onlineUser?.nickName,
+    initials: getInitials(name),
+    avatarTone: connectionStatus === "ONLINE" ? "green" : "blue",
+    connectionStatus,
+    connectionLabel: connectionStatus === "ONLINE" ? "En linea ahora" : "No conectado",
+    recordPath: `/nutritionist/patients/${id}`,
+    statsPath: "/nutritionist/patients/tracking",
+  };
+}
+
+function toChatMessage(message: ChatMessageResource, currentUserId: string): ChatMessage {
+  return {
+    id: message.id,
+    author: String(message.senderId) === currentUserId ? "NUTRITIONIST" : "PATIENT",
+    text: message.content,
+    time: formatMessageTime(message.timestamp),
+    status: String(message.senderId) === currentUserId ? "SENT" : undefined,
+  };
+}
+
+function toResourceMessage(notification: ChatNotificationResource, currentUserId: string): ChatMessage {
+  return {
+    id: notification.id || `message-${Date.now()}`,
+    author: String(notification.senderId) === currentUserId ? "NUTRITIONIST" : "PATIENT",
+    text: notification.content,
+    time: "Ahora",
+    status: String(notification.senderId) === currentUserId ? "SENT" : undefined,
+  };
+}
+
+function getCurrentUserIdentity() {
+  const session = getAuthSession();
+  const profile = getStoredNutritionistProfile(session?.user.id);
+  const id = session?.user.id ?? "";
+  const nickName = session?.user.username ?? "nutricionista@jameofit.com";
+  const fullName = profile?.fullName || session?.user.username || "Nutricionista";
+
+  return { id, nickName, fullName };
+}
+
 export function usePatientChats() {
-  const [chats, setChats] = useState<PatientChat[]>(mockPatientChats);
-  const [activeChatId, setActiveChatId] = useState(mockPatientChats[0]?.id ?? "");
-  const [draft, setDraft] = useState(demoOutgoingMessage);
-  const [typingChatIds, setTypingChatIds] = useState<string[]>([]);
-  const [demoReplyChatIds, setDemoReplyChatIds] = useState<string[]>([]);
+  const [chats, setChats] = useState<PatientChat[]>([]);
+  const [activeChatId, setActiveChatId] = useState("");
+  const [draft, setDraft] = useState("");
+  const [query, setQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("DISCONNECTED");
+  const stompRef = useRef<StompClient | null>(null);
+  const currentUser = useMemo(getCurrentUserIdentity, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadChats() {
+      if (!currentUser.id) {
+        setChats([]);
+        setActiveChatId("");
+        setErrorMessage("No se encontro una sesion activa para cargar el chat.");
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      setErrorMessage("");
+
+      try {
+        const [{ data: exists }, { data: contactIds }, { data: onlineUsers }] = await Promise.all([
+          chatApi.get<ChatUserExistsResource>(`/api/v1/chat/users/${currentUser.id}/exists`),
+          chatApi.get<number[]>(`/api/v1/chat/contacts/${currentUser.id}`),
+          chatApi.get<ChatUserResource[]>("/users"),
+        ]);
+
+        if (!exists.exists) {
+          throw new Error("El usuario actual no existe en el servicio de chat.");
+        }
+
+        const contactChats = await Promise.all(
+          contactIds.map(async (contactId) => {
+            const onlineUser = onlineUsers.find((user) => String(user.userId) === String(contactId));
+            const [{ data: validation }, { data: messages }] = await Promise.all([
+              chatApi.get<ChatValidateResource>("/api/v1/chat/validate", {
+                params: { userId1: currentUser.id, userId2: contactId },
+              }),
+              chatApi.get<ChatMessageResource[]>(`/messages/${currentUser.id}/${contactId}`),
+            ]);
+
+            const mappedMessages = messages.map((message) => toChatMessage(message, currentUser.id));
+            const patient = toPatient(contactId, onlineUser);
+
+            return {
+              id: `${currentUser.id}_${contactId}`,
+              patient,
+              preview: mappedMessages.at(-1)?.text ?? "Sin mensajes todavia",
+              lastActivityLabel: formatLastActivity(mappedMessages),
+              messages: mappedMessages,
+              canChat: validation.canChat,
+            } satisfies PatientChat;
+          }),
+        );
+
+        if (!isMounted) return;
+        setChats(contactChats);
+        setActiveChatId(contactChats[0]?.id ?? "");
+      } catch (error) {
+        if (!isMounted) return;
+        setChats([]);
+        setActiveChatId("");
+        setErrorMessage(error instanceof Error ? error.message : "No se pudo conectar con el chat.");
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    }
+
+    loadChats();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentUser.id]);
+
+  useEffect(() => {
+    if (!currentUser.id) return;
+
+    const client = new StompClient("/ws");
+    stompRef.current = client;
+    client.connect(setConnectionStatus);
+
+    const messagesSubscription = client.subscribe("/user/queue/messages", (body) => {
+      try {
+        const notification = JSON.parse(body) as ChatNotificationResource;
+        const contactId = String(notification.senderId) === currentUser.id ? String(notification.recipientId) : String(notification.senderId);
+        const incomingMessage = toResourceMessage(notification, currentUser.id);
+
+        setChats((current) =>
+          current.map((chat) => {
+            if (chat.patient.userId !== contactId) return chat;
+            return {
+              ...chat,
+              messages: [...chat.messages, incomingMessage],
+              preview: toPreview(incomingMessage),
+              lastActivityLabel: "Ahora",
+            };
+          }),
+        );
+      } catch {
+        setErrorMessage("Se recibio un mensaje de chat con formato no valido.");
+      }
+    });
+
+    const usersSubscription = client.subscribe("/user/public", (body) => {
+      try {
+        const user = JSON.parse(body) as ChatUserResource;
+        setChats((current) =>
+          current.map((chat) => {
+            if (chat.patient.userId !== String(user.userId)) return chat;
+            const connectionStatus = toConnectionStatus(user.status);
+            return {
+              ...chat,
+              patient: {
+                ...chat.patient,
+                name: user.fullName || chat.patient.name,
+                nickName: user.nickName || chat.patient.nickName,
+                connectionStatus,
+                connectionLabel: connectionStatus === "ONLINE" ? "En linea ahora" : "No conectado",
+              },
+            };
+          }),
+        );
+      } catch {
+        setErrorMessage("Se recibio un estado de usuario con formato no valido.");
+      }
+    });
+
+    client.send("/app/user.addUser", JSON.stringify({
+      userId: Number(currentUser.id),
+      nickName: currentUser.nickName,
+      fullName: currentUser.fullName,
+      status: "ONLINE",
+    }));
+
+    return () => {
+      client.send("/app/user.disconnectUser", JSON.stringify({
+        userId: Number(currentUser.id),
+        nickName: currentUser.nickName,
+        fullName: currentUser.fullName,
+        status: "OFFLINE",
+      }));
+      messagesSubscription.unsubscribe();
+      usersSubscription.unsubscribe();
+      client.disconnect();
+      stompRef.current = null;
+    };
+  }, [currentUser.fullName, currentUser.id, currentUser.nickName]);
+
+  const filteredChats = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    if (!normalizedQuery) return chats;
+
+    return chats.filter((chat) => {
+      const fields = [chat.patient.name, chat.patient.nickName, chat.preview, chat.patient.userId].filter(Boolean);
+      return fields.some((field) => String(field).toLowerCase().includes(normalizedQuery));
+    });
+  }, [chats, query]);
 
   const activeChat = useMemo(
-    () => chats.find((chat) => chat.id === activeChatId) ?? chats[0],
-    [activeChatId, chats],
+    () => filteredChats.find((chat) => chat.id === activeChatId) ?? filteredChats[0] ?? chats[0],
+    [activeChatId, chats, filteredChats],
   );
-
-  const createChat = () => {
-    const nextPatient = availableChatPatients.find(
-      (patient) => !chats.some((chat) => chat.patient.id === patient.id),
-    );
-
-    if (!nextPatient) return;
-
-    const nextChat: PatientChat = {
-      id: `chat-${nextPatient.id}`,
-      patient: nextPatient as ChatPatient,
-      preview: "New conversation",
-      lastActivityLabel: "Now",
-      messages: [],
-    };
-
-    setChats((current) => [nextChat, ...current]);
-    setActiveChatId(nextChat.id);
-    setDraft(demoOutgoingMessage);
-  };
-
-  const deleteChat = (chatId: string) => {
-    setChats((current) => {
-      const nextChats = current.filter((chat) => chat.id !== chatId);
-      if (activeChatId === chatId) setActiveChatId(nextChats[0]?.id ?? "");
-      return nextChats;
-    });
-  };
 
   const appendMessage = (chatId: string, message: ChatMessage) => {
     setChats((current) =>
@@ -60,36 +278,33 @@ export function usePatientChats() {
           ...chat,
           messages: [...chat.messages, message],
           preview: toPreview(message),
-          lastActivityLabel: "Now",
+          lastActivityLabel: "Ahora",
         };
       }),
     );
   };
 
   const sendMessage = (chatId: string, text: string) => {
-    const trimmedText = text.trim() || demoOutgoingMessage;
-    appendMessage(chatId, {
-      id: `message-nutritionist-${Date.now()}`,
+    const chat = chats.find((item) => item.id === chatId);
+    const trimmedText = text.trim();
+    if (!chat || !trimmedText || chat.canChat === false) return;
+
+    const optimisticMessage: ChatMessage = {
+      id: `message-local-${Date.now()}`,
       author: "NUTRITIONIST",
       text: trimmedText,
-      time: "Now",
+      time: "Ahora",
       status: "SENT",
-    });
+    };
+
+    appendMessage(chatId, optimisticMessage);
     setDraft("");
 
-    if (!demoReplyChatIds.includes(chatId)) {
-      setTypingChatIds((current) => [...current, chatId]);
-      window.setTimeout(() => {
-        appendMessage(chatId, {
-          id: `message-patient-${Date.now()}`,
-          author: "PATIENT",
-          text: demoIncomingMessage,
-          time: "Now",
-        });
-        setTypingChatIds((current) => current.filter((id) => id !== chatId));
-        setDemoReplyChatIds((current) => [...current, chatId]);
-      }, 1800);
-    }
+    stompRef.current?.send("/app/chat", JSON.stringify({
+      senderId: currentUser.id,
+      recipientId: chat.patient.userId,
+      content: trimmedText,
+    }));
   };
 
   const attachEvidence = (chatId: string, file: File) => {
@@ -104,23 +319,30 @@ export function usePatientChats() {
       id: `message-attachment-${Date.now()}`,
       author: "NUTRITIONIST",
       text: "Evidencia adjunta",
-      time: "Now",
+      time: "Ahora",
       status: "SENT",
       attachments: [attachment],
     });
   };
 
   return {
-    chats,
+    chats: filteredChats,
     activeChat,
-    activeChatId,
+    activeChatId: activeChat?.id ?? activeChatId,
     draft,
-    isPatientTyping: activeChat ? typingChatIds.includes(activeChat.id) : false,
-    canCreateChat: availableChatPatients.some((patient) => !chats.some((chat) => chat.patient.id === patient.id)),
+    query,
+    isPatientTyping: false,
+    canCreateChat: false,
+    isLoading,
+    errorMessage,
+    connectionStatus,
     setDraft,
+    setQuery,
     selectChat: setActiveChatId,
-    createChat,
-    deleteChat,
+    createChat: () => undefined,
+    deleteChat: (chatId: string) => {
+      setChats((current) => current.filter((chat) => chat.id !== chatId));
+    },
     sendMessage,
     attachEvidence,
   };

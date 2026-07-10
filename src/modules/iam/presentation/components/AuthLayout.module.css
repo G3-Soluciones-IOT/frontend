@@ -234,6 +234,31 @@
   animation: panelIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+.authRootWide {
+  overflow: auto;
+}
+
+.authRootWide .visualPanel {
+  display: none;
+}
+
+.formPanelWide {
+  align-items: stretch;
+  justify-content: flex-start;
+  min-width: 0;
+  padding: 28px;
+  background: #f7fbf8;
+}
+
+.formCardWide {
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.formCardWide .formLogo {
+  margin-bottom: 24px;
+}
+
 @keyframes panelIn {
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -631,6 +656,10 @@
   .formPanel {
     padding: 40px 28px;
     justify-content: flex-start;
+  }
+
+  .formPanelWide {
+    padding: 18px;
   }
 }
 

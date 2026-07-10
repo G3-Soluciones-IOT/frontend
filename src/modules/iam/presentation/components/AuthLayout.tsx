@@ -5,6 +5,7 @@ import logo from "@/assets/LogoJameoFit.png";
 interface AuthLayoutProps {
   children: ReactNode;
   imageSrc?: string;
+  variant?: "default" | "wide";
 }
 
 function JameoFitIcon() {
@@ -18,9 +19,11 @@ function JameoFitIcon() {
   );
 }
 
-export function AuthLayout({ children, imageSrc }: AuthLayoutProps) {
+export function AuthLayout({ children, imageSrc, variant = "default" }: AuthLayoutProps) {
+  const isWide = variant === "wide";
+
   return (
-    <div className={styles.authRoot}>
+    <div className={`${styles.authRoot} ${isWide ? styles.authRootWide : ""}`}>
       <aside className={styles.visualPanel} aria-hidden="true">
 
         {/* Imagen de fondo */}
@@ -34,8 +37,8 @@ export function AuthLayout({ children, imageSrc }: AuthLayoutProps) {
         
       </aside>
 
-      <main className={styles.formPanel}>
-        <div className={styles.formCard}>
+      <main className={`${styles.formPanel} ${isWide ? styles.formPanelWide : ""}`}>
+        <div className={`${styles.formCard} ${isWide ? styles.formCardWide : ""}`}>
           <div className={styles.formLogo}>
             
               <JameoFitIcon />

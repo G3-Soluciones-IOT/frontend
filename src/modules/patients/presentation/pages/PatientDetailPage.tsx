@@ -6,6 +6,7 @@ import { PatientOverviewTab } from "../components/patient-detail/PatientOverview
 import { PatientPlaceholderTab } from "../components/patient-detail/PatientPlaceholderTab";
 import { PatientPlansRecipesTab } from "../components/patient-detail/PatientPlansRecipesTab";
 import { PatientTrackingTab } from "../components/patient-detail/PatientTrackingTab";
+import { PatientIotDevicesTab } from "../components/patient-detail/PatientIotDevicesTab";
 import {
   getPatientUserSummaries,
   getUserProfiles,
@@ -133,7 +134,7 @@ export function PatientDetailPage({ currentPath, onNavigate }: PatientDetailPage
           )}
 
           {activeTab === "iot" && (
-            <PatientPlaceholderTab title="IoT Devices" description="Device data and alerts will be shown here." />
+            <PatientIotDevicesTab patientId={patientId} />
           )}
 
           {activeTab === "plans" && (

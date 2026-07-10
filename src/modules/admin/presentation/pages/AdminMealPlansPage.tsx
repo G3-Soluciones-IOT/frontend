@@ -237,12 +237,14 @@ export function AdminMealPlansPage({ currentPath, onNavigate }: AdminMealPlansPa
       onNavigate={onNavigate}
       navigationItems={nav}
       breadcrumbs={["Admin", "Management", "Meal Plans"]}
+      showPageTitle={false}
     >
       <div className="admin-mealplans-page">
         <header className="admin-mealplans-header">
           <div>
+            <span className="admin-mealplans-eyebrow">Nutrition planning</span>
             <h2>Meal Plans</h2>
-            <p>View and manage all meal plans created by nutritionists.</p>
+            <p>Administra los planes alimenticios registrados, categorias, macros y estado actual.</p>
           </div>
         </header>
 
@@ -260,12 +262,12 @@ export function AdminMealPlansPage({ currentPath, onNavigate }: AdminMealPlansPa
             <div className="admin-mealplans-filters">
               <input
                 type="search"
-                placeholder="Search meal plans by name, category..."
+                placeholder="Buscar plan por nombre, categoria o etiqueta..."
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
               />
               <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}>
-                <option value="all">All Categories</option>
+                <option value="all">Todas las categorias</option>
                 {categories.map((category) => (
                   <option key={category} value={category}>
                     {category}
@@ -273,9 +275,9 @@ export function AdminMealPlansPage({ currentPath, onNavigate }: AdminMealPlansPa
                 ))}
               </select>
               <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                <option value="all">Todos los estados</option>
+                <option value="active">Activo</option>
+                <option value="inactive">Inactivo</option>
               </select>
               <button
                 type="button"
@@ -286,7 +288,7 @@ export function AdminMealPlansPage({ currentPath, onNavigate }: AdminMealPlansPa
                   setStatusFilter("all");
                 }}
               >
-                Clear Filters
+                Limpiar
               </button>
             </div>
 
@@ -297,15 +299,15 @@ export function AdminMealPlansPage({ currentPath, onNavigate }: AdminMealPlansPa
                 <table className="admin-mealplans-table">
                   <thead>
                     <tr>
-                      <th>Plan Name</th>
-                      <th>Category</th>
-                      <th>Calories</th>
-                      <th>Protein</th>
+                      <th>Plan</th>
+                      <th>Categoria</th>
+                      <th>Calorias</th>
+                      <th>Proteina</th>
                       <th>Carbs</th>
-                      <th>Fats</th>
+                      <th>Grasas</th>
                       <th>Profile ID</th>
-                      <th>Status</th>
-                      <th>Actions</th>
+                      <th>Estado</th>
+                      <th>Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -332,16 +334,16 @@ export function AdminMealPlansPage({ currentPath, onNavigate }: AdminMealPlansPa
                         <td>{plan.profileId ?? "-"}</td>
                         <td>
                           <span className={plan.isCurrent ? "admin-mealplans-status-active" : "admin-mealplans-status-inactive"}>
-                            {plan.isCurrent ? "Active" : "Inactive"}
+                            {plan.isCurrent ? "Activo" : "Inactivo"}
                           </span>
                         </td>
                         <td>
                           <div className="admin-mealplans-actions">
                             <button type="button" onClick={() => setSelectedMealPlanId(plan.id)}>
-                              View
+                              Ver
                             </button>
                             <button type="button" onClick={() => handleDeleteMealPlan(plan.id)}>
-                              Delete
+                              Eliminar
                             </button>
                           </div>
                         </td>
@@ -456,13 +458,56 @@ export function AdminMealPlansPage({ currentPath, onNavigate }: AdminMealPlansPa
 function MealPlanStat({ value, label, detail, tone }: { value: number; label: string; detail: string; tone: string }) {
   return (
     <article className="admin-mealplans-stat">
-      <div className={`admin-mealplans-stat-icon admin-mealplans-stat-${tone}`}>{label.charAt(0)}</div>
+      <div className={`admin-mealplans-stat-icon admin-mealplans-stat-${tone}`}>
+        <MealPlanStatIcon tone={tone} />
+      </div>
       <div>
         <strong>{value}</strong>
         <span>{label}</span>
         <p>{detail}</p>
       </div>
     </article>
+  );
+}
+
+function MealPlanStatIcon({ tone }: { tone: string }) {
+  if (tone === "green") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M20 6 9 17l-5-5" />
+      </svg>
+    );
+  }
+
+  if (tone === "amber") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 3v18" />
+        <path d="M7 7c0 3 2 5 5 5" />
+        <path d="M17 7c0 3-2 5-5 5" />
+        <path d="M7 17h10" />
+      </svg>
+    );
+  }
+
+  if (tone === "blue") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M5 6h14" />
+        <path d="M5 12h14" />
+        <path d="M5 18h14" />
+        <path d="M8 4v16" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M6 4h12v16H6z" />
+      <path d="M9 8h6" />
+      <path d="M9 12h6" />
+      <path d="M9 16h3" />
+    </svg>
   );
 }
 

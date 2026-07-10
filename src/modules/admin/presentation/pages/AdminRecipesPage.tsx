@@ -280,12 +280,14 @@ export function AdminRecipesPage({ currentPath, onNavigate }: AdminRecipesPagePr
       onNavigate={onNavigate}
       navigationItems={nav}
       breadcrumbs={["Admin", "Management", "Recipes"]}
+      showPageTitle={false}
     >
       <div className="admin-recipes-page">
         <header className="admin-recipes-header">
           <div>
-            <h2>Recipes</h2>
-            <p>Manage and review all recipes in the platform.</p>
+            <span className="admin-recipes-eyebrow">Nutrition content</span>
+            <h2>Recetas</h2>
+            <p>Administra las recetas registradas, sus categorias, ingredientes y macros estimados.</p>
           </div>
         </header>
 
@@ -303,12 +305,12 @@ export function AdminRecipesPage({ currentPath, onNavigate }: AdminRecipesPagePr
             <div className="admin-recipes-filters">
               <input
                 type="search"
-                placeholder="Search recipes by name, ingredient..."
+                placeholder="Buscar receta, nutricionista o ingrediente..."
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
               />
               <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}>
-                <option value="all">All Categories</option>
+                <option value="all">Todas las categorias</option>
                 {categories.map((category) => (
                   <option key={category.id} value={category.name}>
                     {category.name}
@@ -316,7 +318,7 @@ export function AdminRecipesPage({ currentPath, onNavigate }: AdminRecipesPagePr
                 ))}
               </select>
               <select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}>
-                <option value="all">All Types</option>
+                <option value="all">Todos los tipos</option>
                 {recipeTypes.map((type) => (
                   <option key={type.id} value={type.name}>
                     {type.name}
@@ -332,7 +334,7 @@ export function AdminRecipesPage({ currentPath, onNavigate }: AdminRecipesPagePr
                   setTypeFilter("all");
                 }}
               >
-                Clear Filters
+                Limpiar
               </button>
             </div>
 
@@ -343,13 +345,13 @@ export function AdminRecipesPage({ currentPath, onNavigate }: AdminRecipesPagePr
                 <table className="admin-recipes-table">
                   <thead>
                     <tr>
-                      <th>Recipe</th>
-                      <th>Category</th>
-                      <th>Type</th>
-                      <th>Nutritionist</th>
-                      <th>Calories</th>
-                      <th>Difficulty</th>
-                      <th>Actions</th>
+                      <th>Receta</th>
+                      <th>Categoria</th>
+                      <th>Tipo</th>
+                      <th>Nutricionista</th>
+                      <th>Calorias</th>
+                      <th>Dificultad</th>
+                      <th>Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -382,10 +384,10 @@ export function AdminRecipesPage({ currentPath, onNavigate }: AdminRecipesPagePr
                           <td>
                             <div className="admin-recipes-actions">
                               <button type="button" title="View recipe" onClick={() => setSelectedRecipeId(recipe.id)}>
-                                View
+                                Ver
                               </button>
                               <button type="button" title="Delete recipe" onClick={() => handleDeleteRecipe(recipe.id)}>
-                                Delete
+                                Eliminar
                               </button>
                             </div>
                           </td>
@@ -493,12 +495,60 @@ export function AdminRecipesPage({ currentPath, onNavigate }: AdminRecipesPagePr
 function RecipeStat({ value, label, tone }: { value: number; label: string; tone: string }) {
   return (
     <article className="admin-recipes-stat">
-      <div className={`admin-recipes-stat-icon admin-recipes-stat-${tone}`}>{label.charAt(0)}</div>
+      <div className={`admin-recipes-stat-icon admin-recipes-stat-${tone}`}>
+        <RecipeStatIcon tone={tone} />
+      </div>
       <div>
         <strong>{value}</strong>
         <span>{label}</span>
       </div>
     </article>
+  );
+}
+
+function RecipeStatIcon({ tone }: { tone: string }) {
+  if (tone === "green") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 6.5h16" />
+        <path d="M6 6.5v9a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3v-9" />
+        <path d="M9 3.5h6" />
+        <path d="M9 11h6" />
+        <path d="M9 14.5h4" />
+      </svg>
+    );
+  }
+
+  if (tone === "amber") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M7 4h10" />
+        <path d="M8 4v5a4 4 0 0 0 8 0V4" />
+        <path d="M12 13v7" />
+        <path d="M8.5 20h7" />
+      </svg>
+    );
+  }
+
+  if (tone === "blue") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 10h16" />
+        <path d="M6 10v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-8" />
+        <path d="M8 7a4 4 0 0 1 8 0" />
+        <path d="M9 14h6" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M6 4h9l3 3v13H6z" />
+      <path d="M15 4v4h4" />
+      <path d="M9 12h6" />
+      <path d="M9 15h6" />
+      <path d="M9 18h3" />
+    </svg>
   );
 }
 

@@ -154,9 +154,14 @@ export function ChatPage({ currentPath, onNavigate }: ChatPageProps) {
     activeChat,
     activeChatId,
     draft,
+    query,
     isPatientTyping,
     canCreateChat,
+    isLoading,
+    errorMessage,
+    connectionStatus,
     setDraft,
+    setQuery,
     selectChat,
     createChat,
     deleteChat,
@@ -176,20 +181,17 @@ export function ChatPage({ currentPath, onNavigate }: ChatPageProps) {
 
   if (!activeChat) {
     return (
-        <SharedLayout
+      <SharedLayout
         title="Communication"
         currentPath={currentPath}
         onNavigate={onNavigate}
-          navigationItems={useNavigation()}
+        navigationItems={useNavigation()}
         breadcrumbs={["Communication", "Chat"]}
         showPageTitle={false}
       >
         <section className={styles.emptyState}>
-          <h1>No active chats</h1>
-          <button type="button" className={styles.newChatButton} onClick={createChat} disabled={!canCreateChat}>
-            <PlusIcon />
-            New Chat
-          </button>
+          <h1>{isLoading ? "Cargando conversaciones..." : "No hay conversaciones disponibles"}</h1>
+          {errorMessage && <p>{errorMessage}</p>}
         </section>
       </SharedLayout>
     );
@@ -197,7 +199,7 @@ export function ChatPage({ currentPath, onNavigate }: ChatPageProps) {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (isPatientTyping || !draft.trim()) return;
+    if (isPatientTyping || !draft.trim() || activeChat.canChat === false) return;
     sendMessage(activeChat.id, draft);
   };
 
@@ -221,11 +223,23 @@ export function ChatPage({ currentPath, onNavigate }: ChatPageProps) {
         <aside className={styles.conversationPane}>
           <div className={styles.searchBox}>
             <SearchIcon />
-            <input type="search" aria-label="Search conversations" placeholder="Search conversations..." />
+            <input
+              type="search"
+              aria-label="Search conversations"
+              placeholder="Buscar pacientes..."
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+            />
             <button type="button" className={styles.newChatIconButton} aria-label="Create new chat" onClick={createChat} disabled={!canCreateChat}>
               <PlusIcon />
             </button>
           </div>
+
+          {(isLoading || errorMessage) && (
+            <div className={`${styles.systemNotice} ${errorMessage ? styles.systemNoticeError : ""}`}>
+              {isLoading ? "Cargando conversaciones..." : errorMessage}
+            </div>
+          )}
 
           <div className={styles.conversationList}>
             {chats.map((chat) => (
@@ -261,6 +275,9 @@ export function ChatPage({ currentPath, onNavigate }: ChatPageProps) {
               </div>
             </div>
             <div className={styles.threadActions}>
+              <span className={`${styles.wsBadge} ${connectionStatus === "CONNECTED" ? styles.wsConnected : styles.wsDisconnected}`}>
+                {connectionStatus === "CONNECTED" ? "WS conectado" : connectionStatus === "CONNECTING" ? "Conectando" : "WS desconectado"}
+              </span>
               <button type="button" aria-label="Start voice call">
                 <PhoneIcon />
               </button>
@@ -289,7 +306,7 @@ export function ChatPage({ currentPath, onNavigate }: ChatPageProps) {
           </header>
 
           <div className={styles.messageThread} ref={threadRef}>
-            <div className={styles.datePill}>Today, 9:30 AM</div>
+            <div className={styles.datePill}>Hoy</div>
 
             {activeChat.messages.map((message) => (
               <div key={message.id} className={`${styles.messageRow} ${message.author === "NUTRITIONIST" ? styles.nutritionist : styles.patient}`}>
@@ -327,14 +344,14 @@ export function ChatPage({ currentPath, onNavigate }: ChatPageProps) {
               <input
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
-                placeholder="Type your message..."
-                disabled={isPatientTyping}
+                placeholder={activeChat.canChat === false ? "Chat no habilitado para este paciente" : "Escribe tu mensaje..."}
+                disabled={isPatientTyping || activeChat.canChat === false}
               />
               <button type="button" aria-label="Add emoji">
                 <SmileIcon />
               </button>
             </label>
-            <button type="submit" className={styles.sendButton} aria-label="Send message" disabled={!draft.trim() || isPatientTyping}>
+            <button type="submit" className={styles.sendButton} aria-label="Send message" disabled={!draft.trim() || isPatientTyping || activeChat.canChat === false}>
               <SendIcon />
             </button>
           </form>
