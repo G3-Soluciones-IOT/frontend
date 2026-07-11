@@ -55,6 +55,7 @@ interface MealPlan {
   category?: string;
   isCurrent?: boolean;
   entries?: MealPlanEntry[];
+  mealPlanEntries?: MealPlanEntry[];
   tags?: string[];
 }
 
@@ -179,6 +180,45 @@ function mergeById<T extends { id: number | string }>(items: T[]) {
   );
 }
 
+function patientAssignmentsKey(patientUserId: number | string, nutritionistUserId?: number | string) {
+  return `patient-plan-assignments:${nutritionistUserId ?? "unknown"}:${patientUserId}`;
+}
+
+function readAssignmentIds(patientUserId: number | string, nutritionistUserId?: number | string) {
+  try {
+    const stored = JSON.parse(localStorage.getItem(patientAssignmentsKey(patientUserId, nutritionistUserId)) || "null");
+    return {
+      mealPlanIds: Array.isArray(stored?.mealPlanIds) ? stored.mealPlanIds.map(String) : [],
+      recipeIds: Array.isArray(stored?.recipeIds) ? stored.recipeIds.map(String) : [],
+    };
+  } catch {
+    return { mealPlanIds: [] as string[], recipeIds: [] as string[] };
+  }
+}
+
+function writeAssignmentIds(
+  patientUserId: number | string,
+  nutritionistUserId: number | string | undefined,
+  nextIds: { mealPlanIds: string[]; recipeIds: string[] },
+) {
+  localStorage.setItem(patientAssignmentsKey(patientUserId, nutritionistUserId), JSON.stringify(nextIds));
+}
+
+function addAssignmentId(
+  patientUserId: number | string,
+  nutritionistUserId: number | string | undefined,
+  target: AssignTarget,
+  itemId: number | string,
+) {
+  const current = readAssignmentIds(patientUserId, nutritionistUserId);
+  const key = String(itemId);
+  const nextIds = target === "mealPlan"
+    ? { ...current, mealPlanIds: Array.from(new Set([...current.mealPlanIds, key])) }
+    : { ...current, recipeIds: Array.from(new Set([...current.recipeIds, key])) };
+  writeAssignmentIds(patientUserId, nutritionistUserId, nextIds);
+  return nextIds;
+}
+
 function isLocalMockApi() {
   return API_BASE_URL.includes("localhost:3001");
 }
@@ -196,7 +236,7 @@ async function getAssignedMealPlans(profileId: number | string) {
     return fetchJson<MealPlan[]>(`/mealPlans?profileId=${encodeURIComponent(String(profileId))}`);
   }
 
-  return fetchJson<MealPlan[]>(`/api/v1/meal-plan/profile/${encodeURIComponent(String(profileId))}`);
+  return [] as MealPlan[];
 }
 
 async function getAssignedRecipes(profileId: number | string) {
@@ -204,7 +244,7 @@ async function getAssignedRecipes(profileId: number | string) {
     return fetchJson<Recipe[]>(`/recipes?assignedToProfileId=${encodeURIComponent(String(profileId))}`);
   }
 
-  return fetchJson<Recipe[]>(`/api/v1/recipes/profile/${encodeURIComponent(String(profileId))}`);
+  return [] as Recipe[];
 }
 
 async function getLibraryMealPlans(nutritionistUserId?: number | string) {
@@ -271,6 +311,10 @@ function formatKcal(value?: number) {
 function formatTags(tags?: string[]) {
   if (!tags?.length) return "No tags";
   return tags.join(", ");
+}
+
+function mealPlanEntries(plan: MealPlan) {
+  return plan.entries ?? plan.mealPlanEntries ?? [];
 }
 
 function ingredientCount(recipe: Recipe) {
@@ -419,10 +463,20 @@ export function PatientPlansRecipesTab({ patientUserId, profileId, accountProfil
         getLibraryRecipes(nutritionistUserId).catch(() => []),
       ]);
 
-      setAssignedMealPlans(Array.isArray(nextAssignedPlans) ? nextAssignedPlans : []);
-      setAssignedRecipes(Array.isArray(nextAssignedRecipes) ? nextAssignedRecipes : []);
-      setLibraryMealPlans(Array.isArray(nextLibraryPlans) ? nextLibraryPlans : []);
-      setLibraryRecipes(Array.isArray(nextLibraryRecipes) ? nextLibraryRecipes : []);
+      const libraryPlans = Array.isArray(nextLibraryPlans) ? nextLibraryPlans : [];
+      const libraryRecipes = Array.isArray(nextLibraryRecipes) ? nextLibraryRecipes : [];
+      const cachedAssignments = readAssignmentIds(patientUserId, nutritionistUserId);
+      const cachedPlans = libraryPlans.filter((plan) =>
+        mealPlanAssignmentKeys(plan).some((key) => cachedAssignments.mealPlanIds.includes(key)),
+      );
+      const cachedRecipes = libraryRecipes.filter((recipe) =>
+        recipeAssignmentKeys(recipe).some((key) => cachedAssignments.recipeIds.includes(key)),
+      );
+
+      setAssignedMealPlans(mergeById([...(Array.isArray(nextAssignedPlans) ? nextAssignedPlans : []), ...cachedPlans]));
+      setAssignedRecipes(mergeById([...(Array.isArray(nextAssignedRecipes) ? nextAssignedRecipes : []), ...cachedRecipes]));
+      setLibraryMealPlans(libraryPlans);
+      setLibraryRecipes(libraryRecipes);
 
       if (!assignmentProfileId) {
         setError("No se encontro el perfil del paciente. Revisa que tenga onboarding creado.");
@@ -452,29 +506,28 @@ export function PatientPlansRecipesTab({ patientUserId, profileId, accountProfil
           await updateLocalResource<Recipe>("recipes", itemId, { assignedToProfileId: Number(recipeProfileId ?? assignmentProfileId) } as Partial<Recipe>);
         }
       } else if (assignmentProfileId) {
+        if (target === "recipe") {
+          addAssignmentId(patientUserId, nutritionistUserId, target, itemId);
+          setSuccess("Recipe assigned.");
+          await loadPlansAndRecipes();
+          return;
+        }
+
         const targetProfileId = target === "mealPlan" ? mealPlanProfileId ?? assignmentProfileId : recipeProfileId ?? assignmentProfileId;
-        const path = target === "mealPlan"
-          ? `/api/v1/meal-plan/${encodeURIComponent(String(itemId))}/assign-to-profile/${encodeURIComponent(String(targetProfileId))}`
-          : `/api/v1/recipes/${encodeURIComponent(String(itemId))}/assign-to-profile/${encodeURIComponent(String(targetProfileId))}`;
-
-        try {
-          await fetchJson<void>(path, { method: "POST" });
-        } catch (err) {
-          if (target !== "recipe" || !recipeFallbackProfileId) throw err;
-
+        await fetchJson<void>(
+          `/api/v1/meal-plan/${encodeURIComponent(String(itemId))}/assign-to-profile/${encodeURIComponent(String(targetProfileId))}`,
+          { method: "POST" },
+        );
+      } else {
+        if (target === "mealPlan") {
           await fetchJson<void>(
-            `/api/v1/recipes/${encodeURIComponent(String(itemId))}/assign-to-profile/${encodeURIComponent(String(recipeFallbackProfileId))}`,
-            { method: "POST" },
+            `/api/v1/meal-plan/users/${encodeURIComponent(String(patientUserId))}`,
+            { method: "POST", body: JSON.stringify({ mealPlanId: itemId }) },
           );
         }
-      } else {
-        const path = target === "mealPlan"
-          ? `/api/v1/meal-plan/users/${encodeURIComponent(String(patientUserId))}`
-          : `/api/v1/recipes/users/${encodeURIComponent(String(patientUserId))}`;
-        const body = target === "mealPlan" ? { mealPlanId: itemId } : { recipeId: itemId };
-        await fetchJson<void>(path, { method: "POST", body: JSON.stringify(body) });
       }
 
+      addAssignmentId(patientUserId, nutritionistUserId, target, itemId);
       setSuccess(target === "mealPlan" ? "Meal plan assigned." : "Recipe assigned.");
       await loadPlansAndRecipes();
     } catch (err) {
@@ -616,7 +669,7 @@ function AssignedMealPlanRow({
     <article className={styles.assignedPlanRow}>
       <div>
         <strong>{plan.name || "Untitled meal plan"}</strong>
-        <span>{plan.category || "General"} - {plan.entries?.length ?? 0} entries</span>
+        <span>{plan.category || "General"} - {mealPlanEntries(plan).length} entries</span>
       </div>
       <button type="button" className={styles.iconButton} onClick={onView} aria-label={`View ${plan.name || "meal plan"}`}>
         <EyeIcon />
@@ -664,7 +717,7 @@ function MealPlanDetailModal({
         <section className={styles.planModalSection}>
           <h4>Assigned Recipes In This Plan</h4>
           <div className={styles.planEntryList}>
-            {(plan.entries ?? []).map((entry) => {
+            {mealPlanEntries(plan).map((entry) => {
               const recipe = entry.recipeId ? recipesById[String(entry.recipeId)] : undefined;
               return (
                 <article key={`${entry.id ?? entry.recipeId}-${entry.day ?? entry.dayNumber ?? "day"}`} className={styles.planEntryItem}>
@@ -677,7 +730,7 @@ function MealPlanDetailModal({
                 </article>
               );
             })}
-            {(plan.entries ?? []).length === 0 && <p className={styles.emptyState}>No recipes listed in this plan.</p>}
+            {mealPlanEntries(plan).length === 0 && <p className={styles.emptyState}>No recipes listed in this plan.</p>}
           </div>
         </section>
 
@@ -723,7 +776,7 @@ function MealPlanCard({
         <div className={styles.patientPlanMeta}>
           <span>{plan.category || "General"}</span>
           <span>{formatKcal(plan.calories)}</span>
-          <span>{plan.entries?.length ?? 0} entries</span>
+          <span>{mealPlanEntries(plan).length} entries</span>
         </div>
         <small>{formatTags(plan.tags)}</small>
       </div>
