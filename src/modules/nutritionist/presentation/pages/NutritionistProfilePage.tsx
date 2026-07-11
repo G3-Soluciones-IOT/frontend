@@ -2,6 +2,7 @@ import { useMemo, useState, type ChangeEvent, type FormEvent } from "react";
 import { AuthLayout } from "@/modules/iam/presentation/components/AuthLayout";
 import { SharedLayout } from "@/shared/components/layout";
 import { useNavigation } from "@/shared/hooks/useNavigation";
+import { useI18n } from "@/shared/i18n/useI18n";
 import heroImg from "@/assets/SignImage.png";
 import styles from "./NutritionistProfile.module.css";
 import { useUpdateProfile } from "../hooks/useUpdateProfile";
@@ -86,6 +87,7 @@ function getInitials(fullName: string) {
 }
 
 export function NutritionistProfilePage({ currentPath = "/professional-profile", onNavigate, onSignOut }: NutritionistProfilePageProps) {
+  const { t } = useI18n();
   const { execute, isSaving, error: saveError, savedAt } = useUpdateProfile();
   const navigationItems = useNavigation();
   const storedProfile = getStoredNutritionistProfile();
@@ -118,12 +120,12 @@ export function NutritionistProfilePage({ currentPath = "/professional-profile",
   const validate = () => {
     const errors: Partial<Record<keyof ProfileForm, string>> = {};
 
-    if (!form.fullName.trim()) errors.fullName = "Full name is required.";
-    if (!form.licenseNumber.trim()) errors.licenseNumber = "License number is required.";
-    if (!form.specialty.trim()) errors.specialty = "Specialty is required.";
-    if (!form.bio.trim()) errors.bio = "Bio is required.";
-    if (form.bio.length > 500) errors.bio = "Bio must be 500 characters or fewer.";
-    if (form.yearsExperience < 0) errors.yearsExperience = "Years of experience cannot be negative.";
+    if (!form.fullName.trim()) errors.fullName = t("profile.error.fullNameRequired");
+    if (!form.licenseNumber.trim()) errors.licenseNumber = t("profile.error.licenseRequired");
+    if (!form.specialty.trim()) errors.specialty = t("profile.error.specialtyRequired");
+    if (!form.bio.trim()) errors.bio = t("profile.error.bioRequired");
+    if (form.bio.length > 500) errors.bio = t("profile.error.bioLength");
+    if (form.yearsExperience < 0) errors.yearsExperience = t("profile.error.experienceNegative");
 
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
@@ -136,7 +138,7 @@ export function NutritionistProfilePage({ currentPath = "/professional-profile",
 
     const userId = getSessionUserId();
     if (!String(userId).trim()) {
-      setSubmitError("Could not resolve your user ID. Please sign out and sign in again.");
+      setSubmitError(t("profile.error.userId"));
       return;
     }
 
@@ -157,12 +159,12 @@ export function NutritionistProfilePage({ currentPath = "/professional-profile",
     <>
       <div className={styles.pageHeading}>
         <h1 className={styles.pageTitle}>
-          {isProfileCompleted ? "My nutritionist profile" : "Complete your nutritionist profile"}
+          {isProfileCompleted ? t("profile.title.completed") : t("profile.title.create")}
         </h1>
         <p className={styles.pageSubtitle}>
           {isProfileCompleted
-            ? "Update the professional information patients see."
-            : "Add the professional information patients will see before continuing."}
+            ? t("profile.subtitle.completed")
+            : t("profile.subtitle.create")}
         </p>
       </div>
 
@@ -177,25 +179,25 @@ export function NutritionistProfilePage({ currentPath = "/professional-profile",
               <span className={styles.profileAvatarPlaceholder}>{userInitials}</span>
             )}
 
-            <h2 className={styles.profileName}>{form.fullName || "Nutritionist"}</h2>
+            <h2 className={styles.profileName}>{form.fullName || t("profile.fallbackName")}</h2>
             <p className={styles.profileTitle}>
-              {form.acceptingNewPatients ? "Accepting new patients" : "Not accepting new patients"}
+              {form.acceptingNewPatients ? t("profile.accepting") : t("profile.notAccepting")}
             </p>
 
             <div className={styles.profileMetaGrid}>
               <div>
                 <strong>{form.yearsExperience}</strong>
-                <span>Years</span>
+                <span>{t("profile.years")}</span>
               </div>
               <div>
                 <strong>{form.specialty || "-"}</strong>
-                <span>Specialty</span>
+                <span>{t("profile.specialty")}</span>
               </div>
             </div>
 
             <div className={styles.verificationBox}>
               <div className={styles.verificationTitle}>
-                Profile status
+                {t("profile.status")}
                 {savedAt && (
                   <span className={styles.verifiedDot}>
                     <CheckIcon />
@@ -204,7 +206,7 @@ export function NutritionistProfilePage({ currentPath = "/professional-profile",
               </div>
               <div className={styles.verificationItem}>
                 <CheckIcon />
-                {hasRequiredFields ? "Ready to save" : "Missing required fields"}
+                {hasRequiredFields ? t("profile.readyToSave") : t("profile.missingRequired")}
               </div>
             </div>
           </aside>
@@ -213,50 +215,50 @@ export function NutritionistProfilePage({ currentPath = "/professional-profile",
             <section className={styles.card}>
               <h2 className={styles.cardTitle}>
                 <BadgeIcon />
-                Professional information
+                {t("profile.professionalInfo")}
               </h2>
 
               <div className={styles.formGrid}>
                 <div className={`${styles.fieldGroup} ${styles.fieldGroupFull}`}>
-                  <label className={styles.fieldLabel} htmlFor="nutritionist-full-name">Full name</label>
+                  <label className={styles.fieldLabel} htmlFor="nutritionist-full-name">{t("profile.fullName")}</label>
                   <input id="nutritionist-full-name" className={styles.fieldInput} placeholder="Maria Perez" value={form.fullName} onChange={handleFieldChange("fullName")} disabled={isSaving} />
                   {fieldErrors.fullName && <span className={styles.fieldError}>{fieldErrors.fullName}</span>}
                 </div>
 
                 <div className={styles.fieldGroup}>
-                  <label className={styles.fieldLabel} htmlFor="nutritionist-years">Years of experience</label>
+                  <label className={styles.fieldLabel} htmlFor="nutritionist-years">{t("profile.yearsExperience")}</label>
                   <input id="nutritionist-years" className={styles.fieldInput} type="number" min="0" value={form.yearsExperience} onChange={handleFieldChange("yearsExperience")} disabled={isSaving} />
                   {fieldErrors.yearsExperience && <span className={styles.fieldError}>{fieldErrors.yearsExperience}</span>}
                 </div>
 
                 <div className={styles.fieldGroup}>
-                  <label className={styles.fieldLabel} htmlFor="nutritionist-license">License number</label>
+                  <label className={styles.fieldLabel} htmlFor="nutritionist-license">{t("profile.licenseNumber")}</label>
                   <input id="nutritionist-license" className={styles.fieldInput} placeholder="CNP-12345" value={form.licenseNumber} onChange={handleFieldChange("licenseNumber")} disabled={isSaving || isProfileCompleted} />
                   {fieldErrors.licenseNumber && <span className={styles.fieldError}>{fieldErrors.licenseNumber}</span>}
                 </div>
 
                 <div className={styles.fieldGroup}>
-                  <label className={styles.fieldLabel} htmlFor="nutritionist-specialty">Specialty</label>
+                  <label className={styles.fieldLabel} htmlFor="nutritionist-specialty">{t("profile.specialty")}</label>
                   <input id="nutritionist-specialty" className={styles.fieldInput} placeholder="CLINICAL" value={form.specialty} onChange={handleFieldChange("specialty")} disabled={isSaving || isProfileCompleted} />
                   {fieldErrors.specialty && <span className={styles.fieldError}>{fieldErrors.specialty}</span>}
                 </div>
 
                 <div className={styles.fieldGroup}>
-                  <label className={styles.fieldLabel} htmlFor="nutritionist-accepting">Availability</label>
+                  <label className={styles.fieldLabel} htmlFor="nutritionist-accepting">{t("profile.availability")}</label>
                   <label className={styles.toggleRow}>
                     <input id="nutritionist-accepting" type="checkbox" checked={form.acceptingNewPatients} onChange={handleFieldChange("acceptingNewPatients")} disabled={isSaving} />
-                    Accepting new patients
+                    {t("profile.accepting")}
                   </label>
                 </div>
 
                 <div className={`${styles.fieldGroup} ${styles.fieldGroupFull}`}>
-                  <label className={styles.fieldLabel} htmlFor="nutritionist-picture">Profile picture URL</label>
+                  <label className={styles.fieldLabel} htmlFor="nutritionist-picture">{t("profile.pictureUrl")}</label>
                   <input id="nutritionist-picture" className={styles.fieldInput} type="url" placeholder="https://example.com/profile.jpg" value={form.profilePictureUrl} onChange={handleFieldChange("profilePictureUrl")} disabled={isSaving} />
                 </div>
 
                 <div className={`${styles.fieldGroup} ${styles.fieldGroupFull}`}>
-                  <label className={styles.fieldLabel} htmlFor="nutritionist-bio">Bio</label>
-                  <textarea id="nutritionist-bio" className={`${styles.fieldInput} ${styles.textarea}`} maxLength={500} placeholder="Describe your professional experience and care approach." value={form.bio} onChange={handleFieldChange("bio")} disabled={isSaving} />
+                  <label className={styles.fieldLabel} htmlFor="nutritionist-bio">{t("profile.bio")}</label>
+                  <textarea id="nutritionist-bio" className={`${styles.fieldInput} ${styles.textarea}`} maxLength={500} placeholder={t("profile.bio.placeholder")} value={form.bio} onChange={handleFieldChange("bio")} disabled={isSaving} />
                   <span className={`${styles.charCount} ${bioCount > 450 ? styles.nearLimit : ""}`}>{bioCount}/500</span>
                   {fieldErrors.bio && <span className={styles.fieldError}>{fieldErrors.bio}</span>}
                 </div>
@@ -268,7 +270,7 @@ export function NutritionistProfilePage({ currentPath = "/professional-profile",
         <div className={styles.saveBarVisible}>
           <button type="submit" className={styles.btnSave} disabled={isSaving}>
             {isSaving && <span className={styles.spinner} />}
-            {isSaving ? "Saving" : isProfileCompleted ? "Save changes" : "Save and continue"}
+            {isSaving ? t("profile.saving") : isProfileCompleted ? t("profile.saveChanges") : t("profile.saveContinue")}
           </button>
         </div>
       </form>
@@ -278,7 +280,7 @@ export function NutritionistProfilePage({ currentPath = "/professional-profile",
   if (isProfileCompleted) {
     return (
       <SharedLayout
-        title="My Profile"
+        title={t("profile.layoutTitle")}
         currentPath={currentPath}
         navigationItems={navigationItems}
         userInitials={userInitials}

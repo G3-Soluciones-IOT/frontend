@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { apiUrl } from "@/app/config/env";
 import { SharedLayout } from "@/shared/components/layout";
 import { useNavigation } from "@/shared/hooks/useNavigation";
+import { useI18n } from "@/shared/i18n/useI18n";
 import {
   approveNutritionistPatientRelation,
   deleteNutritionistPatientRelation,
@@ -76,8 +77,11 @@ async function getNutritionistProfileByUser(userId: number | string) {
 }
 
 async function getPatientRequestDetails(patientUserId: number | string): Promise<PatientRequestDetails> {
-  const profileData = await fetchJson<PatientProfile | PatientProfile[]>(`/api/v1/profiles/${patientUserId}`);
-  const profile = firstItem(profileData) ?? undefined;
+  const nutritionData = await fetchJson<PatientNutritionProfile & { id?: number | string }>(
+    `/api/v1/user-profiles/by-user/${encodeURIComponent(String(patientUserId))}`,
+  );
+  const profiles = await fetchJson<PatientProfile[]>("/api/v1/profiles");
+  const profile = profiles.find((item) => String(item.userProfileId) === String(nutritionData.id));
 
   if (!profile?.userProfileId) return { profile };
 
@@ -153,6 +157,7 @@ function patientNameFor(
 }
 
 export function NutritionistPatientsPage({ currentPath, onNavigate }: NutritionistPatientsPageProps) {
+  const { t } = useI18n();
   const [relations, setRelations] = useState<NutritionistPatientRelation[]>([]);
   const [patientUsers, setPatientUsers] = useState<PatientUserSummary[]>([]);
   const [patientDetails, setPatientDetails] = useState<Record<string, PatientRequestDetails>>({});
@@ -266,18 +271,18 @@ export function NutritionistPatientsPage({ currentPath, onNavigate }: Nutritioni
 
   return (
     <SharedLayout
-      title="Patient Requests"
+      title={t("requests.title")}
       currentPath={currentPath}
       onNavigate={onNavigate}
       navigationItems={navigationItems}
-      breadcrumbs={["Patients", "Requests"]}
+      breadcrumbs={[t("patients.breadcrumb.patients"), t("requests.breadcrumb")]}
       showPageTitle={false}
     >
       <div className={`${styles.stack} ${styles.requestsPage}`}>
         <header className={styles.requestsHero}>
           <div>
-            <h1>Patient Requests</h1>
-            <p>Review and manage new patient requests.</p>
+            <h1>{t("requests.title")}</h1>
+            <p>{t("requests.description")}</p>
           </div>
         </header>
 
@@ -285,30 +290,30 @@ export function NutritionistPatientsPage({ currentPath, onNavigate }: Nutritioni
           <RequestStatCard
             tone="amber"
             icon={<ClockIcon />}
-            label="Pending Requests"
+            label={t("requests.stats.pending")}
             value={pendingRequests.length}
-            description="Awaiting your response"
+            description={t("requests.stats.pending.description")}
           />
           <RequestStatCard
             tone="green"
             icon={<CheckCircleIcon />}
-            label="Accepted Patients"
+            label={t("requests.stats.accepted")}
             value={acceptedPatients.length}
-            description="Currently working with"
+            description={t("requests.stats.accepted.description")}
           />
           <RequestStatCard
             tone="blue"
             icon={<RelationsIcon />}
-            label="Total Relations"
+            label={t("requests.stats.total")}
             value={relations.length}
-            description="All time relations"
+            description={t("requests.stats.total.description")}
           />
           <RequestStatCard
             tone="purple"
             icon={<CalendarCardIcon />}
-            label="Diet Plan Requests"
+            label={t("requests.stats.dietPlan")}
             value={dietPlanRequests}
-            description="Specific to diet plans"
+            description={t("requests.stats.dietPlan.description")}
           />
         </div>
 
@@ -319,21 +324,21 @@ export function NutritionistPatientsPage({ currentPath, onNavigate }: Nutritioni
               className={`${styles.requestTab} ${activeTab === "requests" ? styles.requestTabActive : ""}`}
               onClick={() => setActiveTab("requests")}
             >
-              Pending Requests ({pendingRequests.length})
+              {t("requests.tab.pending")} ({pendingRequests.length})
             </button>
             <button
               type="button"
               className={`${styles.requestTab} ${activeTab === "patients" ? styles.requestTabActive : ""}`}
               onClick={() => setActiveTab("patients")}
             >
-              Accepted Patients ({acceptedPatients.length})
+              {t("requests.tab.accepted")} ({acceptedPatients.length})
             </button>
             <button
               type="button"
               className={`${styles.requestTab} ${activeTab === "all" ? styles.requestTabActive : ""}`}
               onClick={() => setActiveTab("all")}
             >
-              All Requests ({relations.length})
+              {t("requests.tab.all")} ({relations.length})
             </button>
           </div>
 
@@ -341,7 +346,7 @@ export function NutritionistPatientsPage({ currentPath, onNavigate }: Nutritioni
             <span className={styles.searchIcon} aria-hidden="true" />
             <input
               type="search"
-              placeholder="Search by patient name or ID..."
+              placeholder={t("requests.search.placeholder")}
               value={search}
               onChange={(event) => setSearch(event.target.value)}
             />
@@ -350,19 +355,19 @@ export function NutritionistPatientsPage({ currentPath, onNavigate }: Nutritioni
 
         <section className={`${styles.panel} ${styles.requestsTablePanel}`}>
           {error && <p className={styles.errorText}>{error}</p>}
-          {loading && <p className={styles.muted}>Loading patient relations...</p>}
+          {loading && <p className={styles.muted}>{t("requests.loading")}</p>}
 
           {!loading && (
             <div className={styles.requestsTableScroll}>
               <table className={`${styles.table} ${styles.requestsTable}`}>
                 <thead>
                   <tr>
-                    <th>Patient</th>
-                    <th>Service Type</th>
-                    <th>Requested At</th>
-                    <th>Scheduled At</th>
-                    <th>Status</th>
-                    <th className={styles.alignCenter}>Actions</th>
+                    <th>{t("patients.table.patient")}</th>
+                    <th>{t("requests.table.serviceType")}</th>
+                    <th>{t("requests.table.requestedAt")}</th>
+                    <th>{t("requests.table.scheduledAt")}</th>
+                    <th>{t("patients.table.status")}</th>
+                    <th className={styles.alignCenter}>{t("requests.table.actions")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -384,14 +389,14 @@ export function NutritionistPatientsPage({ currentPath, onNavigate }: Nutritioni
                               <span className={styles.personSubtext}>
                                 ID: #USR-{String(relation.patientUserId).padStart(4, "0")}
                               </span>
-                              {age !== null && <span className={styles.personSubtext}>{age} years old</span>}
+                              {age !== null && <span className={styles.personSubtext}>{age} {t("requests.yearsOld")}</span>}
                             </div>
                           </div>
                         </td>
                         <td>
                           <span className={styles.requestServicePill}>
                             {serviceLabel(relation.serviceType)}
-                            <small>Nutrition Service</small>
+                            <small>{t("requests.nutritionService")}</small>
                           </span>
                         </td>
                         <td className={styles.requestDateCell}>
@@ -408,7 +413,7 @@ export function NutritionistPatientsPage({ currentPath, onNavigate }: Nutritioni
                         </td>
                         <td>
                           <span className={relation.accepted ? styles.statusAccepted : styles.statusPending}>
-                            {relation.accepted ? "Accepted" : "Pending"}
+                            {relation.accepted ? t("patients.status.accepted") : t("patients.status.pending")}
                           </span>
                         </td>
                         <td>
@@ -420,7 +425,7 @@ export function NutritionistPatientsPage({ currentPath, onNavigate }: Nutritioni
                                 onClick={() => approveRequest(relation.id)}
                                 disabled={busy}
                               >
-                                {busy ? "Approving" : "Approve"}
+                                {busy ? t("requests.action.approving") : t("requests.action.approve")}
                               </button>
                             )}
                             <button
@@ -429,7 +434,7 @@ export function NutritionistPatientsPage({ currentPath, onNavigate }: Nutritioni
                               onClick={() => removeRelation(relation.id)}
                               disabled={busy}
                             >
-                              {relation.accepted ? "Remove" : "Reject"}
+                              {relation.accepted ? t("requests.action.remove") : t("requests.action.reject")}
                             </button>
                           </div>
                         </td>
@@ -444,17 +449,17 @@ export function NutritionistPatientsPage({ currentPath, onNavigate }: Nutritioni
           {!loading && visibleRelations.length === 0 && (
             <p className={styles.emptyState}>
               {activeTab === "requests"
-                ? "No pending requests."
+                ? t("requests.empty.pending")
                 : activeTab === "patients"
-                  ? "No accepted patients yet."
-                  : "No relations found."}
+                  ? t("requests.empty.accepted")
+                  : t("requests.empty.all")}
             </p>
           )}
 
           <div className={styles.requestsFooter}>
             <span>
-              Showing {visibleRelations.length > 0 ? 1 : 0} to {visibleRelations.length} of {visibleRelations.length}{" "}
-              {activeTab === "requests" ? "requests" : activeTab === "patients" ? "patients" : "relations"}
+              {t("patients.directory.showing")} {visibleRelations.length > 0 ? 1 : 0} {t("patients.directory.to")} {visibleRelations.length} {t("patients.directory.of")} {visibleRelations.length}{" "}
+              {activeTab === "requests" ? t("requests.footer.requests") : activeTab === "patients" ? t("patients.directory.patients") : t("requests.footer.relations")}
             </span>
             <div className={styles.requestsPager}>
               <button type="button" disabled>{"<"}</button>
@@ -467,11 +472,11 @@ export function NutritionistPatientsPage({ currentPath, onNavigate }: Nutritioni
         <aside className={styles.requestTipBox}>
           <div className={styles.requestTipIcon}><TipIcon /></div>
           <div>
-            <strong>Tip</strong>
-            <p>Review each request carefully. You can check more details about the patient before accepting.</p>
+            <strong>{t("requests.tip.title")}</strong>
+            <p>{t("requests.tip.description")}</p>
           </div>
           <button type="button" onClick={() => onNavigate("/nutritionist/patients/directory")}>
-            View Patient Directory
+            {t("requests.tip.button")}
           </button>
         </aside>
       </div>

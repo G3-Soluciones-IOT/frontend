@@ -127,7 +127,7 @@ export function AdminRecipesPage({ currentPath, onNavigate }: AdminRecipesPagePr
         const [nextRecipes, nextCategories, nextTypes] = await Promise.all([
           fetchJson<RecipeTemplate[]>("/api/v1/recipes/templates/detailed"),
           fetchJson<CatalogItem[]>("/api/v1/categories"),
-          fetchJson<CatalogItem[]>("/api/v1/recipetypes"),
+          fetchJson<CatalogItem[]>("/api/v1/recipe-types"),
         ]);
 
         if (ignore) return;

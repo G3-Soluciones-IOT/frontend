@@ -4,9 +4,18 @@
   padding: 16px 10px 40px;
 }
 
+.hero {
+  padding: 26px 30px;
+  border: 1px solid #cce8d8;
+  border-radius: 10px;
+  background:
+    linear-gradient(135deg, rgba(232, 248, 238, 0.95), rgba(255, 255, 255, 0.96)),
+    radial-gradient(circle at 92% 8%, rgba(19, 184, 79, 0.18), transparent 34%);
+}
+
 .hero h1 {
   margin: 0;
-  color: #141a24;
+  color: #0f3d24;
   font-size: 2.35rem;
   line-height: 1.08;
   font-weight: 700;
@@ -22,9 +31,9 @@
 .panel {
   overflow: hidden;
   background: #ffffff;
-  border: 1px solid #e0e5ee;
+  border: 1px solid #d3ecdc;
   border-radius: 10px;
-  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 12px 30px rgba(15, 77, 42, 0.07);
 }
 
 .filterBar {
@@ -34,15 +43,15 @@
   justify-content: space-between;
   gap: 20px;
   padding: 0 24px;
-  border-bottom: 1px solid #e5e9f1;
-  background: #ffffff;
+  border-bottom: 1px solid #dcefe4;
+  background: #fbfffc;
 }
 
 .filterLabel {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #586176;
+  color: #2f6a45;
 }
 
 .filterLabel span {
@@ -64,8 +73,8 @@
   border: 0;
   border-radius: 999px;
   padding: 0 18px;
-  background: #e9effc;
-  color: #1f2937;
+  background: #eaf6ee;
+  color: #1f4f33;
   font: inherit;
   font-size: 0.9rem;
   font-weight: 600;
@@ -78,7 +87,7 @@
 }
 
 .filterButtonActive {
-  background: #13b84f;
+  background: #159947;
   color: #ffffff;
 }
 
@@ -86,7 +95,7 @@
   margin: 0;
   padding: 10px 24px;
   background: #fff7db;
-  color: #9a6300;
+  color: #8a5700;
   font-size: 0.86rem;
 }
 
@@ -97,16 +106,16 @@
 
 .table {
   width: 100%;
-  min-width: 900px;
+  min-width: 980px;
   border-collapse: collapse;
 }
 
 .table th {
   height: 84px;
   padding: 0 24px;
-  background: #f7f8fd;
-  border-bottom: 1px solid #e6ebf3;
-  color: #596174;
+  background: #f3fbf5;
+  border-bottom: 1px solid #dcefe4;
+  color: #477252;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -139,7 +148,7 @@
 .table td {
   height: 113px;
   padding: 0 24px;
-  border-bottom: 1px solid #eef1f6;
+  border-bottom: 1px solid #edf6f0;
   color: #151c28;
   vertical-align: middle;
 }
@@ -178,44 +187,12 @@
   border-radius: 50%;
   display: grid;
   place-items: center;
-  border: 1px solid #e1e6ef;
+  border: 1px solid #bde5cb;
   overflow: hidden;
-  color: #0b5f83;
-  font-size: 1.1rem;
+  background: linear-gradient(145deg, #dff7e7, #b9ebca);
+  color: #0f5f2f;
+  font-size: 0.9rem;
   font-weight: 700;
-}
-
-.photo-woman,
-.photo-man {
-  background:
-    radial-gradient(circle at 50% 33%, #efc4a3 0 22%, transparent 23%),
-    radial-gradient(circle at 50% 28%, #4f382e 0 28%, transparent 29%),
-    linear-gradient(145deg, #dfe6ed, #f8fafc);
-}
-
-.photo-woman span,
-.photo-man span {
-  width: 70%;
-  height: 70%;
-  display: block;
-  border-radius: 50%;
-  background:
-    linear-gradient(#f5fafc, #f5fafc) center 85% / 75% 30% no-repeat,
-    radial-gradient(circle at 40% 42%, #18212c 0 4%, transparent 5%),
-    radial-gradient(circle at 60% 42%, #18212c 0 4%, transparent 5%),
-    radial-gradient(circle at 50% 58%, #d99572 0 8%, transparent 9%),
-    radial-gradient(circle at 50% 45%, #f1c4a6 0 45%, transparent 46%);
-}
-
-.photo-man {
-  background:
-    radial-gradient(circle at 50% 31%, #d6a17d 0 21%, transparent 22%),
-    radial-gradient(circle at 50% 27%, #1d2531 0 26%, transparent 27%),
-    linear-gradient(145deg, #dfe6ed, #f8fafc);
-}
-
-.blue {
-  background: #82cef8;
 }
 
 .reasonCell {
@@ -245,6 +222,14 @@
   color: #4e5a70;
 }
 
+.dateCell small {
+  display: block;
+  margin-top: 5px;
+  color: #2f7446;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
 .statusPill {
   min-height: 27px;
   display: inline-flex;
@@ -263,22 +248,49 @@
   border-radius: 50%;
 }
 
-.statusPending {
+.statusREQUESTED {
   background: #fff0c7;
   color: #9b7000;
 }
 
-.statusPending span {
+.statusREQUESTED span {
   background: #f2b600;
 }
 
-.statusConfirmed {
-  background: #cde5ff;
-  color: #006fc9;
+.statusCONFIRMED {
+  background: #dff7e7;
+  color: #107237;
 }
 
-.statusConfirmed span {
-  background: #0087ff;
+.statusCONFIRMED span {
+  background: #18a84f;
+}
+
+.statusCOMPLETED {
+  background: #d6f5ed;
+  color: #08705f;
+}
+
+.statusCOMPLETED span {
+  background: #0f9f85;
+}
+
+.statusCANCELLED {
+  background: #edf0f3;
+  color: #5a6472;
+}
+
+.statusCANCELLED span {
+  background: #8d98a7;
+}
+
+.statusREJECTED {
+  background: #ffe1e1;
+  color: #a82424;
+}
+
+.statusREJECTED span {
+  background: #dc3a3a;
 }
 
 .actions {
@@ -289,7 +301,8 @@
 }
 
 .approveButton,
-.moreButton,
+.rejectButton,
+.completeButton,
 .pagination button {
   border: 0;
   background: transparent;
@@ -299,15 +312,52 @@
 }
 
 .approveButton {
-  width: 28px;
-  height: 28px;
-  color: #00843d;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #e3f8eb;
+  color: #0f873f;
 }
 
-.moreButton {
-  width: 24px;
+.rejectButton {
+  width: 32px;
   height: 32px;
-  color: #4b5563;
+  border-radius: 8px;
+  background: #ffe8e8;
+  color: #c33131;
+}
+
+.completeButton {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #e6f7ee;
+  color: #147448;
+}
+
+.approveButton:disabled,
+.rejectButton:disabled,
+.completeButton:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.meetingLink {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 8px;
+  padding: 0 10px;
+  background: #eefaf2;
+  color: #126b38;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.noAction {
+  color: #94a3b8;
+  font-weight: 700;
 }
 
 .loadingOverlay {
@@ -320,6 +370,24 @@
   font-weight: 600;
 }
 
+.emptyState {
+  display: grid;
+  gap: 6px;
+  place-items: center;
+  min-height: 180px;
+  color: #31533b;
+}
+
+.emptyState strong {
+  color: #143d24;
+  font-size: 1rem;
+}
+
+.emptyState span {
+  color: #587461;
+  font-size: 0.9rem;
+}
+
 .footer {
   min-height: 64px;
   display: flex;
@@ -327,8 +395,8 @@
   justify-content: space-between;
   gap: 20px;
   padding: 0 24px;
-  border-top: 1px solid #eef1f6;
-  background: #fbfbfd;
+  border-top: 1px solid #edf6f0;
+  background: #fbfffc;
 }
 
 .footer p {

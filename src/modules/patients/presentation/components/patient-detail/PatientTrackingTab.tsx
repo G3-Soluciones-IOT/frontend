@@ -1,79 +1,38 @@
-import { useEffect, useState, type CSSProperties } from "react";
-import { apiUrl } from "@/app/config/env";
-import type { TrackingResource } from "../../../infrastructure/api/nutritionistPatients.api";
+import { useMemo, type CSSProperties } from "react";
+import { useI18n } from "@/shared/i18n/useI18n";
+import type { TranslationKey } from "@/shared/i18n/translations";
 import styles from "../../pages/PatientsPages.module.css";
 
 interface MacroValues {
-  id?: number | string;
-  calories?: number;
-  carbs?: number;
-  proteins?: number;
-  fats?: number;
+  calories: number;
+  carbs: number;
+  proteins: number;
+  fats: number;
 }
 
-interface TrackingProgressApiResponse {
-  consumed?: MacroValues;
-  target?: MacroValues;
-  calories?: { consumed?: number; target?: number; percentage?: number };
-  carbs?: { consumed?: number; target?: number; percentage?: number };
-  proteins?: { consumed?: number; target?: number; percentage?: number };
-  fats?: { consumed?: number; target?: number; percentage?: number };
-}
-
-interface TrackingGoalApiResponse {
-  id?: number | string;
-  userId?: number | string;
-  targetMacros?: MacroValues;
+interface TrackingProgress {
+  consumed: MacroValues;
+  target: MacroValues;
 }
 
 interface MealHistoryEntry {
   id: number | string;
-  recipeId?: number | string;
-  mealPlanType?: string;
-  dayNumber?: number;
-}
-
-interface WaterToday {
-  userId?: number | string;
-  date?: string;
-  totalWaterMl?: number;
-}
-
-interface WeeklyHydration {
-  userId?: number | string;
-  averageWaterMl?: number;
-  daysBelowGoal?: number;
-  bestDayMl?: number;
+  recipeId: number | string;
+  mealPlanType: string;
+  dayNumber: number;
 }
 
 interface TrackingTabData {
-  tracking?: TrackingResource;
-  progress?: TrackingProgressApiResponse;
-  goal?: TrackingGoalApiResponse;
+  progress: TrackingProgress;
   mealEntries: MealHistoryEntry[];
-  waterToday?: WaterToday;
-  weeklyHydration?: WeeklyHydration;
 }
 
 interface PatientTrackingTabProps {
   patientId: string;
 }
 
-async function fetchPatientDetailJson<T>(path: string): Promise<T> {
-  const token = localStorage.getItem("accessToken");
-  const response = await fetch(apiUrl(path), {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
-  }
-
-  return response.json() as Promise<T>;
-}
-
-function asArray<T>(data: T | T[]) {
-  return Array.isArray(data) ? data : [data];
+function patientSeed(patientId: string) {
+  return patientId.split("").reduce((total, char) => total + char.charCodeAt(0), 0);
 }
 
 function numberOrZero(value?: number) {
@@ -85,149 +44,138 @@ function clampPercent(value: number) {
   return Math.max(0, Math.min(100, value));
 }
 
-function percent(consumed?: number, target?: number, explicit?: number) {
-  if (Number.isFinite(explicit)) return clampPercent(Math.round(Number(explicit)));
+function percent(consumed?: number, target?: number) {
   if (!target) return 0;
   return clampPercent(Math.round((numberOrZero(consumed) / target) * 100));
 }
 
-function macroProgress(progress: TrackingProgressApiResponse | undefined, key: "calories" | "carbs" | "proteins" | "fats") {
-  const fromNested = progress?.[key];
-  const consumed = progress?.consumed?.[key] ?? fromNested?.consumed;
-  const target = progress?.target?.[key] ?? fromNested?.target;
+function dayLabel(day: number | undefined, t: (key: TranslationKey) => string) {
+  const labels: TranslationKey[] = [
+    "patients.day.monday",
+    "patients.day.tuesday",
+    "patients.day.wednesday",
+    "patients.day.thursday",
+    "patients.day.friday",
+    "patients.day.saturday",
+    "patients.day.sunday",
+  ];
+  if (!day || day < 1) return "-";
+  return t(labels[(day - 1) % 7] ?? "patients.day.monday");
+}
+
+function buildMockTrackingData(patientId: string): TrackingTabData {
+  const seed = patientSeed(patientId);
+  const target: MacroValues = {
+    calories: 2100 + (seed % 450),
+    proteins: 120 + (seed % 36),
+    carbs: 230 + (seed % 55),
+    fats: 65 + (seed % 18),
+  };
+
+  const ratio = (offset: number) => 0.58 + (((seed + offset) % 39) / 100);
+  const consumed: MacroValues = {
+    calories: Math.round(target.calories * ratio(3)),
+    proteins: Math.round(target.proteins * ratio(11)),
+    carbs: Math.round(target.carbs * ratio(19)),
+    fats: Math.round(target.fats * ratio(27)),
+  };
+
+  const mealTypes = ["Breakfast", "Lunch", "Dinner", "Snack"];
+  const mealEntries = mealTypes.map((mealType, index) => ({
+    id: `${patientId}-${mealType.toLowerCase()}`,
+    recipeId: 100 + ((seed + index * 13) % 90),
+    mealPlanType: mealType,
+    dayNumber: ((seed + index) % 7) + 1,
+  }));
+
   return {
-    consumed: numberOrZero(consumed),
-    target: numberOrZero(target),
-    percentage: percent(consumed, target, fromNested?.percentage),
+    progress: {
+      consumed,
+      target,
+    },
+    mealEntries,
   };
 }
 
-function dayLabel(day?: number) {
-  const labels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-  if (!day || day < 1) return "-";
-  return labels[(day - 1) % 7] ?? `Day ${day}`;
-}
-
 export function PatientTrackingTab({ patientId }: PatientTrackingTabProps) {
-  const [data, setData] = useState<TrackingTabData>({ mealEntries: [] });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { t } = useI18n();
+  const data = useMemo(() => buildMockTrackingData(patientId), [patientId]);
 
-  useEffect(() => {
-    let mounted = true;
-
-    const loadTrackingTab = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const [nextTracking, nextProgress, nextGoal, waterToday, weeklyHydration] = await Promise.all([
-          fetchPatientDetailJson<TrackingResource>(`/api/v1/tracking/user/${patientId}`),
-          fetchPatientDetailJson<TrackingProgressApiResponse>(`/api/v1/tracking/user/${patientId}/progress`).catch(() => undefined),
-          fetchPatientDetailJson<TrackingGoalApiResponse>(`/api/v1/tracking-goals/user/${patientId}`).catch(() => undefined),
-          fetchPatientDetailJson<WaterToday>(`/api/v1/water-intakes/user/${patientId}/today`).catch(() => undefined),
-          fetchPatientDetailJson<WeeklyHydration>(`/api/v1/water-intakes/user/${patientId}/weekly-summary`).catch(() => undefined),
-        ]);
-
-        const mealEntries = nextTracking?.id
-          ? asArray(
-              await fetchPatientDetailJson<MealHistoryEntry | MealHistoryEntry[]>(
-                `/api/v1/meal-plan-entries/tracking/${nextTracking.id}`,
-              ).catch(() => nextTracking.mealPlanEntries as MealHistoryEntry[]),
-            )
-          : [];
-
-        if (!mounted) return;
-        setData({
-          tracking: nextTracking,
-          progress: nextProgress,
-          goal: nextGoal,
-          mealEntries,
-          waterToday,
-          weeklyHydration,
-        });
-      } catch (err) {
-        if (!mounted) return;
-        setError(err instanceof Error ? err.message : "Failed to load tracking data.");
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
-
-    loadTrackingTab();
-
-    return () => {
-      mounted = false;
-    };
-  }, [patientId]);
-
-  const goal = data.goal?.targetMacros;
-  const calories = macroProgress(data.progress, "calories");
-  const carbs = macroProgress(data.progress, "carbs");
-  const proteins = macroProgress(data.progress, "proteins");
-  const fats = macroProgress(data.progress, "fats");
-  const waterMl = numberOrZero(data.waterToday?.totalWaterMl);
-  const waterPercent = percent(waterMl, 2500);
-  const weeklyAverageMl = numberOrZero(data.weeklyHydration?.averageWaterMl);
-  const weeklyBestMl = numberOrZero(data.weeklyHydration?.bestDayMl);
-  const weeklyBars = [72, 58, 82, 64, 49, 67, 76];
+  const goal = data.progress.target;
+  const calories = {
+    consumed: data.progress.consumed.calories,
+    target: goal.calories,
+    percentage: percent(data.progress.consumed.calories, goal.calories),
+  };
+  const carbs = {
+    consumed: data.progress.consumed.carbs,
+    target: goal.carbs,
+    percentage: percent(data.progress.consumed.carbs, goal.carbs),
+  };
+  const proteins = {
+    consumed: data.progress.consumed.proteins,
+    target: goal.proteins,
+    percentage: percent(data.progress.consumed.proteins, goal.proteins),
+  };
+  const fats = {
+    consumed: data.progress.consumed.fats,
+    target: goal.fats,
+    percentage: percent(data.progress.consumed.fats, goal.fats),
+  };
   const nutritionMetrics = [
     {
-      label: "Calories",
+      label: t("dashboard.metric.calories"),
       consumed: calories.consumed,
       target: calories.target,
       percentage: calories.percentage,
       unit: "kcal",
       tone: "green",
-      icon: "flame",
+      icon: "Cal",
     },
     {
-      label: "Protein",
+      label: t("dashboard.metric.protein"),
       consumed: proteins.consumed,
       target: proteins.target,
       percentage: proteins.percentage,
       unit: "g",
       tone: "blue",
-      icon: "target",
+      icon: "Pro",
     },
     {
-      label: "Carbs",
+      label: t("dashboard.metric.carbs"),
       consumed: carbs.consumed,
       target: carbs.target,
       percentage: carbs.percentage,
       unit: "g",
       tone: "amber",
-      icon: "wheat",
+      icon: "Carb",
     },
     {
-      label: "Fats",
+      label: t("dashboard.metric.fats"),
       consumed: fats.consumed,
       target: fats.target,
       percentage: fats.percentage,
       unit: "g",
       tone: "purple",
-      icon: "drop",
+      icon: "Fat",
     },
   ];
 
   return (
     <section className={styles.patientTrackingTab}>
       <div className={styles.patientOverviewTitle}>
-        <h2>Tracking</h2>
+        <h2>{t("patients.detail.tab.tracking")}</h2>
       </div>
-
-      {loading && <p className={styles.directoryMessage}>Loading tracking data...</p>}
-      {error && <p className={styles.errorText}>Tracking endpoint unavailable: {error}</p>}
 
       <section className={styles.panel}>
         <div className={styles.panelHeader}>
-          <h2 className={`${styles.panelTitle} ${styles.panelTitleSm}`}>Daily Nutrition Progress</h2>
+          <h2 className={`${styles.panelTitle} ${styles.panelTitleSm}`}>{t("patients.tracking.dailyProgress")}</h2>
         </div>
         <div className={styles.nutritionProgressGrid}>
           {nutritionMetrics.map((metric) => (
             <article key={metric.label} className={`${styles.nutritionMetricCard} ${styles[`nutritionMetric${metric.tone}`]}`}>
               <div className={styles.nutritionMetricLabel}>
-                <span className={styles.nutritionMetricIcon}>{metric.icon === "flame" ? "Cal" : metric.icon === "target" ? "Pro" : metric.icon === "wheat" ? "Carb" : "Fat"}</span>
+                <span className={styles.nutritionMetricIcon}>{metric.icon}</span>
                 <span>{metric.label}</span>
               </div>
               <div className={styles.nutritionRing} style={{ "--progress": `${metric.percentage}%` } as CSSProperties}>
@@ -241,10 +189,10 @@ export function PatientTrackingTab({ patientId }: PatientTrackingTabProps) {
           ))}
         </div>
         <div className={styles.nutritionLegend}>
-          <span><i className={styles.legendExcellent} />Excellent (90%+)</span>
-          <span><i className={styles.legendGood} />Good (70-89%)</span>
-          <span><i className={styles.legendNeeds} />Needs Improvement (50-69%)</span>
-          <span><i className={styles.legendPoor} />Poor (&lt;50%)</span>
+          <span><i className={styles.legendExcellent} />{t("patients.tracking.legend.excellent")}</span>
+          <span><i className={styles.legendGood} />{t("patients.tracking.legend.good")}</span>
+          <span><i className={styles.legendNeeds} />{t("patients.tracking.legend.needs")}</span>
+          <span><i className={styles.legendPoor} />{t("patients.tracking.legend.poor")}</span>
         </div>
       </section>
 
@@ -253,34 +201,34 @@ export function PatientTrackingTab({ patientId }: PatientTrackingTabProps) {
           <div className={styles.trackingVisualHeader}>
             <span className={`${styles.trackingHeaderIcon} ${styles.trackingHeaderIconBlue}`}>G</span>
             <div>
-              <h3>Daily Goal</h3>
-              <p>Target macros for this patient</p>
+              <h3>{t("patients.tracking.dailyGoal")}</h3>
+              <p>{t("patients.tracking.dailyGoal.description")}</p>
             </div>
           </div>
           <div className={styles.goalMetricGrid}>
-            <GoalMetric value={numberOrZero(goal?.calories).toLocaleString()} unit="kcal" label="Calories" />
-            <GoalMetric value={numberOrZero(goal?.carbs).toLocaleString()} unit="g" label="Carbohydrates" />
-            <GoalMetric value={numberOrZero(goal?.proteins).toLocaleString()} unit="g" label="Proteins" />
-            <GoalMetric value={numberOrZero(goal?.fats).toLocaleString()} unit="g" label="Fats" />
+            <GoalMetric value={goal.calories.toLocaleString()} unit="kcal" label={t("dashboard.metric.calories")} />
+            <GoalMetric value={goal.carbs.toLocaleString()} unit="g" label={t("patients.tracking.carbohydrates")} />
+            <GoalMetric value={goal.proteins.toLocaleString()} unit="g" label={t("patients.tracking.proteins")} />
+            <GoalMetric value={goal.fats.toLocaleString()} unit="g" label={t("dashboard.metric.fats")} />
           </div>
-          <small className={styles.trackingCardFootnote}>Goal data synced from the patient's active tracking goal.</small>
+          <small className={styles.trackingCardFootnote}>{t("patients.tracking.mockFootnote")}</small>
         </section>
 
         <section className={styles.trackingVisualCard}>
           <div className={styles.trackingVisualHeader}>
             <span className={`${styles.trackingHeaderIcon} ${styles.trackingHeaderIconAmber}`}>M</span>
             <div>
-              <h3>Meal History</h3>
-              <p>Meals assigned to the current tracking day</p>
+              <h3>{t("patients.tracking.mealHistory")}</h3>
+              <p>{t("patients.tracking.mealHistory.description")}</p>
             </div>
           </div>
           <div className={styles.trackingMealTableWrap}>
             <table className={styles.trackingMealTableClean}>
               <thead>
                 <tr>
-                  <th>Meal</th>
-                  <th>Recipe</th>
-                  <th>Day</th>
+                  <th>{t("patients.tracking.meal")}</th>
+                  <th>{t("patients.tracking.recipe")}</th>
+                  <th>{t("patients.tracking.day")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -288,69 +236,20 @@ export function PatientTrackingTab({ patientId }: PatientTrackingTabProps) {
                   <tr key={entry.id}>
                     <td>
                       <span className={styles.mealTypeCell}>
-                        <i>{entry.mealPlanType?.charAt(0) ?? "M"}</i>
-                        {entry.mealPlanType ?? "-"}
+                        <i>{entry.mealPlanType.charAt(0)}</i>
+                        {entry.mealPlanType}
                       </span>
                     </td>
-                    <td><strong>Recipe #{entry.recipeId ?? "-"}</strong></td>
-                    <td>{dayLabel(entry.dayNumber)}</td>
+                    <td><strong>{t("patients.tracking.recipe")} #{entry.recipeId}</strong></td>
+                    <td>{dayLabel(entry.dayNumber, t)}</td>
                   </tr>
                 ))}
-                {data.mealEntries.length === 0 && (
-                  <tr>
-                    <td colSpan={3}>No meal entries found.</td>
-                  </tr>
-                )}
               </tbody>
             </table>
           </div>
         </section>
       </div>
 
-      <div className={styles.hydrationVisualGrid}>
-        <section className={styles.trackingVisualCard}>
-          <div className={styles.trackingVisualHeader}>
-            <span className={`${styles.trackingHeaderIcon} ${styles.trackingHeaderIconBlue}`}>W</span>
-            <div>
-              <h3>Today's Water</h3>
-              <p>Current intake against daily goal</p>
-            </div>
-          </div>
-          <div className={styles.waterFocus}>
-            <strong>{waterMl.toLocaleString()} <span>ml</span></strong>
-            <small>of 2500 ml goal</small>
-            <div className={styles.waterRing} style={{ "--progress": `${waterPercent}%` } as CSSProperties}>
-              <div>
-                <strong>{waterPercent}%</strong>
-                <span>of daily goal</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className={styles.trackingVisualCard}>
-          <div className={styles.trackingVisualHeader}>
-            <span className={`${styles.trackingHeaderIcon} ${styles.trackingHeaderIconBlue}`}>H</span>
-            <div>
-              <h3>Weekly Hydration</h3>
-              <p>Seven-day intake summary</p>
-            </div>
-          </div>
-          <div className={styles.weeklyHydrationStats}>
-            <div><span>Average</span><strong>{weeklyAverageMl.toLocaleString()} ml/day</strong></div>
-            <div><span>Best Day</span><strong>{weeklyBestMl.toLocaleString()} ml</strong></div>
-            <div><span>Days Below Goal</span><strong>{numberOrZero(data.weeklyHydration?.daysBelowGoal)} days</strong></div>
-          </div>
-          <div className={styles.weeklyHydrationBars}>
-            {weeklyBars.map((value, index) => (
-              <div key={index}>
-                <span style={{ height: `${value}%` }} />
-                <small>{["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][index]}</small>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
     </section>
   );
 }

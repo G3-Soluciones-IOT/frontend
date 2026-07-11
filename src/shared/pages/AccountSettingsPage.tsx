@@ -3,7 +3,6 @@ import { SharedLayout } from "@/shared/components/layout";
 import { useNavigation } from "@/shared/hooks/useNavigation";
 import { appLanguages, type AppLanguage } from "@/shared/i18n/language";
 import { useI18n } from "@/shared/i18n/useI18n";
-import type { TranslationKey } from "@/shared/i18n/translations";
 import styles from "./AccountSettingsPage.module.css";
 
 interface AccountSettingsPageProps {
@@ -65,7 +64,6 @@ export function AccountSettingsPage({
   );
   const [newPassword, setNewPassword] = useState("");
   const { language, setLanguage, t } = useI18n();
-  const [theme, setTheme] = useState<TranslationKey>("account.theme.system");
   const [statusMessage, setStatusMessage] = useState("");
 
   const updateEmail = () => {
@@ -181,22 +179,6 @@ export function AccountSettingsPage({
                   ))}
                 </select>
               </label>
-
-              <div className={styles.preferenceGroup}>
-                <span>{t("account.theme.label")}</span>
-                <div className={styles.segmentedControl}>
-                  {(["account.theme.light", "account.theme.dark", "account.theme.system"] as TranslationKey[]).map((option) => (
-                    <button
-                      key={option}
-                      type="button"
-                      className={theme === option ? styles.segmentActive : ""}
-                      onClick={() => setTheme(option)}
-                    >
-                      {t(option)}
-                    </button>
-                  ))}
-                </div>
-              </div>
             </section>
 
             <section className={`${styles.card} ${styles.dangerCard}`}>

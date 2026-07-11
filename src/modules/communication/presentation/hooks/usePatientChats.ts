@@ -12,6 +12,23 @@ import {
 } from "../../infrastructure/api/chat.api";
 import { StompClient } from "../../infrastructure/api/stompClient";
 
+interface NutritionistProfileResource {
+  id: number | string;
+}
+
+interface NutritionistPatientRelationResource {
+  id: number | string;
+  patientUserId: number | string;
+  accepted?: boolean;
+}
+
+interface PatientProfileResource {
+  id: number | string;
+  name?: string;
+  email?: string;
+  userProfileId?: number | string;
+}
+
 type ConnectionStatus = "CONNECTING" | "CONNECTED" | "DISCONNECTED";
 
 function formatFileSize(size: number) {
@@ -67,6 +84,75 @@ function toPatient(userId: number | string, onlineUser?: ChatUserResource): Chat
     connectionLabel: connectionStatus === "ONLINE" ? "En linea ahora" : "No conectado",
     recordPath: `/nutritionist/patients/${id}`,
     statsPath: "/nutritionist/patients/tracking",
+  };
+}
+
+function getAuthHeaders(): HeadersInit {
+  const token = localStorage.getItem("accessToken");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+async function fetchJson<T>(path: string): Promise<T> {
+  const response = await fetch(`${chatApi.defaults.baseURL}${path}`, {
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+
+  return response.json() as Promise<T>;
+}
+
+async function getAcceptedPatientContacts(nutritionistUserId: string) {
+  const nutritionist = await fetchJson<NutritionistProfileResource>(
+    `/api/v1/nutritionists/by-user?userId=${encodeURIComponent(nutritionistUserId)}`,
+  );
+  const relations = await fetchJson<NutritionistPatientRelationResource[]>(
+    `/api/v1/nutritionist-patients/nutritionist/${encodeURIComponent(String(nutritionist.id))}`,
+  );
+  const acceptedRelations = relations.filter((relation) => relation.accepted);
+
+  const profileResults = await Promise.allSettled(
+    acceptedRelations.map(async (relation) => ({
+      relation,
+      profile: await fetchJson<PatientProfileResource>(
+        `/api/v1/profiles/by-user/${encodeURIComponent(String(relation.patientUserId))}`,
+      ),
+    })),
+  );
+
+  return acceptedRelations.map((relation) => {
+    const profileResult = profileResults.find(
+      (result) =>
+        result.status === "fulfilled" &&
+        String(result.value.relation.patientUserId) === String(relation.patientUserId),
+    );
+    const profile = profileResult?.status === "fulfilled" ? profileResult.value.profile : undefined;
+    return {
+      relation,
+      profile,
+    };
+  });
+}
+
+function toEmptyPatientChat(currentUserId: string, patientUserId: number | string, profile?: PatientProfileResource): PatientChat {
+  const name = profile?.name || `Paciente #${patientUserId}`;
+  const patient = toPatient(patientUserId, {
+    id: String(patientUserId),
+    userId: Number(patientUserId),
+    nickName: profile?.email || name,
+    fullName: name,
+    status: "OFFLINE",
+  });
+
+  return {
+    id: `${currentUserId}_${patientUserId}`,
+    patient,
+    preview: "Sin mensajes todavia",
+    lastActivityLabel: "Nuevo",
+    messages: [],
+    canChat: true,
   };
 }
 
@@ -126,27 +212,47 @@ export function usePatientChats() {
       setIsLoading(true);
       setErrorMessage("");
 
+      const loadAcceptedPatientChats = async () => {
+        const acceptedContacts = await getAcceptedPatientContacts(currentUser.id);
+        return acceptedContacts.map(({ relation, profile }) =>
+          toEmptyPatientChat(currentUser.id, relation.patientUserId, profile),
+        );
+      };
+
       try {
-        const [{ data: exists }, { data: contactIds }, { data: onlineUsers }] = await Promise.all([
-          chatApi.get<ChatUserExistsResource>(`/api/v1/chat/users/${currentUser.id}/exists`),
-          chatApi.get<number[]>(`/api/v1/chat/contacts/${currentUser.id}`),
-          chatApi.get<ChatUserResource[]>("/users"),
+        const [existsResult, contactsResult, usersResult] = await Promise.all([
+          chatApi.get<ChatUserExistsResource>(`/api/v1/chat/users/${currentUser.id}/exists`).catch(() => null),
+          chatApi.get<number[]>(`/api/v1/chat/contacts/${currentUser.id}`).catch(() => ({ data: [] as number[] })),
+          chatApi.get<ChatUserResource[]>("/api/v1/chat/users").catch(() => ({ data: [] as ChatUserResource[] })),
         ]);
 
-        if (!exists.exists) {
-          throw new Error("El usuario actual no existe en el servicio de chat.");
+        const contactIds = contactsResult.data;
+        const onlineUsers = usersResult.data;
+
+        if (existsResult?.data.exists === false || contactIds.length === 0) {
+          const fallbackChats = await loadAcceptedPatientChats();
+
+          if (!isMounted) return;
+          setChats(fallbackChats);
+          setActiveChatId(fallbackChats[0]?.id ?? "");
+          setErrorMessage(fallbackChats.length === 0 ? "No hay pacientes aceptados para iniciar conversaciones." : "");
+          return;
         }
 
         const contactChats = await Promise.all(
           contactIds.map(async (contactId) => {
             const onlineUser = onlineUsers.find((user) => String(user.userId) === String(contactId));
-            const [{ data: validation }, { data: messages }] = await Promise.all([
+            const [validationResult, messagesResult] = await Promise.all([
               chatApi.get<ChatValidateResource>("/api/v1/chat/validate", {
                 params: { userId1: currentUser.id, userId2: contactId },
-              }),
-              chatApi.get<ChatMessageResource[]>(`/messages/${currentUser.id}/${contactId}`),
+              }).catch(() => ({ data: { canChat: true } })),
+              chatApi.get<ChatMessageResource[]>(`/api/v1/chat/messages/${currentUser.id}/${contactId}`).catch(() => ({
+                data: [] as ChatMessageResource[],
+              })),
             ]);
 
+            const validation = validationResult.data;
+            const messages = messagesResult.data;
             const mappedMessages = messages.map((message) => toChatMessage(message, currentUser.id));
             const patient = toPatient(contactId, onlineUser);
 
@@ -161,14 +267,32 @@ export function usePatientChats() {
           }),
         );
 
+        if (contactChats.length === 0) {
+          const fallbackChats = await loadAcceptedPatientChats();
+
+          if (!isMounted) return;
+          setChats(fallbackChats);
+          setActiveChatId(fallbackChats[0]?.id ?? "");
+          setErrorMessage(fallbackChats.length === 0 ? "No hay pacientes aceptados para iniciar conversaciones." : "");
+          return;
+        }
+
         if (!isMounted) return;
         setChats(contactChats);
         setActiveChatId(contactChats[0]?.id ?? "");
       } catch (error) {
         if (!isMounted) return;
-        setChats([]);
-        setActiveChatId("");
-        setErrorMessage(error instanceof Error ? error.message : "No se pudo conectar con el chat.");
+        try {
+          const fallbackChats = await loadAcceptedPatientChats();
+          if (!isMounted) return;
+          setChats(fallbackChats);
+          setActiveChatId(fallbackChats[0]?.id ?? "");
+          setErrorMessage(fallbackChats.length === 0 ? "No hay pacientes aceptados para iniciar conversaciones." : "");
+        } catch {
+          setChats([]);
+          setActiveChatId("");
+          setErrorMessage("No se pudieron cargar pacientes asociados para el chat.");
+        }
       } finally {
         if (isMounted) setIsLoading(false);
       }

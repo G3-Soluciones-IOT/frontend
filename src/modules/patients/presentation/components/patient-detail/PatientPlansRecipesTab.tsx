@@ -1,14 +1,34 @@
 import { useEffect, useMemo, useState } from "react";
+import { useI18n } from "@/shared/i18n/useI18n";
 import { API_BASE_URL, apiUrl } from "@/app/config/env";
 import styles from "../../pages/PatientsPages.module.css";
 
 interface PatientPlansRecipesTabProps {
   patientUserId: string;
   profileId?: number | string;
+  accountProfileId?: number | string;
 }
 
 interface SessionUser {
   id: number | string;
+}
+
+interface NutritionistProfile {
+  id: number | string;
+}
+
+interface PatientAccountProfile {
+  id?: number | string;
+  userProfileId?: number | string;
+}
+
+interface PatientUserProfile {
+  id?: number | string;
+}
+
+interface ResolvedPatientProfileIds {
+  accountProfileId: number | string | null;
+  userProfileId: number | string | null;
 }
 
 interface MealPlanEntry {
@@ -22,6 +42,9 @@ interface MealPlanEntry {
 
 interface MealPlan {
   id: number | string;
+  templateId?: number | string;
+  sourceTemplateId?: number | string;
+  originalMealPlanId?: number | string;
   name?: string;
   description?: string;
   calories?: number;
@@ -45,6 +68,9 @@ interface RecipeIngredient {
 
 interface Recipe {
   id: number | string;
+  templateId?: number | string;
+  sourceTemplateId?: number | string;
+  originalRecipeId?: number | string;
   name?: string;
   description?: string;
   preparationTime?: number;
@@ -65,6 +91,7 @@ function getSessionUser(): SessionUser | null {
 function getAuthHeaders(hasBody = false): HeadersInit {
   const token = localStorage.getItem("accessToken");
   return {
+    Accept: "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(hasBody ? { "Content-Type": "application/json" } : {}),
   };
@@ -80,11 +107,76 @@ async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
   });
 
   if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
+    const errorText = await response.text().catch(() => "");
+    throw new Error(errorText ? `HTTP ${response.status}: ${errorText}` : `HTTP ${response.status}`);
   }
 
   if (response.status === 204) return undefined as T;
-  return response.json() as Promise<T>;
+
+  const text = await response.text();
+  if (!text) return undefined as T;
+
+  return JSON.parse(text) as T;
+}
+
+function firstItem<T>(data: T | T[] | null | undefined) {
+  return Array.isArray(data) ? data[0] ?? null : data ?? null;
+}
+
+function normalizeText(value?: string) {
+  return value?.trim().toLowerCase() ?? "";
+}
+
+function mealPlanAssignmentKeys(plan: MealPlan) {
+  return [
+    plan.id,
+    plan.templateId,
+    plan.sourceTemplateId,
+    plan.originalMealPlanId,
+    (plan as MealPlan & { sourceMealPlanId?: number | string }).sourceMealPlanId,
+    (plan as MealPlan & { templateMealPlanId?: number | string }).templateMealPlanId,
+  ]
+    .filter((value) => value !== undefined && value !== null)
+    .map(String);
+}
+
+function recipeAssignmentKeys(recipe: Recipe) {
+  return [
+    recipe.id,
+    recipe.templateId,
+    recipe.sourceTemplateId,
+    recipe.originalRecipeId,
+    (recipe as Recipe & { sourceRecipeId?: number | string }).sourceRecipeId,
+    (recipe as Recipe & { templateRecipeId?: number | string }).templateRecipeId,
+  ]
+    .filter((value) => value !== undefined && value !== null)
+    .map(String);
+}
+
+function mealPlanSignature(plan: MealPlan) {
+  return [
+    normalizeText(plan.name),
+    normalizeText(plan.category),
+    plan.calories ?? "",
+    plan.carbs ?? "",
+    plan.proteins ?? "",
+    plan.fats ?? "",
+  ].join("|");
+}
+
+function recipeSignature(recipe: Recipe) {
+  return [
+    normalizeText(recipe.name),
+    normalizeText(recipe.categoryName),
+    normalizeText(recipe.recipeTypeName),
+    recipe.preparationTime ?? "",
+  ].join("|");
+}
+
+function mergeById<T extends { id: number | string }>(items: T[]) {
+  return Array.from(
+    items.reduce<Map<string, T>>((map, item) => map.set(String(item.id), item), new Map()).values(),
+  );
 }
 
 function isLocalMockApi() {
@@ -122,7 +214,31 @@ async function getLibraryMealPlans(nutritionistUserId?: number | string) {
     return fetchJson<MealPlan[]>(`/mealPlans?nutritionistUserId=${encodeURIComponent(String(nutritionistUserId))}`).catch(() => []);
   }
 
-  return fetchJson<MealPlan[]>(`/api/v1/meal-plan/nutritionists/${encodeURIComponent(String(nutritionistUserId))}`).catch(() => []);
+  return fetchJson<MealPlan[]>(`/api/v1/meal-plan/nutritionists/${encodeURIComponent(String(nutritionistUserId))}`)
+    .catch(() => fetchJson<MealPlan[]>("/api/v1/meal-plan"))
+    .catch(() => []);
+}
+
+async function getNutritionistIdByUserId(userId: number | string) {
+  const profile = await fetchJson<NutritionistProfile>(
+    `/api/v1/nutritionists/by-user?userId=${encodeURIComponent(String(userId))}`,
+  );
+  return profile.id;
+}
+
+async function getPatientProfileIdsByUserId(userId: number | string): Promise<ResolvedPatientProfileIds> {
+  const accountProfile = firstItem(await fetchJson<PatientAccountProfile | PatientAccountProfile[]>(
+    `/api/v1/profiles/by-user/${encodeURIComponent(String(userId))}`,
+  ).catch(() => null));
+
+  const userProfile = firstItem(await fetchJson<PatientUserProfile | PatientUserProfile[]>(
+    `/api/v1/user-profiles/by-user/${encodeURIComponent(String(userId))}`,
+  ).catch(() => null));
+
+  return {
+    accountProfileId: accountProfile?.id ?? null,
+    userProfileId: accountProfile?.userProfileId ?? userProfile?.id ?? null,
+  };
 }
 
 async function getLibraryRecipes(nutritionistUserId?: number | string) {
@@ -132,7 +248,20 @@ async function getLibraryRecipes(nutritionistUserId?: number | string) {
     return fetchJson<Recipe[]>(`/recipes?createdByNutritionistId=${encodeURIComponent(String(nutritionistUserId))}`).catch(() => []);
   }
 
-  return fetchJson<Recipe[]>(`/api/v1/recipes/nutritionists/${encodeURIComponent(String(nutritionistUserId))}/templates`).catch(() => []);
+  return fetchJson<Recipe[]>(`/api/v1/recipes/nutritionists/${encodeURIComponent(String(nutritionistUserId))}/templates/detailed`)
+    .catch(() => fetchJson<Recipe[]>(`/api/v1/recipes/nutritionists/${encodeURIComponent(String(nutritionistUserId))}/templates`))
+    .catch(() => fetchJson<Recipe[]>("/api/v1/recipes/templates/detailed"))
+    .then((recipes) =>
+      recipes.filter((recipe) =>
+        recipe.assignedToProfileId === undefined ||
+        recipe.assignedToProfileId === null,
+      ).filter((recipe) =>
+        !("createdByNutritionistId" in recipe) ||
+        String((recipe as Recipe & { createdByNutritionistId?: number | string }).createdByNutritionistId) ===
+          String(nutritionistUserId),
+      ),
+    )
+    .catch(() => []);
 }
 
 function formatKcal(value?: number) {
@@ -158,8 +287,12 @@ function mealTypeLabel(value?: number | string) {
   return value === undefined ? "Meal" : String(value);
 }
 
-export function PatientPlansRecipesTab({ patientUserId, profileId }: PatientPlansRecipesTabProps) {
+export function PatientPlansRecipesTab({ patientUserId, profileId, accountProfileId }: PatientPlansRecipesTabProps) {
+  const { t } = useI18n();
   const nutritionistUserId = getSessionUser()?.id;
+  const [nutritionistId, setNutritionistId] = useState<number | string | null>(null);
+  const [resolvedUserProfileId, setResolvedUserProfileId] = useState<number | string | null>(profileId ?? null);
+  const [resolvedAccountProfileId, setResolvedAccountProfileId] = useState<number | string | null>(accountProfileId ?? null);
   const [assignedMealPlans, setAssignedMealPlans] = useState<MealPlan[]>([]);
   const [assignedRecipes, setAssignedRecipes] = useState<Recipe[]>([]);
   const [libraryMealPlans, setLibraryMealPlans] = useState<MealPlan[]>([]);
@@ -170,14 +303,42 @@ export function PatientPlansRecipesTab({ patientUserId, profileId }: PatientPlan
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const assignedMealPlanIds = useMemo(
-    () => new Set(assignedMealPlans.map((plan) => String(plan.id))),
+  const assignedMealPlanKeys = useMemo(
+    () => new Set(assignedMealPlans.flatMap(mealPlanAssignmentKeys)),
     [assignedMealPlans],
   );
 
-  const assignedRecipeIds = useMemo(
-    () => new Set(assignedRecipes.map((recipe) => String(recipe.id))),
+  const assignedMealPlanSignatures = useMemo(
+    () => new Set(assignedMealPlans.map(mealPlanSignature).filter(Boolean)),
+    [assignedMealPlans],
+  );
+
+  const assignedRecipeKeys = useMemo(
+    () => new Set(assignedRecipes.flatMap(recipeAssignmentKeys)),
     [assignedRecipes],
+  );
+
+  const assignedRecipeSignatures = useMemo(
+    () => new Set(assignedRecipes.map(recipeSignature).filter(Boolean)),
+    [assignedRecipes],
+  );
+
+  const availableMealPlans = useMemo(
+    () =>
+      libraryMealPlans.filter((plan) => {
+        const hasAssignedKey = mealPlanAssignmentKeys(plan).some((key) => assignedMealPlanKeys.has(key));
+        return !hasAssignedKey && !assignedMealPlanSignatures.has(mealPlanSignature(plan));
+      }),
+    [assignedMealPlanKeys, assignedMealPlanSignatures, libraryMealPlans],
+  );
+
+  const availableRecipes = useMemo(
+    () =>
+      libraryRecipes.filter((recipe) => {
+        const hasAssignedKey = recipeAssignmentKeys(recipe).some((key) => assignedRecipeKeys.has(key));
+        return !hasAssignedKey && !assignedRecipeSignatures.has(recipeSignature(recipe));
+      }),
+    [assignedRecipeKeys, assignedRecipeSignatures, libraryRecipes],
   );
 
   const recipesById = useMemo(() => {
@@ -187,30 +348,85 @@ export function PatientPlansRecipesTab({ patientUserId, profileId }: PatientPlan
     }, {});
   }, [assignedRecipes, libraryRecipes]);
 
-  const loadPlansAndRecipes = async () => {
-    if (!profileId) {
-      setAssignedMealPlans([]);
-      setAssignedRecipes([]);
-      setError("Patient profile id is required to load assigned plans and recipes.");
-      setLoading(false);
-      return;
+  const mealPlanProfileId = profileId ?? resolvedUserProfileId;
+  const recipeProfileId = accountProfileId ?? resolvedAccountProfileId ?? mealPlanProfileId;
+  const assignmentProfileId = mealPlanProfileId ?? recipeProfileId;
+  const recipeFallbackProfileId =
+    mealPlanProfileId && recipeProfileId && String(mealPlanProfileId) !== String(recipeProfileId)
+      ? mealPlanProfileId
+      : null;
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function resolveNutritionistId() {
+      if (!nutritionistUserId) {
+        setNutritionistId(null);
+        return;
+      }
+
+      const resolvedId = await getNutritionistIdByUserId(nutritionistUserId).catch(() => null);
+      if (!ignore) setNutritionistId(resolvedId);
     }
 
+    void resolveNutritionistId();
+
+    return () => {
+      ignore = true;
+    };
+  }, [nutritionistUserId]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function resolvePatientProfileId() {
+      if (profileId) {
+        setResolvedUserProfileId(profileId);
+      }
+
+      if (accountProfileId) {
+        setResolvedAccountProfileId(accountProfileId);
+      }
+
+      const nextProfileIds = await getPatientProfileIdsByUserId(patientUserId).catch(() => null);
+      if (!ignore && nextProfileIds) {
+        setResolvedUserProfileId(profileId ?? nextProfileIds.userProfileId);
+        setResolvedAccountProfileId(accountProfileId ?? nextProfileIds.accountProfileId);
+      }
+    }
+
+    void resolvePatientProfileId();
+
+    return () => {
+      ignore = true;
+    };
+  }, [accountProfileId, patientUserId, profileId]);
+
+  const loadPlansAndRecipes = async () => {
     try {
       setLoading(true);
       setError(null);
 
       const [nextAssignedPlans, nextAssignedRecipes, nextLibraryPlans, nextLibraryRecipes] = await Promise.all([
-        getAssignedMealPlans(profileId),
-        getAssignedRecipes(profileId),
-        getLibraryMealPlans(nutritionistUserId),
-        getLibraryRecipes(nutritionistUserId),
+        mealPlanProfileId ? getAssignedMealPlans(mealPlanProfileId).catch(() => []) : Promise.resolve([]),
+        recipeProfileId
+          ? Promise.all([
+              getAssignedRecipes(recipeProfileId).catch(() => []),
+              recipeFallbackProfileId ? getAssignedRecipes(recipeFallbackProfileId).catch(() => []) : Promise.resolve([]),
+            ]).then(([primaryRecipes, fallbackRecipes]) => mergeById([...primaryRecipes, ...fallbackRecipes]))
+          : Promise.resolve([]),
+        getLibraryMealPlans(nutritionistId ?? undefined).catch(() => []),
+        getLibraryRecipes(nutritionistUserId).catch(() => []),
       ]);
 
       setAssignedMealPlans(Array.isArray(nextAssignedPlans) ? nextAssignedPlans : []);
       setAssignedRecipes(Array.isArray(nextAssignedRecipes) ? nextAssignedRecipes : []);
       setLibraryMealPlans(Array.isArray(nextLibraryPlans) ? nextLibraryPlans : []);
       setLibraryRecipes(Array.isArray(nextLibraryRecipes) ? nextLibraryRecipes : []);
+
+      if (!assignmentProfileId) {
+        setError("No se encontro el perfil del paciente. Revisa que tenga onboarding creado.");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load plans and recipes.");
     } finally {
@@ -220,7 +436,7 @@ export function PatientPlansRecipesTab({ patientUserId, profileId }: PatientPlan
 
   useEffect(() => {
     void loadPlansAndRecipes();
-  }, [nutritionistUserId, patientUserId, profileId]);
+  }, [assignmentProfileId, mealPlanProfileId, nutritionistId, nutritionistUserId, patientUserId, recipeFallbackProfileId, recipeProfileId]);
 
   async function assignItem(target: AssignTarget, itemId: number | string) {
     const key = `${target}-${itemId}`;
@@ -229,17 +445,28 @@ export function PatientPlansRecipesTab({ patientUserId, profileId }: PatientPlan
     setSuccess(null);
 
     try {
-      if (profileId && isLocalMockApi()) {
+      if (assignmentProfileId && isLocalMockApi()) {
         if (target === "mealPlan") {
-          await updateLocalResource<MealPlan>("mealPlans", itemId, { profileId: Number(profileId) });
+          await updateLocalResource<MealPlan>("mealPlans", itemId, { profileId: Number(mealPlanProfileId ?? assignmentProfileId) });
         } else {
-          await updateLocalResource<Recipe>("recipes", itemId, { assignedToProfileId: Number(profileId) } as Partial<Recipe>);
+          await updateLocalResource<Recipe>("recipes", itemId, { assignedToProfileId: Number(recipeProfileId ?? assignmentProfileId) } as Partial<Recipe>);
         }
-      } else if (profileId) {
+      } else if (assignmentProfileId) {
+        const targetProfileId = target === "mealPlan" ? mealPlanProfileId ?? assignmentProfileId : recipeProfileId ?? assignmentProfileId;
         const path = target === "mealPlan"
-          ? `/api/v1/meal-plan/${encodeURIComponent(String(itemId))}/assign-to-profile/${encodeURIComponent(String(profileId))}`
-          : `/api/v1/recipes/${encodeURIComponent(String(itemId))}/assign-to-profile/${encodeURIComponent(String(profileId))}`;
-        await fetchJson<void>(path, { method: "POST" });
+          ? `/api/v1/meal-plan/${encodeURIComponent(String(itemId))}/assign-to-profile/${encodeURIComponent(String(targetProfileId))}`
+          : `/api/v1/recipes/${encodeURIComponent(String(itemId))}/assign-to-profile/${encodeURIComponent(String(targetProfileId))}`;
+
+        try {
+          await fetchJson<void>(path, { method: "POST" });
+        } catch (err) {
+          if (target !== "recipe" || !recipeFallbackProfileId) throw err;
+
+          await fetchJson<void>(
+            `/api/v1/recipes/${encodeURIComponent(String(itemId))}/assign-to-profile/${encodeURIComponent(String(recipeFallbackProfileId))}`,
+            { method: "POST" },
+          );
+        }
       } else {
         const path = target === "mealPlan"
           ? `/api/v1/meal-plan/users/${encodeURIComponent(String(patientUserId))}`
@@ -260,28 +487,28 @@ export function PatientPlansRecipesTab({ patientUserId, profileId }: PatientPlan
   return (
     <section className={styles.patientPlansTab}>
       <div className={styles.patientOverviewTitle}>
-        <h2>Plans & Recipes</h2>
-        <span>{loading ? "Loading" : "Assignment center"}</span>
+        <h2>{t("patients.detail.tab.plans")}</h2>
+        <span>{loading ? t("patients.common.loading") : t("patients.plans.assignmentCenter")}</span>
       </div>
 
       {error && <p className={styles.errorText}>{error}</p>}
       {success && <p className={styles.successText}>{success}</p>}
 
       <div className={styles.patientPlansStats}>
-        <PlanStat label="Assigned Meal Plans" value={assignedMealPlans.length} />
-        <PlanStat label="Extra Recipes" value={assignedRecipes.length} />
-        <PlanStat label="Meal Plan Library" value={libraryMealPlans.length} />
-        <PlanStat label="Extra Recipe Library" value={libraryRecipes.length} />
+        <PlanStat label={t("patients.plans.assignedMealPlans")} value={assignedMealPlans.length} />
+        <PlanStat label={t("patients.plans.extraRecipes")} value={assignedRecipes.length} />
+        <PlanStat label={t("patients.plans.mealPlanLibrary")} value={availableMealPlans.length} />
+        <PlanStat label={t("patients.plans.extraRecipeLibrary")} value={availableRecipes.length} />
       </div>
 
       {loading ? (
-        <p className={styles.directoryMessage}>Loading plans and recipes...</p>
+        <p className={styles.directoryMessage}>{t("patients.plans.loading")}</p>
       ) : (
         <>
           <div className={styles.patientPlansGrid}>
             <section className={styles.patientPlansBlock}>
               <div className={styles.patientPlansBlockHeader}>
-                <h3>Assigned Meal Plans</h3>
+                <h3>{t("patients.plans.assignedMealPlans")}</h3>
                 <span>{assignedMealPlans.length}</span>
               </div>
               <div className={styles.patientPlansList}>
@@ -292,20 +519,20 @@ export function PatientPlansRecipesTab({ patientUserId, profileId }: PatientPlan
                     onView={() => setSelectedMealPlan(plan)}
                   />
                 ))}
-                {assignedMealPlans.length === 0 && <p className={styles.emptyState}>No meal plans assigned.</p>}
+                {assignedMealPlans.length === 0 && <p className={styles.emptyState}>{t("patients.plans.noAssignedMealPlans")}</p>}
               </div>
             </section>
 
             <section className={styles.patientPlansBlock}>
               <div className={styles.patientPlansBlockHeader}>
-                <h3>Assigned Extra Recipes</h3>
+                <h3>{t("patients.plans.assignedExtraRecipes")}</h3>
                 <span>{assignedRecipes.length}</span>
               </div>
               <div className={styles.patientPlansList}>
                 {assignedRecipes.map((recipe) => (
                   <RecipeCard key={recipe.id} recipe={recipe} assigned />
                 ))}
-                {assignedRecipes.length === 0 && <p className={styles.emptyState}>No recipes assigned.</p>}
+                {assignedRecipes.length === 0 && <p className={styles.emptyState}>{t("patients.plans.noAssignedRecipes")}</p>}
               </div>
             </section>
           </div>
@@ -313,49 +540,45 @@ export function PatientPlansRecipesTab({ patientUserId, profileId }: PatientPlan
           <div className={styles.patientPlansGrid}>
             <section className={styles.patientPlansBlock}>
               <div className={styles.patientPlansBlockHeader}>
-                <h3>Available Meal Plans</h3>
-                <span>{libraryMealPlans.length}</span>
+                <h3>{t("patients.plans.availableMealPlans")}</h3>
+                <span>{availableMealPlans.length}</span>
               </div>
               <div className={styles.patientPlansList}>
-                {libraryMealPlans.map((plan) => {
-                  const assigned = assignedMealPlanIds.has(String(plan.id));
+                {availableMealPlans.map((plan) => {
                   const key = `mealPlan-${plan.id}`;
                   return (
                     <MealPlanCard
                       key={plan.id}
                       plan={plan}
-                      assigned={assigned}
-                      actionLabel={assigned ? "Assigned" : "Assign"}
-                      actionDisabled={assigned || assigningKey === key || !profileId}
+                      actionLabel={t("patients.action.assign")}
+                      actionDisabled={assigningKey === key || !assignmentProfileId}
                       onAction={() => assignItem("mealPlan", plan.id)}
                     />
                   );
                 })}
-                {libraryMealPlans.length === 0 && <p className={styles.emptyState}>No meal plan templates found.</p>}
+                {availableMealPlans.length === 0 && <p className={styles.emptyState}>{t("patients.plans.noMealPlanTemplates")}</p>}
               </div>
             </section>
 
             <section className={styles.patientPlansBlock}>
               <div className={styles.patientPlansBlockHeader}>
-                <h3>Available Extra Recipes</h3>
-                <span>{libraryRecipes.length}</span>
+                <h3>{t("patients.plans.availableExtraRecipes")}</h3>
+                <span>{availableRecipes.length}</span>
               </div>
               <div className={styles.patientPlansList}>
-                {libraryRecipes.map((recipe) => {
-                  const assigned = assignedRecipeIds.has(String(recipe.id));
+                {availableRecipes.map((recipe) => {
                   const key = `recipe-${recipe.id}`;
                   return (
                     <RecipeCard
                       key={recipe.id}
                       recipe={recipe}
-                      assigned={assigned}
-                      actionLabel={assigned ? "Assigned" : "Assign"}
-                      actionDisabled={assigned || assigningKey === key || !profileId}
+                      actionLabel={t("patients.action.assign")}
+                      actionDisabled={assigningKey === key || !assignmentProfileId}
                       onAction={() => assignItem("recipe", recipe.id)}
                     />
                   );
                 })}
-                {libraryRecipes.length === 0 && <p className={styles.emptyState}>No extra recipe templates found.</p>}
+                {availableRecipes.length === 0 && <p className={styles.emptyState}>{t("patients.plans.noRecipeTemplates")}</p>}
               </div>
             </section>
           </div>

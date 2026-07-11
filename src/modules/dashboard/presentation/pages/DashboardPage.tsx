@@ -2,16 +2,13 @@ import { useEffect, useState, type ReactNode } from "react";
 import { apiUrl } from "@/app/config/env";
 import { SharedLayout } from "@/shared/components/layout";
 import { useNavigation } from "@/shared/hooks/useNavigation";
-import { dashboardSummary } from "../../infrastructure/mock/dashboard.mock";
+import { useI18n } from "@/shared/i18n/useI18n";
+import type { TranslationKey } from "@/shared/i18n/translations";
 import {
   getNutritionistPatientRelations,
   getPatientUserSummaries,
-  getTrackingByUser,
-  getTrackingProgressByUser,
   type MacroResource,
   type NutritionistPatientRelation,
-  type TrackingResource,
-  type TrackingProgressResource,
 } from "@/modules/patients/infrastructure/api/nutritionistPatients.api";
 import { PatientIotAlertsTable } from "@/modules/patients/presentation/components/PatientIotAlertsTable";
 import {
@@ -42,7 +39,11 @@ interface NutritionistProfilePreview {
 interface NutritionTrackingRow {
   id: string;
   patientName: string;
-  tracking: TrackingResource;
+  tracking: {
+    id: number | string;
+    date: string;
+    consumedMacros: MacroResource;
+  };
 }
 
 interface PatientProfilePreview {
@@ -73,10 +74,11 @@ interface RecentPatientRequest {
   accepted: boolean;
 }
 
-type DashboardTrackingProgress = TrackingProgressResource | {
-  consumed?: MacroResource;
-  target?: MacroResource;
-};
+interface AiHealthSummary {
+  text: string;
+  onTrackPercentage: number;
+  attentionCount: number;
+}
 
 interface DashboardLibraryItem {
   id?: number | string;
@@ -133,20 +135,43 @@ async function fetchDashboardJson<T>(path: string): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+async function getDashboardMealPlans(nutritionistId?: number | string, userId?: number | string) {
+  if (nutritionistId) {
+    const mealPlans = await fetchDashboardJson<DashboardLibraryItem[]>(
+      `/api/v1/meal-plan/nutritionists/${encodeURIComponent(String(nutritionistId))}`,
+    ).catch(() => null);
+
+    if (Array.isArray(mealPlans)) return mealPlans;
+  }
+
+  if (userId && String(userId) !== String(nutritionistId ?? "")) {
+    const mealPlans = await fetchDashboardJson<DashboardLibraryItem[]>(
+      `/api/v1/meal-plan/nutritionists/${encodeURIComponent(String(userId))}`,
+    ).catch(() => null);
+
+    if (Array.isArray(mealPlans)) return mealPlans;
+  }
+
+  return fetchDashboardJson<DashboardLibraryItem[]>("/api/v1/meal-plan").catch(() => []);
+}
+
 function firstItem<T>(data: T | T[]) {
   return Array.isArray(data) ? data[0] ?? null : data;
 }
 
 async function getPatientProfileName(userId: number | string, fallbackName: string) {
-  try {
-    const profileData = await fetchDashboardJson<PatientProfilePreview | PatientProfilePreview[]>(
-      `/api/v1/profiles/${encodeURIComponent(String(userId))}`,
-    );
-    const profile = firstItem(profileData);
-    return profile?.name || profile?.fullName || profile?.username || fallbackName;
-  } catch {
-    return fallbackName;
-  }
+  const profileData = await fetchDashboardJson<PatientProfilePreview | PatientProfilePreview[]>(
+    `/api/v1/profiles/by-user/${encodeURIComponent(String(userId))}`,
+  )
+    .catch(() =>
+      fetchDashboardJson<PatientProfilePreview | PatientProfilePreview[]>(
+        `/api/v1/profiles/${encodeURIComponent(String(userId))}`,
+      ),
+    )
+    .catch(() => null);
+
+  const profile = firstItem(profileData);
+  return profile?.name || profile?.fullName || profile?.username || fallbackName;
 }
 
 async function getNutritionistDisplayName(user: SessionUser | null) {
@@ -209,6 +234,30 @@ function trackingTime(row: NutritionTrackingRow) {
   return Number.isNaN(time) ? 0 : time;
 }
 
+function numericSeed(value: number | string) {
+  return String(value)
+    .split("")
+    .reduce((seed, character) => seed + character.charCodeAt(0), 0);
+}
+
+function buildMockTracking(patientUserId: number | string): NutritionTrackingRow["tracking"] {
+  const seed = numericSeed(patientUserId);
+  const date = new Date();
+  date.setDate(date.getDate() - (seed % 5));
+
+  return {
+    id: `mock-tracking-${patientUserId}`,
+    date: date.toISOString(),
+    consumedMacros: {
+      id: seed,
+      calories: 1450 + (seed % 520),
+      proteins: 72 + (seed % 38),
+      carbs: 150 + (seed % 70),
+      fats: 42 + (seed % 24),
+    },
+  };
+}
+
 function isPendingRelation(relation: { accepted?: boolean; status?: string }) {
   if (typeof relation.status === "string") {
     return relation.status.trim().toUpperCase() === "PENDING";
@@ -217,38 +266,20 @@ function isPendingRelation(relation: { accepted?: boolean; status?: string }) {
   return relation.accepted === false;
 }
 
-function metricPercentage(consumed?: number, target?: number) {
-  if (!target || !Number.isFinite(target)) return 0;
-  return Math.max(0, Math.min(100, Math.round(((consumed ?? 0) / target) * 100)));
+function mockAttentionPercentage(patientId: number | string, metricIndex: number) {
+  const seed = String(patientId)
+    .split("")
+    .reduce((total, char) => total + char.charCodeAt(0), 0);
+  return 45 + ((seed + metricIndex * 17) % 51);
 }
 
-function getProgressMetrics(progress: DashboardTrackingProgress) {
-  const consumed = "consumed" in progress ? progress.consumed : undefined;
-  const target = "target" in progress ? progress.target : undefined;
-  const normalized = "calories" in progress ? progress : null;
-
-  return [
-    {
-      label: "Calories",
-      percentage: normalized?.calories?.percentage ?? metricPercentage(consumed?.calories, target?.calories),
-    },
-    {
-      label: "Protein",
-      percentage: normalized?.proteins?.percentage ?? metricPercentage(consumed?.proteins, target?.proteins),
-    },
-    {
-      label: "Carbs",
-      percentage: normalized?.carbs?.percentage ?? metricPercentage(consumed?.carbs, target?.carbs),
-    },
-    {
-      label: "Fats",
-      percentage: normalized?.fats?.percentage ?? metricPercentage(consumed?.fats, target?.fats),
-    },
+function buildAttentionPatient(patientName: string, patientId: number | string) {
+  const metrics = [
+    { label: "Calories", percentage: mockAttentionPercentage(patientId, 0) },
+    { label: "Protein", percentage: mockAttentionPercentage(patientId, 1) },
+    { label: "Carbs", percentage: mockAttentionPercentage(patientId, 2) },
+    { label: "Fats", percentage: mockAttentionPercentage(patientId, 3) },
   ];
-}
-
-function buildAttentionPatient(patientName: string, patientId: number | string, progress: DashboardTrackingProgress) {
-  const metrics = getProgressMetrics(progress);
   const lowest = metrics.reduce((currentLowest, metric) =>
     metric.percentage < currentLowest.percentage ? metric : currentLowest,
   );
@@ -263,6 +294,61 @@ function buildAttentionPatient(patientName: string, patientId: number | string, 
     lowestPercentage: lowest.percentage,
     metrics,
   } satisfies AttentionPatient;
+}
+
+function fillTemplate(template: string, values: Record<string, string | number>) {
+  return Object.entries(values).reduce(
+    (nextText, [key, value]) => nextText.replaceAll(`{${key}}`, String(value)),
+    template,
+  );
+}
+
+function metricLabel(metric: string, t: (key: TranslationKey) => string) {
+  const labels: Record<string, TranslationKey> = {
+    Calories: "dashboard.metric.calories",
+    Protein: "dashboard.metric.protein",
+    Carbs: "dashboard.metric.carbs",
+    Fats: "dashboard.metric.fats",
+  };
+
+  return t(labels[metric] ?? "dashboard.metric.calories");
+}
+
+function buildAiHealthSummary(totalPatients: number, attentionPatients: AttentionPatient[], t: (key: TranslationKey) => string): AiHealthSummary {
+  if (totalPatients === 0) {
+    return {
+      text: t("dashboard.ai.empty"),
+      onTrackPercentage: 0,
+      attentionCount: 0,
+    };
+  }
+
+  const attentionCount = attentionPatients.length;
+  const onTrackCount = Math.max(totalPatients - attentionCount, 0);
+  const onTrackPercentage = Math.round((onTrackCount / totalPatients) * 100);
+  const mostUrgent = attentionPatients[0];
+
+  if (!mostUrgent) {
+    return {
+      text: fillTemplate(t("dashboard.ai.allOnTrack"), {
+        totalPatients,
+      }),
+      onTrackPercentage,
+      attentionCount,
+    };
+  }
+
+  return {
+    text: fillTemplate(t("dashboard.ai.needsReview"), {
+      totalPatients,
+      onTrackCount,
+      patientName: mostUrgent.patientName,
+      metric: metricLabel(mostUrgent.lowestMetric, t).toLowerCase(),
+      percentage: mostUrgent.lowestPercentage,
+    }),
+    onTrackPercentage,
+    attentionCount,
+  };
 }
 
 async function buildRecentRequest(relation: NutritionistPatientRelation, fallbackName: string) {
@@ -373,6 +459,7 @@ function MetricCard({
 }
 
 export function DashboardPage({ currentPath, onNavigate }: DashboardPageProps) {
+  const { t } = useI18n();
   const [nutritionistName, setNutritionistName] = useState("Nutritionist");
   const [trackingRows, setTrackingRows] = useState<NutritionTrackingRow[]>([]);
   const [attentionPatients, setAttentionPatients] = useState<AttentionPatient[]>([]);
@@ -403,42 +490,28 @@ export function DashboardPage({ currentPath, onNavigate }: DashboardPageProps) {
           sessionUser?.id
             ? fetchDashboardJson<DashboardLibraryItem[]>(`/api/v1/recipes/nutritionists/${encodeURIComponent(String(sessionUser.id))}/templates`).catch(() => [])
             : Promise.resolve([]),
-          sessionUser?.id
-            ? fetchDashboardJson<DashboardLibraryItem[]>(`/api/v1/meal-plan/nutritionists/${encodeURIComponent(String(sessionUser.id))}`).catch(() => [])
-            : Promise.resolve([]),
+          getDashboardMealPlans(profile?.id, sessionUser?.id),
         ]);
         const rows = await Promise.all(
           acceptedRelations.map(async (relation) => {
-            try {
-              const tracking = await getTrackingByUser(relation.patientUserId);
-              if (!tracking) return null;
+            const patient = users.find((user) => String(user.id) === String(relation.patientUserId));
+            const fallbackName = patient?.fullName || patient?.username || `Patient #${relation.patientUserId}`;
+            const patientName = await getPatientProfileName(relation.patientUserId, fallbackName);
+            const tracking = buildMockTracking(relation.patientUserId);
 
-              const patient = users.find((user) => String(user.id) === String(relation.patientUserId));
-              const fallbackName = patient?.fullName || patient?.username || `Patient #${relation.patientUserId}`;
-              const patientName = await getPatientProfileName(relation.patientUserId, fallbackName);
-
-              return {
-                id: String(tracking.id),
-                patientName,
-                tracking,
-              };
-            } catch {
-              return null;
-            }
+            return {
+              id: String(tracking.id),
+              patientName,
+              tracking,
+            };
           })
         );
         const attentionRows = await Promise.all(
           acceptedRelations.map(async (relation) => {
-            try {
-              const progress = await getTrackingProgressByUser(relation.patientUserId);
-              if (!progress) return null;
-
-              const patient = users.find((user) => String(user.id) === String(relation.patientUserId));
-              const patientName = patient?.fullName || patient?.username || `Patient #${relation.patientUserId}`;
-              return buildAttentionPatient(patientName, relation.patientUserId, progress as DashboardTrackingProgress);
-            } catch {
-              return null;
-            }
+            const patient = users.find((user) => String(user.id) === String(relation.patientUserId));
+            const fallbackName = patient?.fullName || patient?.username || `Patient #${relation.patientUserId}`;
+            const patientName = await getPatientProfileName(relation.patientUserId, fallbackName).catch(() => fallbackName);
+            return buildAttentionPatient(patientName, relation.patientUserId);
           })
         );
         const requestRows = await Promise.all(
@@ -450,6 +523,11 @@ export function DashboardPage({ currentPath, onNavigate }: DashboardPageProps) {
         );
 
         if (mounted) {
+          const sortedAttentionRows = attentionRows
+            .filter((row): row is AttentionPatient => Boolean(row))
+            .sort((first, second) => first.lowestPercentage - second.lowestPercentage)
+            .slice(0, 3);
+
           setMetrics({
             myPatients: acceptedRelations.length,
             pendingRequests: relations.filter(isPendingRelation).length,
@@ -463,12 +541,7 @@ export function DashboardPage({ currentPath, onNavigate }: DashboardPageProps) {
               .sort((first, second) => trackingTime(second) - trackingTime(first))
               .slice(0, 4),
           );
-          setAttentionPatients(
-            attentionRows
-              .filter((row): row is AttentionPatient => Boolean(row))
-              .sort((first, second) => first.lowestPercentage - second.lowestPercentage)
-              .slice(0, 3),
-          );
+          setAttentionPatients(sortedAttentionRows);
           setRecentRequests(
             requestRows
               .sort((first, second) => requestTime(second) - requestTime(first))
@@ -499,217 +572,223 @@ export function DashboardPage({ currentPath, onNavigate }: DashboardPageProps) {
     };
   }, []);
 
+  const aiHealthSummary = buildAiHealthSummary(metrics.myPatients, attentionPatients, t);
+  const dashboardGreeting = fillTemplate(t("dashboard.greeting"), { name: nutritionistName });
+
   return (
     <SharedLayout
-      title="Dashboard"
+      title={t("dashboard.title")}
       currentPath={currentPath}
       onNavigate={onNavigate}
       navigationItems={useNavigation()}
       showPageTitle={false}
       topbarTabs={[
-        { label: "Overview", href: "/nutritionist", active: currentPath === "/nutritionist" },
-        { label: "Recent Logs", href: "/nutritionist/recent-logs", active: currentPath === "/nutritionist/recent-logs" },
+        { label: t("dashboard.tab.overview"), href: "/nutritionist", active: currentPath === "/nutritionist" },
+        { label: t("dashboard.tab.recentLogs"), href: "/nutritionist/recent-logs", active: currentPath === "/nutritionist/recent-logs" },
       ]}
     >
       <div className={styles.dashboard}>
         <header className={styles.dashboardHero}>
-          <h1>Good morning, {nutritionistName}! <span aria-hidden="true">{"\uD83D\uDC4B"}</span></h1>
-          <p>Here&apos;s what&apos;s happening with your patients today.</p>
+          <h1>{dashboardGreeting} <span aria-hidden="true">{"\uD83D\uDC4B"}</span></h1>
+          <p>{t("dashboard.hero.description")}</p>
         </header>
 
         <section className={styles.metricsGrid}>
           <MetricCard
-            title="My Patients"
+            title={t("dashboard.metrics.patients.title")}
             value={metrics.myPatients}
-            suffix="Patients"
-            detail="+3 this month"
-            action="View Patients"
+            suffix={t("dashboard.metrics.patients.suffix")}
+            detail={t("dashboard.metrics.patients.detail")}
+            action={t("dashboard.metrics.patients.action")}
             tone="green"
             icon={<UsersMetricIcon />}
             onClick={() => onNavigate("/nutritionist/patients/directory")}
           />
           <MetricCard
-            title="Pending Requests"
+            title={t("dashboard.metrics.pending.title")}
             value={metrics.pendingRequests}
-            suffix="Requests"
-            detail="Needs your approval"
-            action="Review Requests"
+            suffix={t("dashboard.metrics.pending.suffix")}
+            detail={t("dashboard.metrics.pending.detail")}
+            action={t("dashboard.metrics.pending.action")}
             tone="purple"
             icon={<PendingMetricIcon />}
             onClick={() => onNavigate("/nutritionist/patients/request")}
           />
           <MetricCard
-            title="Recipes Library"
+            title={t("dashboard.metrics.recipes.title")}
             value={metrics.recipes}
-            suffix="Recipes"
-            detail="+2 this week"
-            action="Manage Recipes"
+            suffix={t("dashboard.metrics.recipes.suffix")}
+            detail={t("dashboard.metrics.recipes.detail")}
+            action={t("dashboard.metrics.recipes.action")}
             tone="blue"
             icon={<RecipesMetricIcon />}
             onClick={() => onNavigate("/nutritionist/recipes")}
           />
           <MetricCard
-            title="Meal Plans Library"
+            title={t("dashboard.metrics.mealPlans.title")}
             value={metrics.mealPlans}
-            suffix="Meal Plans"
-            detail="5 active templates"
-            action="Manage Meal Plans"
+            suffix={t("dashboard.metrics.mealPlans.suffix")}
+            detail={t("dashboard.metrics.mealPlans.detail")}
+            action={t("dashboard.metrics.mealPlans.action")}
             tone="amber"
             icon={<MealPlansMetricIcon />}
             onClick={() => onNavigate("/nutritionist/meal-plans")}
           />
         </section>
 
-        <section className={styles.topGrid}>
-          <article className={styles.aiSummaryCard}>
-            <div className={styles.cardTitleRow}>
-              <h2>
-                <SparklesIcon />
-                AI Health Summary (Mock)
-              </h2>
-              <span className={styles.mockPill}>AI Powered (Mock)</span>
-            </div>
-            <p>{dashboardSummary.aiSummary}</p>
-            <div className={styles.tagRow}>
-              <span className={`${styles.tag} ${styles.tagGreen}`}>
-                <TrendIcon />
-                12% {dashboardSummary.tags[0]} (Mock)
-              </span>
-              <span className={`${styles.tag} ${styles.tagRed}`}>
-                <AlertIcon />
-                2 Patients Need Attention (Mock)
-              </span>
-            </div>
-          </article>
-
-          <article className={styles.attentionPanel}>
-            <div className={styles.attentionHeader}>
-              <span className={styles.attentionIcon}>
-                <AlertIcon />
-              </span>
-              <div>
-                <h2>Patients Needing Attention</h2>
-                <p>Nutrition progress below target thresholds.</p>
+        <section className={styles.dashboardColumns}>
+          <div className={styles.dashboardColumn}>
+            <article className={`${styles.panel} ${styles.recentTrackingPanel}`}>
+              <div className={styles.panelHeader}>
+                <h2 className={styles.panelTitle}>{t("dashboard.tracking.title")}</h2>
+                <button type="button" className={styles.outlineButton} onClick={() => onNavigate("/nutritionist/patients/directory")}>
+                  {t("dashboard.action.viewAll")}
+                </button>
               </div>
-            </div>
-
-            <div className={styles.attentionSummary}>
-              <strong>{attentionPatients.length}</strong>
-              <span>patients below 70%</span>
-            </div>
-
-            <div className={styles.attentionList}>
-              {attentionPatients.map((patient) => (
-                <article key={patient.id} className={styles.attentionItem}>
-                  <span className={styles.attentionAvatar}>{patient.initials}</span>
-                  <div className={styles.attentionBody}>
-                    <div className={styles.attentionItemHeader}>
-                      <strong>{patient.patientName}</strong>
-                      <em>{patient.lowestPercentage}%</em>
-                    </div>
-                    <p>{patient.lowestMetric} needs review</p>
-                    <div className={styles.attentionProgress}>
-                      <span style={{ width: `${patient.lowestPercentage}%` }} />
-                    </div>
-                  </div>
-                </article>
-              ))}
-
-              {!attentionPatients.length && (
-                <div className={styles.attentionEmpty}>
-                  <strong>All patients on track</strong>
-                  <span>No accepted patient is below the nutrition threshold.</span>
-                </div>
-              )}
-            </div>
-
-            <button type="button" className={styles.attentionAction} onClick={() => onNavigate("/nutritionist/patients/directory")}>
-              Review patients
-              <span aria-hidden="true">&rarr;</span>
-            </button>
-          </article>
-        </section>
-
-        <section className={styles.bottomGrid}>
-          <article className={`${styles.panel} ${styles.recentRequestsPanel}`}>
-            <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>Recent Patient Requests</h2>
-              <button type="button" className={styles.outlineButton} onClick={() => onNavigate("/nutritionist/patients/request")}>
-                View All
-              </button>
-            </div>
-            <div className={styles.requestPreviewList}>
-              {recentRequests.map((request) => (
-                <article className={styles.requestPreviewItem} key={request.id}>
-                  <span className={styles.requestPreviewAvatar}>{request.initials}</span>
-                  <div className={styles.requestPreviewBody}>
-                    <strong>{request.patientName}</strong>
-                    <span>Requested: {formatShortDate(request.requestedAt)}</span>
-                    <small>{request.serviceType.replaceAll("_", " ")}</small>
-                  </div>
-                  <span className={request.accepted ? styles.requestStatusAccepted : styles.requestStatusPending}>
-                    {request.accepted ? "Accepted" : "Pending"}
-                  </span>
-                </article>
-              ))}
-              {!recentRequests.length && (
-                <div className={styles.emptyTableState}>No recent patient requests found.</div>
-              )}
-            </div>
-          </article>
-
-          <article className={`${styles.panel} ${styles.recentTrackingPanel}`}>
-            <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>Recent Nutrition Tracking (Real)</h2>
-              <button type="button" className={styles.outlineButton} onClick={() => onNavigate("/nutritionist/patients/directory")}>
-                View All
-              </button>
-            </div>
-            <div className={styles.tableWrap}>
-              <table className={`${styles.mealTable} ${styles.recentTrackingTable}`}>
-                <thead>
-                  <tr>
-                    <th>Patient</th>
-                    <th>Tracking Date</th>
-                    <th>Calories</th>
-                    <th>Protein</th>
-                    <th>Carbs</th>
-                    <th>Fats</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {trackingRows.map((row) => (
-                    <tr key={row.id}>
-                      <td>
-                        <div className={styles.mealPatientCell}>
-                          <span>{getInitials(row.patientName)}</span>
-                          {row.patientName}
-                        </div>
-                      </td>
-                      <td>{formatTrackingDate(row.tracking.date)}</td>
-                      <td>{row.tracking.consumedMacros.calories} kcal</td>
-                      <td>{row.tracking.consumedMacros.proteins}g</td>
-                      <td>{row.tracking.consumedMacros.carbs}g</td>
-                      <td>{row.tracking.consumedMacros.fats}g</td>
-                    </tr>
-                  ))}
-                  {!trackingRows.length && (
+              <div className={styles.tableWrap}>
+                <table className={`${styles.mealTable} ${styles.recentTrackingTable}`}>
+                  <thead>
                     <tr>
-                      <td colSpan={6}>
-                        <div className={styles.emptyTableState}>No nutrition tracking records found.</div>
-                      </td>
+                      <th>{t("dashboard.table.patient")}</th>
+                      <th>{t("dashboard.table.trackingDate")}</th>
+                      <th>{t("dashboard.metric.calories")}</th>
+                      <th>{t("dashboard.metric.protein")}</th>
+                      <th>{t("dashboard.metric.carbs")}</th>
+                      <th>{t("dashboard.metric.fats")}</th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-            <button type="button" className={styles.linkFooter} onClick={() => onNavigate("/nutritionist/patients/directory")}>
-              View all patients &rarr;
+                  </thead>
+                  <tbody>
+                    {trackingRows.map((row) => (
+                      <tr key={row.id}>
+                        <td>
+                          <div className={styles.mealPatientCell}>
+                            <span>{getInitials(row.patientName)}</span>
+                            {row.patientName}
+                          </div>
+                        </td>
+                        <td>{formatTrackingDate(row.tracking.date)}</td>
+                        <td>{row.tracking.consumedMacros.calories} kcal</td>
+                        <td>{row.tracking.consumedMacros.proteins}g</td>
+                        <td>{row.tracking.consumedMacros.carbs}g</td>
+                        <td>{row.tracking.consumedMacros.fats}g</td>
+                      </tr>
+                    ))}
+                    {!trackingRows.length && (
+                      <tr>
+                        <td colSpan={6}>
+                          <div className={styles.emptyTableState}>{t("dashboard.tracking.empty")}</div>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              <button type="button" className={styles.linkFooter} onClick={() => onNavigate("/nutritionist/patients/directory")}>
+              {t("dashboard.action.viewAllPatients")} &rarr;
             </button>
           </article>
+
+            <PatientIotAlertsTable onNavigate={onNavigate} />
+          </div>
+
+          <div className={styles.dashboardColumn}>
+            <article className={styles.attentionPanel}>
+              <div className={styles.attentionHeader}>
+                <span className={styles.attentionIcon}>
+                  <AlertIcon />
+                </span>
+                <div>
+                  <h2>{t("dashboard.attention.title")}</h2>
+                  <p>{t("dashboard.attention.description")}</p>
+                </div>
+              </div>
+
+              <div className={styles.attentionSummary}>
+                <strong>{attentionPatients.length}</strong>
+                <span>{t("dashboard.attention.belowThreshold")}</span>
+              </div>
+
+              <div className={styles.attentionList}>
+                {attentionPatients.map((patient) => (
+                  <article key={patient.id} className={styles.attentionItem}>
+                    <span className={styles.attentionAvatar}>{patient.initials}</span>
+                    <div className={styles.attentionBody}>
+                      <div className={styles.attentionItemHeader}>
+                        <strong>{patient.patientName}</strong>
+                        <em>{patient.lowestPercentage}%</em>
+                      </div>
+                      <p>{fillTemplate(t("dashboard.attention.metricNeedsReview"), { metric: metricLabel(patient.lowestMetric, t) })}</p>
+                      <div className={styles.attentionProgress}>
+                        <span style={{ width: `${patient.lowestPercentage}%` }} />
+                      </div>
+                    </div>
+                  </article>
+                ))}
+
+                {!attentionPatients.length && (
+                  <div className={styles.attentionEmpty}>
+                  <strong>{t("dashboard.attention.empty.title")}</strong>
+                  <span>{t("dashboard.attention.empty.description")}</span>
+                  </div>
+                )}
+              </div>
+
+              <button type="button" className={styles.attentionAction} onClick={() => onNavigate("/nutritionist/patients/directory")}>
+                {t("dashboard.action.reviewPatients")}
+                <span aria-hidden="true">&rarr;</span>
+              </button>
+            </article>
+
+            <article className={styles.aiSummaryCard}>
+              <div className={styles.cardTitleRow}>
+                <h2>
+                  <SparklesIcon />
+                  {t("dashboard.ai.title")}
+                </h2>
+                <span className={styles.mockPill}>{t("dashboard.ai.powered")}</span>
+              </div>
+              <p>{aiHealthSummary.text}</p>
+              <div className={styles.tagRow}>
+                <span className={`${styles.tag} ${styles.tagGreen}`}>
+                  <TrendIcon />
+                  {aiHealthSummary.onTrackPercentage}% {t("dashboard.ai.onTrack")}
+                </span>
+                <span className={`${styles.tag} ${styles.tagRed}`}>
+                  <AlertIcon />
+                  {aiHealthSummary.attentionCount} {t("dashboard.ai.needAttention")}
+                </span>
+              </div>
+            </article>
+
+            <article className={`${styles.panel} ${styles.recentRequestsPanel}`}>
+              <div className={styles.panelHeader}>
+                <h2 className={styles.panelTitle}>{t("dashboard.requests.title")}</h2>
+                <button type="button" className={styles.outlineButton} onClick={() => onNavigate("/nutritionist/patients/request")}>
+                  {t("dashboard.action.viewAll")}
+                </button>
+              </div>
+              <div className={styles.requestPreviewList}>
+                {recentRequests.map((request) => (
+                  <article className={styles.requestPreviewItem} key={request.id}>
+                    <span className={styles.requestPreviewAvatar}>{request.initials}</span>
+                    <div className={styles.requestPreviewBody}>
+                      <strong>{request.patientName}</strong>
+                      <span>{t("dashboard.requests.requested")}: {formatShortDate(request.requestedAt)}</span>
+                      <small>{request.serviceType.replaceAll("_", " ")}</small>
+                    </div>
+                    <span className={request.accepted ? styles.requestStatusAccepted : styles.requestStatusPending}>
+                      {request.accepted ? t("dashboard.status.accepted") : t("dashboard.status.pending")}
+                    </span>
+                  </article>
+                ))}
+                {!recentRequests.length && (
+                  <div className={styles.emptyTableState}>{t("dashboard.requests.empty")}</div>
+                )}
+              </div>
+            </article>
+          </div>
         </section>
 
-        <PatientIotAlertsTable onNavigate={onNavigate} />
       </div>
     </SharedLayout>
   );

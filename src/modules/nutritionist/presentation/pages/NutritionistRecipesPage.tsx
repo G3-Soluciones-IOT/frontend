@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { apiUrl } from "@/app/config/env";
 import { SharedLayout } from "@/shared/components/layout";
 import { useNavigation } from "@/shared/hooks/useNavigation";
+import { useI18n } from "@/shared/i18n/useI18n";
+import type { TranslationKey } from "@/shared/i18n/translations";
 
 interface NutritionistRecipesPageProps {
   currentPath: string;
@@ -102,7 +104,11 @@ async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
   }
 
   if (response.status === 204) return undefined as T;
-  return response.json() as Promise<T>;
+
+  const text = await response.text();
+  if (!text) return undefined as T;
+
+  return JSON.parse(text) as T;
 }
 
 function normalize(value?: string) {
@@ -123,15 +129,32 @@ function difficultyClass(value?: string) {
 function categoryClass(value?: string) {
   const normalized = normalize(value);
   if (normalized.includes("breakfast")) return "admin-recipes-pill-green";
+  if (normalized.includes("desayuno")) return "admin-recipes-pill-green";
   if (normalized.includes("dinner")) return "admin-recipes-pill-blue";
+  if (normalized.includes("cena")) return "admin-recipes-pill-blue";
   if (normalized.includes("lunch")) return "admin-recipes-pill-amber";
+  if (normalized.includes("almuerzo")) return "admin-recipes-pill-amber";
   return "admin-recipes-pill-gray";
 }
 
-function ingredientSummary(recipe: Recipe) {
+function recipeTypeBucket(value?: string) {
+  const normalized = normalize(value);
+  if (normalized.includes("breakfast") || normalized.includes("desayuno") || normalized.includes("cafe da manha")) {
+    return "breakfast";
+  }
+  if (normalized.includes("lunch") || normalized.includes("almuerzo") || normalized.includes("almoco")) {
+    return "lunch";
+  }
+  if (normalized.includes("dinner") || normalized.includes("cena") || normalized.includes("jantar")) {
+    return "dinner";
+  }
+  return normalized;
+}
+
+function ingredientSummary(recipe: Recipe, t: (key: TranslationKey) => string) {
   const count = recipe.ingredients?.length ?? 0;
   if (count === 0) return "-";
-  return `${count} ingredient${count === 1 ? "" : "s"}`;
+  return `${count} ${count === 1 ? t("recipes.ingredient.singular") : t("recipes.ingredient.plural")}`;
 }
 
 function toForm(recipe: Recipe, categories: CatalogItem[], recipeTypes: CatalogItem[]): RecipeForm {
@@ -150,6 +173,7 @@ function toForm(recipe: Recipe, categories: CatalogItem[], recipeTypes: CatalogI
 }
 
 export function NutritionistRecipesPage({ currentPath, onNavigate }: NutritionistRecipesPageProps) {
+  const { t } = useI18n();
   const nav = useNavigation();
   const nutritionistUserId = getSessionUser()?.id;
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -195,19 +219,33 @@ export function NutritionistRecipesPage({ currentPath, onNavigate }: Nutritionis
     try {
       setCatalogLoading(true);
       setPanelError(null);
-      const [nextCategories, nextTypes, nextIngredients] = await Promise.all([
+      const [categoriesResult, typesResult, ingredientsResult] = await Promise.allSettled([
         fetchJson<CatalogItem[]>("/api/v1/categories"),
-        fetchJson<CatalogItem[]>("/api/v1/recipetypes"),
+        fetchJson<CatalogItem[]>("/api/v1/recipe-types"),
         fetchJson<Ingredient[]>("/api/v1/ingredients"),
       ]);
 
-      const loadedCategories = Array.isArray(nextCategories) ? nextCategories : [];
-      const loadedTypes = Array.isArray(nextTypes) ? nextTypes : [];
-      const loadedIngredients = Array.isArray(nextIngredients) ? nextIngredients : [];
+      const loadedCategories =
+        categoriesResult.status === "fulfilled" && Array.isArray(categoriesResult.value) ? categoriesResult.value : [];
+      const loadedTypes = typesResult.status === "fulfilled" && Array.isArray(typesResult.value) ? typesResult.value : [];
+      const loadedIngredients =
+        ingredientsResult.status === "fulfilled" && Array.isArray(ingredientsResult.value)
+          ? ingredientsResult.value
+          : [];
 
       setCategories(loadedCategories);
       setRecipeTypes(loadedTypes);
       setIngredients(loadedIngredients);
+
+      const failedCatalogs = [
+        categoriesResult.status === "rejected" ? "categories" : null,
+        typesResult.status === "rejected" ? "recipe types" : null,
+        ingredientsResult.status === "rejected" ? "ingredients" : null,
+      ].filter(Boolean);
+
+      if (failedCatalogs.length > 0) {
+        setPanelError(`Could not load ${failedCatalogs.join(", ")}.`);
+      }
 
       return {
         categories: loadedCategories,
@@ -242,10 +280,10 @@ export function NutritionistRecipesPage({ currentPath, onNavigate }: Nutritionis
     });
   }, [recipes, search]);
 
-  const categoryCounts = useMemo(() => {
+  const recipeTypeCounts = useMemo(() => {
     return recipes.reduce<Record<string, number>>((counts, recipe) => {
-      const category = normalize(recipe.categoryName);
-      counts[category] = (counts[category] ?? 0) + 1;
+      const type = recipeTypeBucket(recipe.recipeTypeName);
+      if (type) counts[type] = (counts[type] ?? 0) + 1;
       return counts;
     }, {});
   }, [recipes]);
@@ -301,7 +339,7 @@ export function NutritionistRecipesPage({ currentPath, onNavigate }: Nutritionis
   }
 
   async function handleDeleteRecipe(recipeId: number | string) {
-    const confirmed = window.confirm("Delete this recipe?");
+    const confirmed = window.confirm(t("recipes.confirm.delete"));
     if (!confirmed) return;
 
     try {
@@ -423,28 +461,29 @@ export function NutritionistRecipesPage({ currentPath, onNavigate }: Nutritionis
 
   return (
     <SharedLayout
-      title="Recipes"
+      title={t("recipes.title")}
       currentPath={currentPath}
       onNavigate={onNavigate}
       navigationItems={nav}
-      breadcrumbs={["Nutritionist", "Recipes"]}
+      breadcrumbs={[t("recipes.breadcrumb.nutritionist"), t("recipes.title")]}
+      showPageTitle={false}
     >
       <div className="admin-recipes-page">
         <header className="admin-recipes-header">
           <div>
-            <h2>Recipes</h2>
-            <p>Manage your own recipe templates.</p>
+            <h2>{t("recipes.title")}</h2>
+            <p>{t("recipes.description")}</p>
           </div>
           <button type="button" className="admin-recipes-create-button" onClick={openCreatePanel}>
-            Create Recipe
+            {t("recipes.create")}
           </button>
         </header>
 
         <section className="admin-recipes-stats">
-          <RecipeStat value={recipes.length} label="My Recipes" tone="purple" />
-          <RecipeStat value={categoryCounts.breakfast ?? 0} label="Breakfast" tone="green" />
-          <RecipeStat value={categoryCounts.lunch ?? 0} label="Lunch" tone="amber" />
-          <RecipeStat value={categoryCounts.dinner ?? 0} label="Dinner" tone="blue" />
+          <RecipeStat value={recipes.length} label={t("recipes.stats.mine")} tone="purple" icon={<BookOpenIcon />} />
+          <RecipeStat value={recipeTypeCounts.breakfast ?? 0} label={t("recipes.category.breakfast")} tone="green" icon={<CoffeeIcon />} />
+          <RecipeStat value={recipeTypeCounts.lunch ?? 0} label={t("recipes.category.lunch")} tone="amber" icon={<UtensilsIcon />} />
+          <RecipeStat value={recipeTypeCounts.dinner ?? 0} label={t("recipes.category.dinner")} tone="blue" icon={<MoonIcon />} />
         </section>
 
         {error && <div className="admin-recipes-warning">{error}</div>}
@@ -454,29 +493,29 @@ export function NutritionistRecipesPage({ currentPath, onNavigate }: Nutritionis
             <div className="admin-recipes-filters">
               <input
                 type="search"
-                placeholder="Search recipes by name, category, type..."
+                placeholder={t("recipes.search.placeholder")}
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
               />
               <button type="button" className="admin-recipes-clear" onClick={() => setSearch("")}>
-                Clear Search
+                {t("recipes.search.clear")}
               </button>
             </div>
 
-            {loading && <div className="admin-recipes-state">Loading recipes...</div>}
+            {loading && <div className="admin-recipes-state">{t("recipes.loading")}</div>}
 
             {!loading && (
               <div className="admin-recipes-table-wrap">
                 <table className="admin-recipes-table">
                   <thead>
                     <tr>
-                      <th>Recipe</th>
-                      <th>Category</th>
-                      <th>Type</th>
-                      <th>Preparation Time</th>
-                      <th>Difficulty</th>
-                      <th>Ingredients</th>
-                      <th>Actions</th>
+                      <th>{t("recipes.table.recipe")}</th>
+                      <th>{t("recipes.table.category")}</th>
+                      <th>{t("recipes.table.type")}</th>
+                      <th>{t("recipes.table.preparationTime")}</th>
+                      <th>{t("recipes.table.difficulty")}</th>
+                      <th>{t("recipes.table.ingredients")}</th>
+                      <th>{t("recipes.table.actions")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -503,17 +542,17 @@ export function NutritionistRecipesPage({ currentPath, onNavigate }: Nutritionis
                             {recipe.difficulty || "-"}
                           </span>
                         </td>
-                        <td>{ingredientSummary(recipe)}</td>
+                        <td>{ingredientSummary(recipe, t)}</td>
                         <td>
                           <div className="admin-recipes-actions">
                             <button type="button" onClick={() => openViewPanel(recipe.id)}>
-                              View
+                              {t("recipes.action.view")}
                             </button>
                             <button type="button" onClick={() => openEditPanel(recipe.id)}>
-                              Edit
+                              {t("recipes.action.edit")}
                             </button>
                             <button type="button" onClick={() => handleDeleteRecipe(recipe.id)}>
-                              Delete
+                              {t("recipes.action.delete")}
                             </button>
                           </div>
                         </td>
@@ -524,10 +563,10 @@ export function NutritionistRecipesPage({ currentPath, onNavigate }: Nutritionis
               </div>
             )}
 
-            {!loading && filteredRecipes.length === 0 && <div className="admin-recipes-state">No recipes found.</div>}
+            {!loading && filteredRecipes.length === 0 && <div className="admin-recipes-state">{t("recipes.empty")}</div>}
             {!loading && filteredRecipes.length > 0 && (
               <div className="admin-recipes-footnote">
-                Showing 1 to {filteredRecipes.length} of {recipes.length} recipes
+                {t("patients.directory.showing")} 1 {t("patients.directory.to")} {filteredRecipes.length} {t("patients.directory.of")} {recipes.length} {t("recipes.footer.recipes")}
               </div>
             )}
           </section>
@@ -535,16 +574,16 @@ export function NutritionistRecipesPage({ currentPath, onNavigate }: Nutritionis
           {showViewPanel && (
             <aside className="admin-recipes-detail-card nutritionist-recipes-panel">
               <div className="admin-recipes-detail-header">
-                <h3>Recipe Details</h3>
-                <button type="button" aria-label="Close recipe panel" onClick={closePanel}>
+                <h3>{t("recipes.details.title")}</h3>
+                <button type="button" aria-label={t("recipes.action.closePanel")} onClick={closePanel}>
                   X
                 </button>
               </div>
 
-              {detailLoading && <div className="admin-recipes-state">Loading...</div>}
+              {detailLoading && <div className="admin-recipes-state">{t("patients.common.loading")}...</div>}
               {panelError && <div className="admin-recipes-warning">{panelError}</div>}
 
-              {!detailLoading && selectedRecipe && <RecipeDetailPanel recipe={selectedRecipe} nutrition={selectedNutrition} />}
+              {!detailLoading && selectedRecipe && <RecipeDetailPanel recipe={selectedRecipe} nutrition={selectedNutrition} t={t} />}
             </aside>
           )}
         </div>
@@ -554,16 +593,16 @@ export function NutritionistRecipesPage({ currentPath, onNavigate }: Nutritionis
             <div className="nutritionist-recipes-modal-content">
               <div className="nutritionist-recipes-modal-header">
                 <div>
-                  <h3>{panelMode === "create" ? "Create Recipe" : "Edit Recipe"}</h3>
-                  <p>{panelMode === "create" ? "Register a new recipe template." : "Update the recipe base information."}</p>
+                  <h3>{panelMode === "create" ? t("recipes.create") : t("recipes.edit")}</h3>
+                  <p>{panelMode === "create" ? t("recipes.create.description") : t("recipes.edit.description")}</p>
                 </div>
-                <button type="button" aria-label="Close recipe modal" onClick={closePanel}>
+                <button type="button" aria-label={t("recipes.action.closeModal")} onClick={closePanel}>
                   X
                 </button>
               </div>
 
               <div className="nutritionist-recipes-modal-body">
-                {(detailLoading || catalogLoading) && <div className="admin-recipes-state">Loading...</div>}
+                {(detailLoading || catalogLoading) && <div className="admin-recipes-state">{t("patients.common.loading")}...</div>}
                 {panelError && <div className="admin-recipes-warning">{panelError}</div>}
 
                 {!detailLoading && !catalogLoading && (
@@ -580,6 +619,7 @@ export function NutritionistRecipesPage({ currentPath, onNavigate }: Nutritionis
                     onIngredientChange={updateIngredient}
                     onAddIngredient={addIngredientRow}
                     onRemoveIngredient={removeIngredientRow}
+                    t={t}
                   />
                 )}
               </div>
@@ -591,7 +631,7 @@ export function NutritionistRecipesPage({ currentPath, onNavigate }: Nutritionis
   );
 }
 
-function RecipeDetailPanel({ recipe, nutrition }: { recipe: Recipe; nutrition: RecipeNutrition | null }) {
+function RecipeDetailPanel({ recipe, nutrition, t }: { recipe: Recipe; nutrition: RecipeNutrition | null; t: (key: TranslationKey) => string }) {
   return (
     <>
       <div className="admin-recipes-detail-title">
@@ -603,19 +643,19 @@ function RecipeDetailPanel({ recipe, nutrition }: { recipe: Recipe; nutrition: R
       </div>
 
       <div className="admin-recipes-detail-grid">
-        <DetailRow label="Category" value={recipe.categoryName || "-"} pillClass={categoryClass(recipe.categoryName)} />
-        <DetailRow label="Recipe Type" value={recipe.recipeTypeName || "-"} />
-        <DetailRow label="Preparation Time" value={formatMinutes(recipe.preparationTime)} />
-        <DetailRow label="Difficulty" value={recipe.difficulty || "-"} pillClass={difficultyClass(recipe.difficulty)} />
+        <DetailRow label={t("recipes.table.category")} value={recipe.categoryName || "-"} pillClass={categoryClass(recipe.categoryName)} />
+        <DetailRow label={t("recipes.table.type")} value={recipe.recipeTypeName || "-"} />
+        <DetailRow label={t("recipes.table.preparationTime")} value={formatMinutes(recipe.preparationTime)} />
+        <DetailRow label={t("recipes.table.difficulty")} value={recipe.difficulty || "-"} pillClass={difficultyClass(recipe.difficulty)} />
       </div>
 
       <section className="admin-recipes-detail-section">
-        <h4>Description</h4>
+        <h4>{t("recipes.form.description")}</h4>
         <p>{recipe.description || "-"}</p>
       </section>
 
       <section className="admin-recipes-detail-section">
-        <h4>Ingredients</h4>
+        <h4>{t("recipes.table.ingredients")}</h4>
         <ul>
           {(recipe.ingredients ?? []).map((item, index) => (
             <li key={`${item.ingredient?.id ?? index}-${item.amountGrams ?? 0}`}>
@@ -624,16 +664,16 @@ function RecipeDetailPanel({ recipe, nutrition }: { recipe: Recipe; nutrition: R
             </li>
           ))}
         </ul>
-        {(recipe.ingredients ?? []).length === 0 && <p>No ingredients listed.</p>}
+        {(recipe.ingredients ?? []).length === 0 && <p>{t("recipes.ingredients.empty")}</p>}
       </section>
 
       <section className="admin-recipes-nutrition">
-        <h4>Total Nutrition</h4>
+        <h4>{t("recipes.nutrition.total")}</h4>
         <div>
-          <NutritionBox label="Calories" value={nutrition?.calories} />
-          <NutritionBox label="Carbs" value={nutrition?.carbs} suffix="g" />
-          <NutritionBox label="Proteins" value={nutrition?.proteins} suffix="g" />
-          <NutritionBox label="Fats" value={nutrition?.fats} suffix="g" />
+          <NutritionBox label={t("dashboard.metric.calories")} value={nutrition?.calories} />
+          <NutritionBox label={t("dashboard.metric.carbs")} value={nutrition?.carbs} suffix="g" />
+          <NutritionBox label={t("patients.tracking.proteins")} value={nutrition?.proteins} suffix="g" />
+          <NutritionBox label={t("dashboard.metric.fats")} value={nutrition?.fats} suffix="g" />
         </div>
       </section>
     </>
@@ -653,6 +693,7 @@ function RecipeFormPanel({
   onIngredientChange,
   onAddIngredient,
   onRemoveIngredient,
+  t,
 }: {
   mode: "create" | "edit";
   form: RecipeForm;
@@ -666,22 +707,23 @@ function RecipeFormPanel({
   onIngredientChange: (index: number, field: "ingredientId" | "amountGrams", value: string) => void;
   onAddIngredient: () => void;
   onRemoveIngredient: (index: number) => void;
+  t: (key: TranslationKey) => string;
 }) {
   return (
     <form className="nutritionist-recipes-form" onSubmit={onSubmit}>
       <label className="nutritionist-recipes-field nutritionist-recipes-field-full">
-        <span>Recipe name</span>
+        <span>{t("recipes.form.name")}</span>
         <input value={form.name} onChange={(event) => onChange("name", event.target.value)} required />
       </label>
 
       <label className="nutritionist-recipes-field nutritionist-recipes-field-full">
-        <span>Description</span>
+        <span>{t("recipes.form.description")}</span>
         <textarea value={form.description} onChange={(event) => onChange("description", event.target.value)} required />
       </label>
 
       <div className="nutritionist-recipes-form-grid">
         <label className="nutritionist-recipes-field">
-          <span>Preparation time</span>
+          <span>{t("recipes.table.preparationTime")}</span>
           <input
             type="number"
             min="1"
@@ -692,20 +734,20 @@ function RecipeFormPanel({
         </label>
 
         <label className="nutritionist-recipes-field">
-          <span>Difficulty</span>
+          <span>{t("recipes.table.difficulty")}</span>
           <select value={form.difficulty} onChange={(event) => onChange("difficulty", event.target.value)}>
-            <option value="Easy">Easy</option>
-            <option value="Medium">Medium</option>
-            <option value="Hard">Hard</option>
+            <option value="Easy">{t("recipes.difficulty.easy")}</option>
+            <option value="Medium">{t("recipes.difficulty.medium")}</option>
+            <option value="Hard">{t("recipes.difficulty.hard")}</option>
           </select>
         </label>
       </div>
 
       <div className="nutritionist-recipes-form-grid">
       <label className="nutritionist-recipes-field">
-        <span>Category</span>
+        <span>{t("recipes.table.category")}</span>
         <select value={form.categoryId} onChange={(event) => onChange("categoryId", event.target.value)} required>
-          <option value="">Select category</option>
+          <option value="">{t("recipes.form.selectCategory")}</option>
           {categories.map((category) => (
             <option key={category.id} value={category.id}>
               {category.name}
@@ -715,9 +757,9 @@ function RecipeFormPanel({
       </label>
 
       <label className="nutritionist-recipes-field">
-        <span>Recipe type</span>
+        <span>{t("recipes.table.type")}</span>
         <select value={form.recipeTypeId} onChange={(event) => onChange("recipeTypeId", event.target.value)} required>
-          <option value="">Select recipe type</option>
+          <option value="">{t("recipes.form.selectType")}</option>
           {recipeTypes.map((type) => (
             <option key={type.id} value={type.id}>
               {type.name}
@@ -730,21 +772,21 @@ function RecipeFormPanel({
       {mode === "create" ? (
         <section className="nutritionist-recipes-ingredients">
           <div className="nutritionist-recipes-section-header">
-            <h4>Ingredients</h4>
+            <h4>{t("recipes.table.ingredients")}</h4>
             <button type="button" onClick={onAddIngredient}>
-              Add
+              {t("recipes.action.add")}
             </button>
           </div>
 
           {form.ingredients.map((item, index) => (
             <div className="nutritionist-recipes-ingredient-row" key={index}>
               <label className="nutritionist-recipes-field">
-                <span>Ingredient</span>
+                <span>{t("recipes.ingredient.singular")}</span>
                 <select
                   value={item.ingredientId}
                   onChange={(event) => onIngredientChange(index, "ingredientId", event.target.value)}
                 >
-                  <option value="">Select ingredient</option>
+                  <option value="">{t("recipes.form.selectIngredient")}</option>
                   {ingredients.map((ingredient) => (
                     <option key={ingredient.id} value={ingredient.id}>
                       {ingredient.name}
@@ -753,7 +795,7 @@ function RecipeFormPanel({
                 </select>
               </label>
               <label className="nutritionist-recipes-field">
-                <span>Amount in grams</span>
+                <span>{t("recipes.form.amountGrams")}</span>
                 <input
                   type="number"
                   min="1"
@@ -768,15 +810,14 @@ function RecipeFormPanel({
                 onClick={() => onRemoveIngredient(index)}
                 disabled={form.ingredients.length === 1}
               >
-                Remove
+                {t("recipes.action.remove")}
               </button>
             </div>
           ))}
         </section>
       ) : (
         <section className="admin-recipes-detail-section">
-          <h4>Ingredients</h4>
-          <p>Ingredient replacement is not available because the API only exposes add-ingredient for recipes.</p>
+          <h4>{t("recipes.table.ingredients")}</h4>
           <ul>
             {(selectedRecipe?.ingredients ?? []).map((item, index) => (
               <li key={`${item.ingredient?.id ?? index}-${item.amountGrams ?? 0}`}>
@@ -789,21 +830,63 @@ function RecipeFormPanel({
       )}
 
       <button type="submit" className="nutritionist-recipes-submit" disabled={saving}>
-        {saving ? "Saving..." : mode === "create" ? "Save Recipe" : "Save Changes"}
+        {saving ? t("recipes.action.saving") : mode === "create" ? t("recipes.action.saveRecipe") : t("recipes.action.saveChanges")}
       </button>
     </form>
   );
 }
 
-function RecipeStat({ value, label, tone }: { value: number; label: string; tone: string }) {
+function RecipeStat({ value, label, tone, icon }: { value: number; label: string; tone: string; icon: ReactNode }) {
   return (
     <article className="admin-recipes-stat">
-      <div className={`admin-recipes-stat-icon admin-recipes-stat-${tone}`}>{label.charAt(0)}</div>
+      <div className={`admin-recipes-stat-icon admin-recipes-stat-${tone}`}>{icon}</div>
       <div>
         <strong>{value}</strong>
         <span>{label}</span>
       </div>
     </article>
+  );
+}
+
+function BookOpenIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 7v14" />
+      <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H12v16H6.5A2.5 2.5 0 0 0 4 21.5Z" />
+      <path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H12v16h5.5a2.5 2.5 0 0 1 2.5 2.5Z" />
+    </svg>
+  );
+}
+
+function CoffeeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M6 8h10v6a4 4 0 0 1-4 4h-2a4 4 0 0 1-4-4Z" />
+      <path d="M16 9h1.5a2.5 2.5 0 0 1 0 5H16" />
+      <path d="M8 3v2" />
+      <path d="M12 3v2" />
+      <path d="M4 21h16" />
+    </svg>
+  );
+}
+
+function UtensilsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 3v8" />
+      <path d="M8 3v8" />
+      <path d="M4 7h4" />
+      <path d="M6 11v10" />
+      <path d="M18 3c-2 1.8-3 4.1-3 7v2h4v9" />
+    </svg>
+  );
+}
+
+function MoonIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M20 14.5A7.5 7.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5Z" />
+    </svg>
   );
 }
 

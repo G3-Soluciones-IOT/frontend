@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { API_BASE_URL, apiUrl } from "@/app/config/env";
 import { SharedLayout } from "@/shared/components/layout";
 import { useNavigation } from "@/shared/hooks/useNavigation";
+import { useI18n } from "@/shared/i18n/useI18n";
 import {
   getNutritionistPatientRelations,
   type NutritionistPatientRelation,
@@ -140,8 +141,14 @@ async function getPatientProfile(patientUserId: number | string) {
     } satisfies PatientProfile;
   }
 
-  const profileData = await fetchJson<PatientProfile | PatientProfile[]>(`/api/v1/profiles/${patientUserId}`);
-  return firstItem(profileData) ?? undefined;
+  const nutritionProfileData = await fetchJson<PatientNutritionProfile | PatientNutritionProfile[]>(
+    `/api/v1/user-profiles/by-user/${encodeURIComponent(String(patientUserId))}`,
+  );
+  const nutritionProfile = firstItem(nutritionProfileData);
+  if (!nutritionProfile?.id) return undefined;
+
+  const profiles = await fetchJson<PatientProfile[]>("/api/v1/profiles");
+  return profiles.find((profile) => String(profile.userProfileId) === String(nutritionProfile.id));
 }
 
 async function getPatientNutritionProfile(userProfileId?: number | string, patientUserId?: number | string) {
@@ -152,6 +159,13 @@ async function getPatientNutritionProfile(userProfileId?: number | string, patie
     return userProfiles.find((item) => String(item.id) === String(userProfileId))
       ?? userProfiles.find((item) => String(item.userId) === String(patientUserId))
       ?? undefined;
+  }
+
+  if (!userProfileId && patientUserId) {
+    const nutritionProfileData = await fetchJson<PatientNutritionProfile | PatientNutritionProfile[]>(
+      `/api/v1/user-profiles/by-user/${encodeURIComponent(String(patientUserId))}`,
+    );
+    return firstItem(nutritionProfileData) ?? undefined;
   }
 
   if (!userProfileId) return undefined;
@@ -263,6 +277,7 @@ function formatDate(value?: string) {
 }
 
 export function PatientsDirectoryPage({ currentPath, onNavigate }: PatientsDirectoryPageProps) {
+  const { t } = useI18n();
   const [relations, setRelations] = useState<NutritionistPatientRelation[]>([]);
   const [rows, setRows] = useState<DirectoryRow[]>([]);
   const [objectives, setObjectives] = useState<ObjectiveOption[]>([]);
@@ -359,24 +374,24 @@ export function PatientsDirectoryPage({ currentPath, onNavigate }: PatientsDirec
 
   return (
     <SharedLayout
-      title="Patient Directory"
+      title={t("patients.directory.title")}
       currentPath={currentPath}
       onNavigate={onNavigate}
       navigationItems={useNavigation()}
-      breadcrumbs={["Patients", "Directory"]}
+      breadcrumbs={[t("patients.breadcrumb.patients"), t("patients.breadcrumb.directory")]}
       showPageTitle={false}
     >
       <div className={`${styles.stack} ${styles.directoryStack}`}>
         <header className={styles.directoryHero}>
-          <h1>Patients Directory</h1>
-          <p>View and manage all your accepted patients.</p>
+          <h1>{t("patients.directory.title")}</h1>
+          <p>{t("patients.directory.description")}</p>
         </header>
 
         <div className={styles.directoryStatsGrid}>
-          <DirectoryStatCard tone="green" icon={<UsersIcon />} label="Total Patients" value={acceptedRelations.length} detail="Accepted patients" />
-          <DirectoryStatCard tone="blue" icon={<TargetIcon />} label="Weight Loss" value={weightLossCount} detail="Patients" />
-          <DirectoryStatCard tone="purple" icon={<DumbbellIcon />} label="Muscle Gain" value={muscleGainCount} detail="Patients" />
-          <DirectoryStatCard tone="amber" icon={<PendingIcon />} label="Pending Requests" value={pendingRequests.length} detail="Awaiting response" />
+          <DirectoryStatCard tone="green" icon={<UsersIcon />} label={t("patients.directory.stats.total")} value={acceptedRelations.length} detail={t("patients.directory.stats.accepted")} />
+          <DirectoryStatCard tone="blue" icon={<TargetIcon />} label={t("patients.directory.stats.weightLoss")} value={weightLossCount} detail={t("patients.directory.stats.patients")} />
+          <DirectoryStatCard tone="purple" icon={<DumbbellIcon />} label={t("patients.directory.stats.muscleGain")} value={muscleGainCount} detail={t("patients.directory.stats.patients")} />
+          <DirectoryStatCard tone="amber" icon={<PendingIcon />} label={t("patients.directory.stats.pending")} value={pendingRequests.length} detail={t("patients.directory.stats.awaiting")} />
         </div>
 
         <div className={styles.directoryFilterBar}>
@@ -386,13 +401,13 @@ export function PatientsDirectoryPage({ currentPath, onNavigate }: PatientsDirec
               <input
                 className={styles.searchInput}
                 type="search"
-                placeholder="Search by patient name or email..."
+                placeholder={t("patients.directory.search.placeholder")}
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
               />
             </label>
             <select className={styles.rangeSelect} value={objectiveFilter} onChange={(event) => setObjectiveFilter(event.target.value)}>
-              <option value="all">All Objectives</option>
+              <option value="all">{t("patients.directory.filter.allObjectives")}</option>
               {objectives.map((objective) => {
                 const label = objective.objectiveName ?? objective.name ?? String(objective.id);
                 return (
@@ -403,7 +418,7 @@ export function PatientsDirectoryPage({ currentPath, onNavigate }: PatientsDirec
               })}
             </select>
             <select className={styles.rangeSelect} value={activityFilter} onChange={(event) => setActivityFilter(event.target.value)}>
-              <option value="all">All Activity Levels</option>
+              <option value="all">{t("patients.directory.filter.allActivity")}</option>
               {activityLevels.map((activity) => (
                 <option key={activity.id} value={activity.name}>
                   {activity.name}
@@ -411,19 +426,19 @@ export function PatientsDirectoryPage({ currentPath, onNavigate }: PatientsDirec
               ))}
             </select>
             <select className={styles.rangeSelect} value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="pending">Pending</option>
+              <option value="all">{t("patients.directory.filter.allStatus")}</option>
+              <option value="active">{t("patients.status.active")}</option>
+              <option value="pending">{t("patients.status.pending")}</option>
             </select>
           </div>
           <button type="button" className={styles.directoryExportButton} onClick={loadDirectory} disabled={loading}>
-            Refresh
+            {t("patients.action.refresh")}
           </button>
         </div>
 
         <section className={`${styles.panel} ${styles.directoryCard}`}>
           {error && <p className={styles.errorText}>{error}</p>}
-          {loading && <p className={styles.directoryMessage}>Loading patient profiles...</p>}
+          {loading && <p className={styles.directoryMessage}>{t("patients.directory.loading")}</p>}
 
           {!loading && filteredRows.length > 0 && (
             <div className={styles.directoryTableScroll}>
@@ -438,12 +453,12 @@ export function PatientsDirectoryPage({ currentPath, onNavigate }: PatientsDirec
                 </colgroup>
                 <thead>
                   <tr>
-                    <th>Patient</th>
-                    <th>Objective</th>
-                    <th>Activity Level</th>
-                    <th>Body Data</th>
-                    <th>Status</th>
-                    <th className={styles.alignRight}>Action</th>
+                    <th>{t("patients.table.patient")}</th>
+                    <th>{t("patients.table.objective")}</th>
+                    <th>{t("patients.table.activityLevel")}</th>
+                    <th>{t("patients.table.bodyData")}</th>
+                    <th>{t("patients.table.status")}</th>
+                    <th className={styles.alignRight}>{t("patients.table.action")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -488,7 +503,7 @@ export function PatientsDirectoryPage({ currentPath, onNavigate }: PatientsDirec
                             </span>
                             <div>
                               <span className={styles.personName}>{activity}</span>
-                              <span className={styles.personSubtext}>{activityTone(activity)} Activity</span>
+                              <span className={styles.personSubtext}>{activityTone(activity)} {t("patients.directory.activity")}</span>
                             </div>
                           </div>
                         </td>
@@ -498,13 +513,13 @@ export function PatientsDirectoryPage({ currentPath, onNavigate }: PatientsDirec
                             <i />
                             <span>{body.height}</span>
                           </div>
-                          <span className={styles.personSubtext}>BMI: {bmi(row.nutritionProfile)}</span>
+                          <span className={styles.personSubtext}>{t("patients.directory.bmi")}: {bmi(row.nutritionProfile)}</span>
                         </td>
                         <td>
                           <span className={row.relation.accepted ? styles.statusAccepted : styles.statusPending}>
-                            {row.relation.accepted ? "Active" : "Pending"}
+                            {row.relation.accepted ? t("patients.status.active") : t("patients.status.pending")}
                           </span>
-                          <span className={styles.personSubtext}>Since {formatDate(row.relation.startDate || row.relation.requestedAt)}</span>
+                          <span className={styles.personSubtext}>{t("patients.directory.since")} {formatDate(row.relation.startDate || row.relation.requestedAt)}</span>
                         </td>
                         <td className={styles.alignRight}>
                           <button
@@ -512,7 +527,7 @@ export function PatientsDirectoryPage({ currentPath, onNavigate }: PatientsDirec
                             className={styles.trackingButton}
                             onClick={() => onNavigate(`/nutritionist/patients/${patientId}`)}
                           >
-                            View Profile
+                            {t("patients.action.viewProfile")}
                           </button>
                         </td>
                       </tr>
@@ -524,12 +539,12 @@ export function PatientsDirectoryPage({ currentPath, onNavigate }: PatientsDirec
           )}
 
           {!loading && filteredRows.length === 0 && (
-            <p className={styles.emptyState}>No accepted patient profiles found.</p>
+            <p className={styles.emptyState}>{t("patients.directory.empty")}</p>
           )}
 
           <div className={styles.tableFooter}>
             <span className={styles.footnote}>
-              Showing {filteredRows.length > 0 ? 1 : 0} to {filteredRows.length} of {filteredRows.length} patients
+              {t("patients.directory.showing")} {filteredRows.length > 0 ? 1 : 0} {t("patients.directory.to")} {filteredRows.length} {t("patients.directory.of")} {filteredRows.length} {t("patients.directory.patients")}
             </span>
             <div className={styles.pager}>
               <button type="button" className={styles.secondaryButton} disabled>{"<"}</button>

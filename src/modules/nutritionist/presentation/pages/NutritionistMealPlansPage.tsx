@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { apiUrl } from "@/app/config/env";
 import { SharedLayout } from "@/shared/components/layout";
 import { useNavigation } from "@/shared/hooks/useNavigation";
+import { useI18n } from "@/shared/i18n/useI18n";
+import type { TranslationKey } from "@/shared/i18n/translations";
 
 interface NutritionistMealPlansPageProps {
   currentPath: string;
@@ -9,6 +11,10 @@ interface NutritionistMealPlansPageProps {
 }
 
 interface SessionUser {
+  id: string | number;
+}
+
+interface NutritionistProfile {
   id: string | number;
 }
 
@@ -39,6 +45,8 @@ interface MealPlanRecipe {
   id: number | string;
   name?: string;
   description?: string;
+  createdByNutritionistId?: number | string;
+  source?: "meal-plan" | "recipe-template";
 }
 
 interface MealPlanForm {
@@ -48,15 +56,9 @@ interface MealPlanForm {
   carbs: string;
   proteins: string;
   fats: string;
-  profileId: string;
   category: string;
   isCurrent: boolean;
   tags: string;
-  entries: Array<{
-    recipeId: string;
-    type: string;
-    day: string;
-  }>;
 }
 
 const emptyForm: MealPlanForm = {
@@ -66,11 +68,9 @@ const emptyForm: MealPlanForm = {
   carbs: "",
   proteins: "",
   fats: "",
-  profileId: "0",
   category: "",
   isCurrent: true,
   tags: "",
-  entries: [{ recipeId: "", type: "BREAKFAST", day: "1" }],
 };
 
 function getSessionUser(): SessionUser | null {
@@ -96,11 +96,23 @@ async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
   });
 
   if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
+    const errorText = await response.text().catch(() => "");
+    throw new Error(errorText ? `HTTP ${response.status}: ${errorText}` : `HTTP ${response.status}`);
   }
 
   if (response.status === 204) return undefined as T;
-  return response.json() as Promise<T>;
+
+  const text = await response.text();
+  if (!text) return undefined as T;
+
+  return JSON.parse(text) as T;
+}
+
+async function getNutritionistIdByUserId(userId: string | number) {
+  const profile = await fetchJson<NutritionistProfile>(
+    `/api/v1/nutritionists/by-user?userId=${encodeURIComponent(String(userId))}`,
+  );
+  return profile.id;
 }
 
 function normalize(value?: string) {
@@ -115,13 +127,13 @@ function formatGram(value?: number) {
   return value === undefined ? "-" : `${value} g`;
 }
 
-function mealTypeLabel(value?: number | string) {
+function mealTypeLabel(value: number | string | undefined, t: (key: TranslationKey) => string) {
   const normalized = String(value ?? "").toLowerCase();
-  if (normalized === "0" || normalized === "breakfast") return "Breakfast";
-  if (normalized === "1" || normalized === "lunch") return "Lunch";
-  if (normalized === "2" || normalized === "dinner") return "Dinner";
-  if (normalized === "3" || normalized === "snack") return "Snack";
-  return value === undefined ? "Meal" : String(value);
+  if (normalized === "0" || normalized === "breakfast") return t("recipes.category.breakfast");
+  if (normalized === "1" || normalized === "lunch") return t("recipes.category.lunch");
+  if (normalized === "2" || normalized === "dinner") return t("recipes.category.dinner");
+  if (normalized === "3" || normalized === "snack") return t("mealPlans.meal.snack");
+  return value === undefined ? t("mealPlans.meal.default") : String(value);
 }
 
 function parseTags(value: string) {
@@ -132,19 +144,22 @@ function parseTags(value: string) {
 }
 
 export function NutritionistMealPlansPage({ currentPath, onNavigate }: NutritionistMealPlansPageProps) {
+  const { t } = useI18n();
   const navigationItems = useNavigation();
   const nutritionistUserId = getSessionUser()?.id;
+  const [nutritionistId, setNutritionistId] = useState<string | number | null>(null);
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
   const [recipes, setRecipes] = useState<MealPlanRecipe[]>([]);
   const [selectedMealPlanId, setSelectedMealPlanId] = useState<number | string | null>(null);
   const [selectedMealPlan, setSelectedMealPlan] = useState<MealPlan | null>(null);
+  const [entryModalOpen, setEntryModalOpen] = useState(false);
+  const [entryForm, setEntryForm] = useState({ recipeId: "", type: "Breakfast", day: "1" });
   const [form, setForm] = useState<MealPlanForm>(emptyForm);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [recipesLoading, setRecipesLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [detailError, setDetailError] = useState<string | null>(null);
@@ -158,7 +173,7 @@ export function NutritionistMealPlansPage({ currentPath, onNavigate }: Nutrition
   }, [recipes]);
 
   const loadMealPlans = async () => {
-    if (!nutritionistUserId) {
+    if (!nutritionistId) {
       setMealPlans([]);
       setError("No active nutritionist session found.");
       setLoading(false);
@@ -169,8 +184,8 @@ export function NutritionistMealPlansPage({ currentPath, onNavigate }: Nutrition
       setLoading(true);
       setError(null);
       const nextPlans = await fetchJson<MealPlan[]>(
-        `/api/v1/meal-plan/nutritionists/${encodeURIComponent(String(nutritionistUserId))}`,
-      );
+        `/api/v1/meal-plan/nutritionists/${encodeURIComponent(String(nutritionistId))}`,
+      ).catch(() => fetchJson<MealPlan[]>("/api/v1/meal-plan"));
       setMealPlans(Array.isArray(nextPlans) ? nextPlans : []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load meal plans.");
@@ -180,20 +195,61 @@ export function NutritionistMealPlansPage({ currentPath, onNavigate }: Nutrition
   };
 
   const loadRecipes = async () => {
-    try {
-      setRecipesLoading(true);
-      const nextRecipes = await fetchJson<MealPlanRecipe[]>("/api/v1/meal-plan/recipes");
-      setRecipes(Array.isArray(nextRecipes) ? nextRecipes : []);
-    } catch (err) {
-      setModalError(err instanceof Error ? err.message : "Failed to load recipes.");
-    } finally {
-      setRecipesLoading(false);
+    if (!nutritionistUserId) return [] as MealPlanRecipe[];
+
+    const nextRecipes = await fetchJson<MealPlanRecipe[]>("/api/v1/recipes").catch(() => []);
+    const loadedRecipes = Array.isArray(nextRecipes)
+      ? nextRecipes
+          .filter((recipe) => String(recipe.createdByNutritionistId) === String(nutritionistUserId))
+          .map((recipe) => ({ ...recipe, source: "recipe-template" as const }))
+      : [];
+
+    setRecipes(loadedRecipes);
+
+    if (loadedRecipes.length === 0) {
+      setModalError("No recipes were found for this nutritionist in /api/v1/recipes.");
     }
+
+    return loadedRecipes;
   };
 
   useEffect(() => {
-    void loadMealPlans();
+    let ignore = false;
+
+    async function resolveNutritionistId() {
+      if (!nutritionistUserId) {
+        setNutritionistId(null);
+        setMealPlans([]);
+        setError("No active nutritionist session found.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        const resolvedId = await getNutritionistIdByUserId(nutritionistUserId);
+        if (!ignore) setNutritionistId(resolvedId);
+      } catch (err) {
+        if (!ignore) {
+          setNutritionistId(null);
+          setMealPlans([]);
+          setError(err instanceof Error ? err.message : "Failed to resolve nutritionist profile.");
+          setLoading(false);
+        }
+      }
+    }
+
+    void resolveNutritionistId();
+
+    return () => {
+      ignore = true;
+    };
   }, [nutritionistUserId]);
+
+  useEffect(() => {
+    if (nutritionistId) void loadMealPlans();
+  }, [nutritionistId]);
 
   const categories = useMemo(() => {
     return Array.from(new Set(mealPlans.map((plan) => plan.category).filter(Boolean) as string[]));
@@ -224,7 +280,6 @@ export function NutritionistMealPlansPage({ currentPath, onNavigate }: Nutrition
     setForm(emptyForm);
     setModalError(null);
     setModalOpen(true);
-    await loadRecipes();
   }
 
   async function openDetail(planId: number | string) {
@@ -247,7 +302,7 @@ export function NutritionistMealPlansPage({ currentPath, onNavigate }: Nutrition
   }
 
   async function handleDelete(planId: number | string) {
-    const confirmed = window.confirm("Delete this meal plan?");
+    const confirmed = window.confirm(t("mealPlans.confirm.delete"));
     if (!confirmed) return;
 
     try {
@@ -263,36 +318,53 @@ export function NutritionistMealPlansPage({ currentPath, onNavigate }: Nutrition
     }
   }
 
-  function updateForm(field: keyof Omit<MealPlanForm, "entries">, value: string | boolean) {
+  function updateForm(field: keyof MealPlanForm, value: string | boolean) {
     setForm((current) => ({ ...current, [field]: value }));
   }
 
-  function updateEntry(index: number, field: "recipeId" | "type" | "day", value: string) {
-    setForm((current) => ({
-      ...current,
-      entries: current.entries.map((entry, entryIndex) =>
-        entryIndex === index ? { ...entry, [field]: value } : entry,
-      ),
-    }));
+  function openEntryModal() {
+    setEntryForm({ recipeId: recipes[0] ? String(recipes[0].id) : "", type: "Breakfast", day: "1" });
+    setModalError(null);
+    setEntryModalOpen(true);
+    if (recipes.length === 0) void loadRecipes();
   }
 
-  function addEntry() {
-    setForm((current) => ({
-      ...current,
-      entries: [...current.entries, { recipeId: "", type: "BREAKFAST", day: "1" }],
-    }));
-  }
+  async function handleAddEntry(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!selectedMealPlanId || !nutritionistUserId) return;
 
-  function removeEntry(index: number) {
-    setForm((current) => ({
-      ...current,
-      entries: current.entries.filter((_, entryIndex) => entryIndex !== index),
-    }));
+    if (!entryForm.recipeId || !entryForm.day) {
+      setModalError("Select a recipe and day.");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setModalError(null);
+      await fetchJson<void>(`/api/v1/meal-plan/${selectedMealPlanId}/entries`, {
+        method: "POST",
+        body: JSON.stringify({
+          recipeId: Number(entryForm.recipeId),
+          type: entryForm.type,
+          day: Number(entryForm.day),
+          userId: Number(nutritionistUserId),
+        }),
+      });
+
+      const detail = await fetchJson<MealPlan>(`/api/v1/meal-plan/${selectedMealPlanId}`);
+      setSelectedMealPlan(detail);
+      await loadMealPlans();
+      setEntryModalOpen(false);
+    } catch (err) {
+      setModalError(err instanceof Error ? err.message : "Failed to add recipe entry.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!nutritionistUserId) {
+    if (!nutritionistUserId || !nutritionistId) {
       setModalError("No active nutritionist session found.");
       return;
     }
@@ -304,7 +376,6 @@ export function NutritionistMealPlansPage({ currentPath, onNavigate }: Nutrition
       carbs: Number(form.carbs),
       proteins: Number(form.proteins),
       fats: Number(form.fats),
-      profileId: Number(form.profileId || 0),
       category: form.category.trim(),
       isCurrent: form.isCurrent,
       tags: parseTags(form.tags),
@@ -319,28 +390,10 @@ export function NutritionistMealPlansPage({ currentPath, onNavigate }: Nutrition
       setSaving(true);
       setModalError(null);
 
-      const created = await fetchJson<MealPlan>(
-        `/api/v1/meal-plan/nutritionists/${encodeURIComponent(String(nutritionistUserId))}`,
-        {
-          method: "POST",
-          body: JSON.stringify(body),
-        },
-      );
-
-      const entries = form.entries.filter((entry) => entry.recipeId && entry.day);
-      await Promise.all(
-        entries.map((entry) =>
-          fetchJson<void>(`/api/v1/meal-plan/${created.id}/entries`, {
-            method: "POST",
-            body: JSON.stringify({
-              recipeId: Number(entry.recipeId),
-              type: entry.type,
-              day: Number(entry.day),
-              userId: Number(nutritionistUserId),
-            }),
-          }),
-        ),
-      );
+      await fetchJson<MealPlan>(`/api/v1/meal-plan/nutritionists/${encodeURIComponent(String(nutritionistId))}`, {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
 
       await loadMealPlans();
       setModalOpen(false);
@@ -354,27 +407,28 @@ export function NutritionistMealPlansPage({ currentPath, onNavigate }: Nutrition
 
   return (
     <SharedLayout
-      title="Meal Plans"
+      title={t("mealPlans.title")}
       currentPath={currentPath}
       onNavigate={onNavigate}
       navigationItems={navigationItems}
-      breadcrumbs={["Nutritionist", "Meal Plans"]}
+      breadcrumbs={[t("recipes.breadcrumb.nutritionist"), t("mealPlans.title")]}
+      showPageTitle={false}
     >
       <div className="nutritionist-mealplans-page">
         <header className="nutritionist-mealplans-hero">
           <div>
-            <span>Meal plan templates</span>
-            <h2>Manage your nutrition plans</h2>
-            <p>Create reusable plans, organize recipes by day and keep macros visible at a glance.</p>
+            <span>{t("mealPlans.eyebrow")}</span>
+            <h2>{t("mealPlans.heading")}</h2>
+            <p>{t("mealPlans.description")}</p>
           </div>
-          <button type="button" onClick={openCreateModal}>Create Meal Plan</button>
+          <button type="button" onClick={openCreateModal}>{t("mealPlans.create")}</button>
         </header>
 
         <section className="nutritionist-mealplans-stats">
-          <StatCard label="My Plans" value={mealPlans.length} detail="Templates" />
-          <StatCard label="Active" value={activeCount} detail="Current plans" />
-          <StatCard label="Entries" value={entryCount} detail="Recipes scheduled" />
-          <StatCard label="Categories" value={categories.length} detail="Plan groups" />
+          <StatCard label={t("mealPlans.stats.mine")} value={mealPlans.length} detail={t("mealPlans.stats.templates")} tone="green" icon={<ClipboardListIcon />} />
+          <StatCard label={t("mealPlans.stats.active")} value={activeCount} detail={t("mealPlans.stats.current")} tone="blue" icon={<CheckCircleIcon />} />
+          <StatCard label={t("mealPlans.stats.entries")} value={entryCount} detail={t("mealPlans.stats.scheduled")} tone="amber" icon={<CalendarIcon />} />
+          <StatCard label={t("mealPlans.stats.categories")} value={categories.length} detail={t("mealPlans.stats.groups")} tone="purple" icon={<TagsIcon />} />
         </section>
 
         {error && <div className="nutritionist-mealplans-warning">{error}</div>}
@@ -384,22 +438,22 @@ export function NutritionistMealPlansPage({ currentPath, onNavigate }: Nutrition
             <div className="nutritionist-mealplans-toolbar">
               <input
                 type="search"
-                placeholder="Search by name, category, tags..."
+                placeholder={t("mealPlans.search.placeholder")}
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
               />
               <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}>
-                <option value="all">All Categories</option>
+                <option value="all">{t("recipes.form.selectCategory")}</option>
                 {categories.map((category) => (
                   <option key={category} value={category}>{category}</option>
                 ))}
               </select>
               <button type="button" onClick={() => { setSearch(""); setCategoryFilter("all"); }}>
-                Clear
+                {t("recipes.search.clear")}
               </button>
             </div>
 
-            {loading && <div className="nutritionist-mealplans-state">Loading meal plans...</div>}
+            {loading && <div className="nutritionist-mealplans-state">{t("mealPlans.loading")}</div>}
 
             {!loading && (
               <div className="nutritionist-mealplans-grid">
@@ -411,22 +465,22 @@ export function NutritionistMealPlansPage({ currentPath, onNavigate }: Nutrition
                         <p>{plan.description || "-"}</p>
                       </div>
                       <span className={plan.isCurrent ? "nutritionist-mealplans-badge-active" : "nutritionist-mealplans-badge-muted"}>
-                        {plan.isCurrent ? "Active" : "Inactive"}
+                        {plan.isCurrent ? t("patients.status.active") : t("mealPlans.status.inactive")}
                       </span>
                     </div>
                     <div className="nutritionist-mealplans-macros">
-                      <Macro label="Calories" value={formatKcal(plan.calories)} />
-                      <Macro label="Carbs" value={formatGram(plan.carbs)} />
-                      <Macro label="Protein" value={formatGram(plan.proteins)} />
-                      <Macro label="Fats" value={formatGram(plan.fats)} />
+                      <Macro label={t("dashboard.metric.calories")} value={formatKcal(plan.calories)} />
+                      <Macro label={t("dashboard.metric.carbs")} value={formatGram(plan.carbs)} />
+                      <Macro label={t("dashboard.metric.protein")} value={formatGram(plan.proteins)} />
+                      <Macro label={t("dashboard.metric.fats")} value={formatGram(plan.fats)} />
                     </div>
                     <div className="nutritionist-mealplans-tags">
-                      <strong>{plan.category || "Uncategorized"}</strong>
+                      <strong>{plan.category || t("mealPlans.uncategorized")}</strong>
                       {(plan.tags ?? []).slice(0, 3).map((tag) => <span key={tag}>{tag}</span>)}
                     </div>
                     <div className="nutritionist-mealplans-actions">
-                      <button type="button" onClick={() => openDetail(plan.id)}>View</button>
-                      <button type="button" onClick={() => handleDelete(plan.id)}>Delete</button>
+                      <button type="button" onClick={() => openDetail(plan.id)}>{t("recipes.action.view")}</button>
+                      <button type="button" onClick={() => handleDelete(plan.id)}>{t("recipes.action.delete")}</button>
                     </div>
                   </article>
                 ))}
@@ -434,23 +488,29 @@ export function NutritionistMealPlansPage({ currentPath, onNavigate }: Nutrition
             )}
 
             {!loading && filteredMealPlans.length === 0 && (
-              <div className="nutritionist-mealplans-state">No meal plans found.</div>
+              <div className="nutritionist-mealplans-state">{t("mealPlans.empty")}</div>
             )}
           </section>
 
           {selectedMealPlanId && (
             <aside className="nutritionist-mealplans-detail">
               <div className="nutritionist-mealplans-detail-header">
-                <h3>Meal Plan Details</h3>
+                <h3>{t("mealPlans.details.title")}</h3>
                 <button type="button" onClick={() => { setSelectedMealPlanId(null); setSelectedMealPlan(null); }}>
                   X
                 </button>
               </div>
 
-              {detailLoading && <div className="nutritionist-mealplans-state">Loading details...</div>}
+              {detailLoading && <div className="nutritionist-mealplans-state">{t("mealPlans.details.loading")}</div>}
               {detailError && <div className="nutritionist-mealplans-warning">{detailError}</div>}
               {!detailLoading && selectedMealPlan && (
-                <MealPlanDetail plan={selectedMealPlan} recipesById={recipesById} onDelete={handleDelete} />
+                <MealPlanDetail
+                  plan={selectedMealPlan}
+                  recipesById={recipesById}
+                  onAddEntry={openEntryModal}
+                  onDelete={handleDelete}
+                  t={t}
+                />
               )}
             </aside>
           )}
@@ -461,28 +521,78 @@ export function NutritionistMealPlansPage({ currentPath, onNavigate }: Nutrition
             <div className="nutritionist-mealplans-modal-content">
               <div className="nutritionist-mealplans-modal-header">
                 <div>
-                  <h3>Create Meal Plan</h3>
-                  <p>Set the base macros and add recipe entries to the template.</p>
+                  <h3>{t("mealPlans.create")}</h3>
+                  <p>{t("mealPlans.create.description")}</p>
                 </div>
-                <button type="button" onClick={() => setModalOpen(false)} aria-label="Close meal plan modal">X</button>
+                <button type="button" onClick={() => setModalOpen(false)} aria-label={t("mealPlans.action.closeModal")}>X</button>
               </div>
 
               <div className="nutritionist-mealplans-modal-body">
                 {modalError && <div className="nutritionist-mealplans-warning">{modalError}</div>}
-                {recipesLoading ? (
-                  <div className="nutritionist-mealplans-state">Loading recipes...</div>
-                ) : (
-                  <MealPlanForm
-                    form={form}
-                    recipes={recipes}
-                    saving={saving}
-                    onSubmit={handleSubmit}
-                    onChange={updateForm}
-                    onEntryChange={updateEntry}
-                    onAddEntry={addEntry}
-                    onRemoveEntry={removeEntry}
-                  />
-                )}
+                <MealPlanForm
+                  form={form}
+                  saving={saving}
+                  onSubmit={handleSubmit}
+                  onChange={updateForm}
+                  t={t}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {entryModalOpen && selectedMealPlan && (
+          <div className="nutritionist-mealplans-modal" role="dialog" aria-modal="true">
+            <div className="nutritionist-mealplans-modal-content">
+              <div className="nutritionist-mealplans-modal-header">
+                <div>
+                  <h3>{t("mealPlans.entry.add")}</h3>
+                  <p>{t("mealPlans.entry.addDescription")} {selectedMealPlan.name || t("mealPlans.entry.thisPlan")}.</p>
+                </div>
+                <button type="button" onClick={() => setEntryModalOpen(false)} aria-label={t("mealPlans.entry.closeModal")}>X</button>
+              </div>
+              <div className="nutritionist-mealplans-modal-body">
+                {modalError && <div className="nutritionist-mealplans-warning">{modalError}</div>}
+                <form className="nutritionist-mealplans-form" onSubmit={handleAddEntry}>
+                  <label className="nutritionist-mealplans-field nutritionist-mealplans-field-full">
+                    <span>{t("recipes.table.recipe")}</span>
+                    <select
+                      value={entryForm.recipeId}
+                      onChange={(event) => setEntryForm((current) => ({ ...current, recipeId: event.target.value }))}
+                      required
+                    >
+                      <option value="">{t("mealPlans.entry.selectRecipe")}</option>
+                      {recipes.map((recipe) => (
+                        <option key={recipe.id} value={recipe.id}>{recipe.name || `Recipe #${recipe.id}`}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="nutritionist-mealplans-field">
+                    <span>{t("recipes.table.type")}</span>
+                    <select
+                      value={entryForm.type}
+                      onChange={(event) => setEntryForm((current) => ({ ...current, type: event.target.value }))}
+                    >
+                      <option value="Breakfast">{t("recipes.category.breakfast")}</option>
+                      <option value="Lunch">{t("recipes.category.lunch")}</option>
+                      <option value="Dinner">{t("recipes.category.dinner")}</option>
+                      <option value="Snack">{t("mealPlans.meal.snack")}</option>
+                    </select>
+                  </label>
+                  <label className="nutritionist-mealplans-field">
+                    <span>{t("patients.tracking.day")}</span>
+                    <input
+                      type="number"
+                      min="1"
+                      value={entryForm.day}
+                      onChange={(event) => setEntryForm((current) => ({ ...current, day: event.target.value }))}
+                      required
+                    />
+                  </label>
+                  <button type="submit" className="nutritionist-mealplans-submit" disabled={saving || recipes.length === 0}>
+                    {saving ? t("mealPlans.entry.adding") : t("mealPlans.entry.addRecipe")}
+                  </button>
+                </form>
               </div>
             </div>
           </div>
@@ -492,13 +602,61 @@ export function NutritionistMealPlansPage({ currentPath, onNavigate }: Nutrition
   );
 }
 
-function StatCard({ label, value, detail }: { label: string; value: number; detail: string }) {
+function StatCard({ label, value, detail, tone, icon }: { label: string; value: number; detail: string; tone: string; icon: ReactNode }) {
   return (
-    <article className="nutritionist-mealplans-stat">
-      <strong>{value}</strong>
-      <span>{label}</span>
-      <p>{detail}</p>
+    <article className={`nutritionist-mealplans-stat nutritionist-mealplans-stat-${tone}`}>
+      <div className="nutritionist-mealplans-stat-icon">{icon}</div>
+      <div>
+        <strong>{value}</strong>
+        <span>{label}</span>
+        <p>{detail}</p>
+      </div>
     </article>
+  );
+}
+
+function ClipboardListIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M9 5h6" />
+      <path d="M9 3h6v4H9z" />
+      <path d="M7 5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+      <path d="M8 12h8" />
+      <path d="M8 16h5" />
+    </svg>
+  );
+}
+
+function CheckCircleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path d="m8 12 2.5 2.5L16 9" />
+    </svg>
+  );
+}
+
+function CalendarIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="4" y="5" width="16" height="15" rx="2" />
+      <path d="M8 3v4" />
+      <path d="M16 3v4" />
+      <path d="M4 10h16" />
+      <path d="M8 14h3" />
+      <path d="M13 14h3" />
+    </svg>
+  );
+}
+
+function TagsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M20 10 14 4H6v8l6 6Z" />
+      <path d="M14 4v6h6" />
+      <circle cx="9" cy="9" r="1" />
+      <path d="m16 14 3 3" />
+    </svg>
   );
 }
 
@@ -514,11 +672,15 @@ function Macro({ label, value }: { label: string; value: string }) {
 function MealPlanDetail({
   plan,
   recipesById,
+  onAddEntry,
   onDelete,
+  t,
 }: {
   plan: MealPlan;
   recipesById: Record<string, MealPlanRecipe>;
+  onAddEntry: () => void;
   onDelete: (id: number | string) => void;
+  t: (key: TranslationKey) => string;
 }) {
   return (
     <>
@@ -531,45 +693,48 @@ function MealPlanDetail({
       </section>
 
       <section className="nutritionist-mealplans-detail-section">
-        <h4>Nutrition</h4>
+        <h4>{t("recipes.nutrition.total")}</h4>
         <div className="nutritionist-mealplans-macros">
-          <Macro label="Calories" value={formatKcal(plan.calories)} />
-          <Macro label="Carbs" value={formatGram(plan.carbs)} />
-          <Macro label="Protein" value={formatGram(plan.proteins)} />
-          <Macro label="Fats" value={formatGram(plan.fats)} />
+          <Macro label={t("dashboard.metric.calories")} value={formatKcal(plan.calories)} />
+          <Macro label={t("dashboard.metric.carbs")} value={formatGram(plan.carbs)} />
+          <Macro label={t("dashboard.metric.protein")} value={formatGram(plan.proteins)} />
+          <Macro label={t("dashboard.metric.fats")} value={formatGram(plan.fats)} />
         </div>
       </section>
 
       <section className="nutritionist-mealplans-detail-section">
-        <h4>Information</h4>
-        <DetailRow label="Category" value={plan.category || "-"} />
+        <h4>{t("mealPlans.details.information")}</h4>
+        <DetailRow label={t("recipes.table.category")} value={plan.category || "-"} />
         <DetailRow label="Profile ID" value={String(plan.profileId ?? "-")} />
-        <DetailRow label="Status" value={plan.isCurrent ? "Active" : "Inactive"} />
+        <DetailRow label={t("patients.table.status")} value={plan.isCurrent ? t("patients.status.active") : t("mealPlans.status.inactive")} />
         <div className="nutritionist-mealplans-tags">
           {(plan.tags ?? []).map((tag) => <span key={tag}>{tag}</span>)}
-          {(plan.tags ?? []).length === 0 && <span>No tags</span>}
+          {(plan.tags ?? []).length === 0 && <span>{t("mealPlans.noTags")}</span>}
         </div>
       </section>
 
       <section className="nutritionist-mealplans-detail-section">
-        <h4>Entries</h4>
+        <div className="nutritionist-mealplans-entry-header">
+          <h4>{t("mealPlans.stats.entries")}</h4>
+          <button type="button" onClick={onAddEntry}>{t("mealPlans.entry.addRecipe")}</button>
+        </div>
         <ul className="nutritionist-mealplans-entry-list">
           {(plan.entries ?? []).map((entry) => {
             const recipe = recipesById[String(entry.recipeId)];
             return (
               <li key={entry.id}>
-                <span>{mealTypeLabel(entry.mealPlanType)}</span>
-                <strong>{recipe?.name || `Recipe #${entry.recipeId}`}</strong>
-                <em>Day {entry.day ?? "-"}</em>
+                <span>{mealTypeLabel(entry.mealPlanType, t)}</span>
+                <strong>{recipe?.name || `${t("recipes.table.recipe")} #${entry.recipeId}`}</strong>
+                <em>{t("patients.tracking.day")} {entry.day ?? "-"}</em>
               </li>
             );
           })}
         </ul>
-        {(plan.entries ?? []).length === 0 && <p>No entries listed.</p>}
+        {(plan.entries ?? []).length === 0 && <p>{t("mealPlans.entries.empty")}</p>}
       </section>
 
       <div className="nutritionist-mealplans-detail-actions">
-        <button type="button" onClick={() => onDelete(plan.id)}>Delete Meal Plan</button>
+        <button type="button" onClick={() => onDelete(plan.id)}>{t("mealPlans.delete")}</button>
       </div>
     </>
   );
@@ -586,112 +751,66 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 
 function MealPlanForm({
   form,
-  recipes,
   saving,
   onSubmit,
   onChange,
-  onEntryChange,
-  onAddEntry,
-  onRemoveEntry,
+  t,
 }: {
   form: MealPlanForm;
-  recipes: MealPlanRecipe[];
   saving: boolean;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
-  onChange: (field: keyof Omit<MealPlanForm, "entries">, value: string | boolean) => void;
-  onEntryChange: (index: number, field: "recipeId" | "type" | "day", value: string) => void;
-  onAddEntry: () => void;
-  onRemoveEntry: (index: number) => void;
+  onChange: (field: keyof MealPlanForm, value: string | boolean) => void;
+  t: (key: TranslationKey) => string;
 }) {
   return (
     <form className="nutritionist-mealplans-form" onSubmit={onSubmit}>
       <label className="nutritionist-mealplans-field nutritionist-mealplans-field-full">
-        <span>Name</span>
+        <span>{t("patients.overview.name")}</span>
         <input value={form.name} onChange={(event) => onChange("name", event.target.value)} required />
       </label>
 
       <label className="nutritionist-mealplans-field nutritionist-mealplans-field-full">
-        <span>Description</span>
+        <span>{t("recipes.form.description")}</span>
         <textarea value={form.description} onChange={(event) => onChange("description", event.target.value)} required />
       </label>
 
       <label className="nutritionist-mealplans-field">
-        <span>Category</span>
+        <span>{t("recipes.table.category")}</span>
         <input value={form.category} onChange={(event) => onChange("category", event.target.value)} required />
       </label>
 
       <label className="nutritionist-mealplans-field">
-        <span>Profile ID</span>
-        <input type="number" min="0" value={form.profileId} onChange={(event) => onChange("profileId", event.target.value)} />
-      </label>
-
-      <label className="nutritionist-mealplans-field">
-        <span>Calories</span>
+        <span>{t("dashboard.metric.calories")}</span>
         <input type="number" min="0" step="0.1" value={form.calories} onChange={(event) => onChange("calories", event.target.value)} />
       </label>
 
       <label className="nutritionist-mealplans-field">
-        <span>Carbs</span>
+        <span>{t("dashboard.metric.carbs")}</span>
         <input type="number" min="0" step="0.1" value={form.carbs} onChange={(event) => onChange("carbs", event.target.value)} />
       </label>
 
       <label className="nutritionist-mealplans-field">
-        <span>Proteins</span>
+        <span>{t("patients.tracking.proteins")}</span>
         <input type="number" min="0" step="0.1" value={form.proteins} onChange={(event) => onChange("proteins", event.target.value)} />
       </label>
 
       <label className="nutritionist-mealplans-field">
-        <span>Fats</span>
+        <span>{t("dashboard.metric.fats")}</span>
         <input type="number" min="0" step="0.1" value={form.fats} onChange={(event) => onChange("fats", event.target.value)} />
       </label>
 
       <label className="nutritionist-mealplans-field nutritionist-mealplans-field-full">
-        <span>Tags</span>
+        <span>{t("mealPlans.tags")}</span>
         <input placeholder="weight loss, balanced, weekly" value={form.tags} onChange={(event) => onChange("tags", event.target.value)} />
       </label>
 
       <label className="nutritionist-mealplans-toggle">
         <input type="checkbox" checked={form.isCurrent} onChange={(event) => onChange("isCurrent", event.target.checked)} />
-        <span>Current active template</span>
+        <span>{t("mealPlans.currentTemplate")}</span>
       </label>
 
-      <section className="nutritionist-mealplans-entry-editor">
-        <div className="nutritionist-mealplans-entry-header">
-          <h4>Recipe entries</h4>
-          <button type="button" onClick={onAddEntry}>Add Entry</button>
-        </div>
-
-        {form.entries.map((entry, index) => (
-          <div className="nutritionist-mealplans-entry-row" key={index}>
-            <label className="nutritionist-mealplans-field">
-              <span>Recipe</span>
-              <select value={entry.recipeId} onChange={(event) => onEntryChange(index, "recipeId", event.target.value)}>
-                <option value="">Select recipe</option>
-                {recipes.map((recipe) => (
-                  <option key={recipe.id} value={recipe.id}>{recipe.name}</option>
-                ))}
-              </select>
-            </label>
-            <label className="nutritionist-mealplans-field">
-              <span>Type</span>
-              <select value={entry.type} onChange={(event) => onEntryChange(index, "type", event.target.value)}>
-                <option value="BREAKFAST">Breakfast</option>
-                <option value="LUNCH">Lunch</option>
-                <option value="DINNER">Dinner</option>
-                <option value="SNACK">Snack</option>
-              </select>
-            </label>
-            <label className="nutritionist-mealplans-field">
-              <span>Day</span>
-              <input type="number" min="1" value={entry.day} onChange={(event) => onEntryChange(index, "day", event.target.value)} />
-            </label>
-            <button type="button" onClick={() => onRemoveEntry(index)} disabled={form.entries.length === 1}>Remove</button>
-          </div>
-        ))}
-      </section>
-
       <button type="submit" className="nutritionist-mealplans-submit" disabled={saving}>
-        {saving ? "Saving..." : "Save Meal Plan"}
+        {saving ? t("recipes.action.saving") : t("mealPlans.save")}
       </button>
     </form>
   );

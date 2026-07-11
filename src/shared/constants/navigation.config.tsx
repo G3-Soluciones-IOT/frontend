@@ -14,7 +14,6 @@ export const navigationConfig = {
     { label: "Nutrition Library", icon: <FileIcon />, group: "root" },
     { label: "Recipes", href: "/nutritionist/recipes", icon: null, group: "nutrition-library" },
     { label: "Meal Plans", href: "/nutritionist/meal-plans", icon: null, group: "nutrition-library" },
-    { label: "Analytics", href: "/analytics", icon: <ChartIcon />, group: "root" },
   ] as NavigationItem[],
 
   patient: [

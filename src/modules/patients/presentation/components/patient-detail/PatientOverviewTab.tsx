@@ -1,14 +1,21 @@
 import { useEffect, useState } from "react";
+import { useI18n } from "@/shared/i18n/useI18n";
 import { apiUrl } from "@/app/config/env";
 import type { UserProfileResource } from "../../../infrastructure/api/nutritionistPatients.api";
 import styles from "../../pages/PatientsPages.module.css";
 
 interface PatientProfileResource {
   id: number | string;
+  userId?: number | string;
   name?: string;
   username?: string;
   email?: string;
   birthDate?: string;
+  dateOfBirth?: string;
+  birthday?: string;
+  birthdate?: string;
+  birth_date?: string;
+  date_of_birth?: string;
   userProfileId?: number | string;
 }
 
@@ -35,10 +42,6 @@ async function fetchPatientDetailJson<T>(path: string): Promise<T> {
   }
 
   return response.json() as Promise<T>;
-}
-
-function firstItem<T>(data: T | T[]) {
-  return Array.isArray(data) ? data[0] ?? undefined : data;
 }
 
 function calculateAge(birthDate?: string) {
@@ -69,6 +72,53 @@ function formatBirthDate(value?: string) {
   });
 }
 
+function getDateValue(source?: unknown) {
+  if (!source || typeof source !== "object") return undefined;
+  const record = source as Record<string, unknown>;
+  const value =
+    record.birthDate ??
+    record.birthdate ??
+    record.birth_date ??
+    record.dateOfBirth ??
+    record.date_of_birth ??
+    record.birthday ??
+    record.dob;
+
+  return typeof value === "string" ? value : undefined;
+}
+
+function resolveBirthDate(profile?: PatientProfileResource, nutritionProfile?: UserProfileResource, fallbackProfile?: UserProfileResource | null) {
+  return (
+    getDateValue(nutritionProfile) ||
+    getDateValue(profile) ||
+    getDateValue(fallbackProfile)
+  );
+}
+
+function findProfileByPatient(
+  profiles: PatientProfileResource[],
+  patientId: string,
+  nutritionProfile?: UserProfileResource,
+) {
+  return (
+    profiles.find((profile) => String(profile.userProfileId) === String(nutritionProfile?.id)) ||
+    profiles.find((profile) => String(profile.userId) === String(patientId)) ||
+    profiles.find((profile) => String(profile.id) === String(patientId))
+  );
+}
+
+function findNutritionProfileByPatient(
+  profiles: UserProfileResource[],
+  patientId: string,
+  accountProfile?: PatientProfileResource,
+) {
+  return (
+    profiles.find((profile) => String(profile.id) === String(accountProfile?.userProfileId)) ||
+    profiles.find((profile) => String(profile.userId) === String(patientId)) ||
+    profiles.find((profile) => String(profile.id) === String(patientId))
+  );
+}
+
 function formatHeight(height?: number) {
   if (!height || !Number.isFinite(height)) return "-";
   return height > 3 ? `${height} cm` : `${height.toFixed(2)} m`;
@@ -94,6 +144,7 @@ export function PatientOverviewTab({
   fallbackEmail,
   fallbackProfile,
 }: PatientOverviewTabProps) {
+  const { t } = useI18n();
   const [overviewData, setOverviewData] = useState<OverviewData>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -106,20 +157,40 @@ export function PatientOverviewTab({
       setError(null);
 
       try {
-        const profileData = await fetchPatientDetailJson<PatientProfileResource | PatientProfileResource[]>(
-          `/api/v1/profiles/${patientId}`,
-        );
-        const nextProfile = firstItem(profileData);
-        const nutritionProfile = nextProfile?.userProfileId
-          ? firstItem(
-              await fetchPatientDetailJson<UserProfileResource | UserProfileResource[]>(
-                `/api/v1/user-profiles/${nextProfile.userProfileId}`,
-              ),
-            )
-          : undefined;
+        const [profileResult, nutritionProfileResult] = await Promise.allSettled([
+          fetchPatientDetailJson<PatientProfileResource>(
+            `/api/v1/profiles/by-user/${encodeURIComponent(String(patientId))}`,
+          ),
+          fetchPatientDetailJson<UserProfileResource>(
+            `/api/v1/user-profiles/by-user/${encodeURIComponent(String(patientId))}`,
+          ),
+        ]);
+
+        const nextProfile = profileResult.status === "fulfilled" ? profileResult.value : undefined;
+        const nutritionProfileByUser =
+          nutritionProfileResult.status === "fulfilled" ? nutritionProfileResult.value : undefined;
+
+        const hasBirthDate = resolveBirthDate(nextProfile, nutritionProfileByUser, fallbackProfile);
+        let resolvedProfile = nextProfile;
+        let resolvedNutritionProfile = nutritionProfileByUser;
+
+        if (!hasBirthDate) {
+          const [profilesResult, nutritionProfilesResult] = await Promise.allSettled([
+            fetchPatientDetailJson<PatientProfileResource[]>("/api/v1/profiles"),
+            fetchPatientDetailJson<UserProfileResource[]>("/api/v1/user-profiles"),
+          ]);
+
+          const profiles = profilesResult.status === "fulfilled" ? profilesResult.value : [];
+          const nutritionProfiles = nutritionProfilesResult.status === "fulfilled" ? nutritionProfilesResult.value : [];
+
+          resolvedProfile = resolvedProfile ?? findProfileByPatient(profiles, patientId, resolvedNutritionProfile);
+          resolvedNutritionProfile =
+            resolvedNutritionProfile ?? findNutritionProfileByPatient(nutritionProfiles, patientId, resolvedProfile);
+          resolvedProfile = resolvedProfile ?? findProfileByPatient(profiles, patientId, resolvedNutritionProfile);
+        }
 
         if (!mounted) return;
-        setOverviewData({ profile: nextProfile, nutritionProfile });
+        setOverviewData({ profile: resolvedProfile, nutritionProfile: resolvedNutritionProfile });
       } catch (err) {
         if (!mounted) return;
         setError(err instanceof Error ? err.message : "Failed to load overview.");
@@ -137,32 +208,32 @@ export function PatientOverviewTab({
 
   const overviewProfile = overviewData.profile;
   const overviewNutrition = overviewData.nutritionProfile;
-  const birthDate = overviewNutrition?.birthDate || overviewProfile?.birthDate || fallbackProfile?.birthDate;
+  const birthDate = resolveBirthDate(overviewProfile, overviewNutrition, fallbackProfile);
   const allergies = overviewNutrition?.allergyNames?.length ? overviewNutrition.allergyNames : [];
 
   return (
     <section className={styles.patientOverviewPanel}>
       <div className={styles.patientOverviewTitle}>
-        <h2>Patient Overview</h2>
-        <span>{loading ? "Loading" : "Real profile data"}</span>
+        <h2>{t("patients.overview.title")}</h2>
+        <span>{loading ? t("patients.common.loading") : t("patients.overview.realData")}</span>
       </div>
-      {error && <p className={styles.errorText}>Overview endpoint unavailable: {error}</p>}
+      {error && <p className={styles.errorText}>{t("patients.overview.unavailable")}: {error}</p>}
       <div className={styles.patientOverviewGrid}>
-        <OverviewItem label="Name" value={overviewProfile?.name || overviewProfile?.username || fallbackName} />
-        <OverviewItem label="Email" value={overviewProfile?.email || fallbackEmail || "-"} />
-        <OverviewItem label="Age" value={calculateAge(birthDate)} />
-        <OverviewItem label="Birth Date" value={formatBirthDate(birthDate)} />
-        <OverviewItem label="Weight" value={formatWeight(overviewNutrition?.weight ?? fallbackProfile?.weight)} />
-        <OverviewItem label="Height" value={formatHeight(overviewNutrition?.height ?? fallbackProfile?.height)} />
-        <OverviewItem label="Objective" value={overviewNutrition?.objectiveName || fallbackProfile?.objectiveName || "-"} />
-        <OverviewItem label="Activity Level" value={overviewNutrition?.activityLevelName || fallbackProfile?.activityLevelName || "-"} />
+        <OverviewItem label={t("patients.overview.name")} value={overviewProfile?.name || overviewProfile?.username || fallbackName} />
+        <OverviewItem label={t("patients.overview.email")} value={overviewProfile?.email || fallbackEmail || "-"} />
+        <OverviewItem label={t("patients.overview.age")} value={calculateAge(birthDate)} />
+        <OverviewItem label={t("patients.overview.birthDate")} value={formatBirthDate(birthDate)} />
+        <OverviewItem label={t("patients.overview.weight")} value={formatWeight(overviewNutrition?.weight ?? fallbackProfile?.weight)} />
+        <OverviewItem label={t("patients.overview.height")} value={formatHeight(overviewNutrition?.height ?? fallbackProfile?.height)} />
+        <OverviewItem label={t("patients.overview.objective")} value={overviewNutrition?.objectiveName || fallbackProfile?.objectiveName || "-"} />
+        <OverviewItem label={t("patients.overview.activityLevel")} value={overviewNutrition?.activityLevelName || fallbackProfile?.activityLevelName || "-"} />
       </div>
       <div className={styles.patientAllergiesCard}>
-        <span>Allergies</span>
+        <span>{t("patients.overview.allergies")}</span>
         <div className={styles.tagsRow}>
           {allergies.length > 0
             ? allergies.map((allergy) => <span key={allergy} className={styles.tag}>{allergy}</span>)
-            : <span className={styles.tag}>No allergies registered</span>}
+            : <span className={styles.tag}>{t("patients.overview.noAllergies")}</span>}
         </div>
       </div>
     </section>
