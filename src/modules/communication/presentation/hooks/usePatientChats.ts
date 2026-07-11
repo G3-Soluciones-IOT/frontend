@@ -1,32 +1,49 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { apiUrl } from "@/app/config/env";
 import { getStoredNutritionistProfile } from "@/modules/nutritionist/infrastructure/storage/nutritionistProfileStorage";
 import { getAuthSession } from "@/shared/utils/authSession";
 import type { ChatAttachment, ChatMessage, ChatPatient, PatientChat, PatientConnectionStatus } from "../../domain/models/PatientChat";
 import {
-  chatApi,
-  type ChatMessageResource,
   type ChatNotificationResource,
   type ChatUserResource,
-  type ChatValidateResource,
-  type ChatUserExistsResource,
 } from "../../infrastructure/api/chat.api";
 import { StompClient } from "../../infrastructure/api/stompClient";
 
-interface NutritionistProfileResource {
-  id: number | string;
-}
+const CHAT_SEND_DESTINATION = (import.meta.env.VITE_STOMP_CHAT_SEND_DESTINATION as string | undefined) ?? "/app/chat.sendMessage";
+const CHAT_SEND_REST_PATH = import.meta.env.VITE_CHAT_SEND_REST_PATH as string | undefined;
+const CHAT_SEND_DESTINATIONS = Array.from(
+  new Set([
+    CHAT_SEND_DESTINATION,
+    "/app/chat",
+    "/app/chat.send",
+    "/app/chat/message",
+    "/app/chat.private",
+    "/app/sendMessage",
+  ].filter(Boolean)),
+);
 
-interface NutritionistPatientRelationResource {
-  id: number | string;
-  patientUserId: number | string;
+interface ChatContactResource {
+  contactUserId: number | string;
+  relationshipId: number | string;
+  role: "NUTRITIONIST" | "PATIENT";
+  displayName?: string | null;
+  username?: string | null;
+  profilePictureUrl?: string | null;
   accepted?: boolean;
 }
 
-interface PatientProfileResource {
-  id: number | string;
-  name?: string;
-  email?: string;
-  userProfileId?: number | string;
+interface ChatConversationMessageResource {
+  id?: number | string;
+  senderId?: number | string;
+  senderUserId?: number | string;
+  recipientId?: number | string;
+  recipientUserId?: number | string;
+  content?: string;
+  message?: string;
+  text?: string;
+  timestamp?: string | null;
+  sentAt?: string | null;
+  createdAt?: string | null;
 }
 
 type ConnectionStatus = "CONNECTING" | "CONNECTED" | "DISCONNECTED";
@@ -48,6 +65,61 @@ function getInitials(name: string) {
   return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
 }
 
+function toConnectionStatus(status?: ChatUserResource["status"]): PatientConnectionStatus {
+  return status === "ONLINE" ? "ONLINE" : "OFFLINE";
+}
+
+function toPatient(contact: ChatContactResource, onlineUser?: ChatUserResource): ChatPatient {
+  const id = String(contact.contactUserId);
+  const name = onlineUser?.fullName || contact.displayName || onlineUser?.nickName || contact.username || `Paciente #${id}`;
+  const connectionStatus = toConnectionStatus(onlineUser?.status);
+
+  return {
+    id,
+    userId: id,
+    name,
+    nickName: onlineUser?.nickName || contact.username || undefined,
+    initials: getInitials(name),
+    avatarTone: contact.profilePictureUrl ? "photo" : connectionStatus === "ONLINE" ? "green" : "blue",
+    connectionStatus,
+    connectionLabel: connectionStatus === "ONLINE" ? "En linea ahora" : "No conectado",
+    recordPath: `/nutritionist/patients/${id}`,
+    statsPath: "/nutritionist/patients/tracking",
+  };
+}
+
+function getAuthHeaders(): HeadersInit {
+  const token = localStorage.getItem("accessToken");
+  return {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
+async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(apiUrl(path), {
+    ...init,
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+
+  return response.json() as Promise<T>;
+}
+
+function toResourceMessage(notification: ChatNotificationResource, currentUserId: string): ChatMessage {
+  return {
+    id: notification.id || `message-${Date.now()}`,
+    author: String(notification.senderId) === currentUserId ? "NUTRITIONIST" : "PATIENT",
+    text: notification.content,
+    time: "Ahora",
+    status: String(notification.senderId) === currentUserId ? "SENT" : undefined,
+  };
+}
+
 function formatMessageTime(timestamp?: string | null) {
   if (!timestamp) return "Ahora";
 
@@ -60,119 +132,83 @@ function formatMessageTime(timestamp?: string | null) {
   }).format(date);
 }
 
-function formatLastActivity(messages: ChatMessage[]) {
-  return messages.at(-1)?.time ?? "Nuevo";
+function messageTimestamp(message: ChatConversationMessageResource) {
+  return message.timestamp ?? message.sentAt ?? message.createdAt ?? null;
 }
 
-function toConnectionStatus(status?: ChatUserResource["status"]): PatientConnectionStatus {
-  return status === "ONLINE" ? "ONLINE" : "OFFLINE";
+function messageSenderId(message: ChatConversationMessageResource) {
+  return message.senderUserId ?? message.senderId ?? "";
 }
 
-function toPatient(userId: number | string, onlineUser?: ChatUserResource): ChatPatient {
-  const id = String(userId);
-  const name = onlineUser?.fullName || onlineUser?.nickName || `Paciente #${id}`;
-  const connectionStatus = toConnectionStatus(onlineUser?.status);
+function messageContent(message: ChatConversationMessageResource) {
+  return message.content ?? message.message ?? message.text ?? "";
+}
+
+function toChatMessage(message: ChatConversationMessageResource, currentUserId: string): ChatMessage {
+  const senderId = messageSenderId(message);
 
   return {
-    id,
-    userId: id,
-    name,
-    nickName: onlineUser?.nickName,
-    initials: getInitials(name),
-    avatarTone: connectionStatus === "ONLINE" ? "green" : "blue",
-    connectionStatus,
-    connectionLabel: connectionStatus === "ONLINE" ? "En linea ahora" : "No conectado",
-    recordPath: `/nutritionist/patients/${id}`,
-    statsPath: "/nutritionist/patients/tracking",
+    id: String(message.id ?? `message-${senderId}-${messageTimestamp(message) ?? Date.now()}`),
+    author: String(senderId) === currentUserId ? "NUTRITIONIST" : "PATIENT",
+    text: messageContent(message),
+    time: formatMessageTime(messageTimestamp(message)),
+    status: String(senderId) === currentUserId ? "SENT" : undefined,
   };
 }
 
-function getAuthHeaders(): HeadersInit {
-  const token = localStorage.getItem("accessToken");
-  return token ? { Authorization: `Bearer ${token}` } : {};
+function messageMatches(message: ChatConversationMessageResource, currentUserId: string, contactUserId: string, text: string) {
+  const senderId = String(messageSenderId(message));
+  const recipientId = String(message.recipientUserId ?? message.recipientId ?? "");
+  const sameText = messageContent(message).trim() === text.trim();
+
+  return sameText && senderId === currentUserId && (!recipientId || recipientId === contactUserId);
 }
 
-async function fetchJson<T>(path: string): Promise<T> {
-  const response = await fetch(`${chatApi.defaults.baseURL}${path}`, {
-    headers: getAuthHeaders(),
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
-  }
-
-  return response.json() as Promise<T>;
-}
-
-async function getAcceptedPatientContacts(nutritionistUserId: string) {
-  const nutritionist = await fetchJson<NutritionistProfileResource>(
-    `/api/v1/nutritionists/by-user?userId=${encodeURIComponent(nutritionistUserId)}`,
-  );
-  const relations = await fetchJson<NutritionistPatientRelationResource[]>(
-    `/api/v1/nutritionist-patients/nutritionist/${encodeURIComponent(String(nutritionist.id))}`,
-  );
-  const acceptedRelations = relations.filter((relation) => relation.accepted);
-
-  const profileResults = await Promise.allSettled(
-    acceptedRelations.map(async (relation) => ({
-      relation,
-      profile: await fetchJson<PatientProfileResource>(
-        `/api/v1/profiles/by-user/${encodeURIComponent(String(relation.patientUserId))}`,
-      ),
-    })),
-  );
-
-  return acceptedRelations.map((relation) => {
-    const profileResult = profileResults.find(
-      (result) =>
-        result.status === "fulfilled" &&
-        String(result.value.relation.patientUserId) === String(relation.patientUserId),
-    );
-    const profile = profileResult?.status === "fulfilled" ? profileResult.value.profile : undefined;
-    return {
-      relation,
-      profile,
-    };
+function wait(ms: number) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
   });
 }
 
-function toEmptyPatientChat(currentUserId: string, patientUserId: number | string, profile?: PatientProfileResource): PatientChat {
-  const name = profile?.name || `Paciente #${patientUserId}`;
-  const patient = toPatient(patientUserId, {
-    id: String(patientUserId),
-    userId: Number(patientUserId),
-    nickName: profile?.email || name,
-    fullName: name,
-    status: "OFFLINE",
-  });
+async function getChatContacts() {
+  const contacts = await fetchJson<ChatContactResource[]>("/api/v1/chat/me/contacts");
+  return contacts.filter((contact) => contact.accepted !== false);
+}
+
+async function getConversationMessages(contactUserId: number | string) {
+  return fetchJson<ChatConversationMessageResource[]>(
+    `/api/v1/chat/conversations/${encodeURIComponent(String(contactUserId))}/messages?limit=50`,
+  ).catch(() => []);
+}
+
+async function sendConversationMessage(contactUserId: number | string, content: string) {
+  if (!CHAT_SEND_REST_PATH) return null;
+
+  const path = CHAT_SEND_REST_PATH
+    .replace(":contactUserId", encodeURIComponent(String(contactUserId)))
+    .replace("{contactUserId}", encodeURIComponent(String(contactUserId)));
+
+  return fetchJson<ChatConversationMessageResource>(
+    path,
+    {
+      method: "POST",
+      body: JSON.stringify({ content }),
+    },
+  );
+}
+
+async function getContactChat(currentUserId: string, contact: ChatContactResource): Promise<PatientChat> {
+  const messages = (await getConversationMessages(contact.contactUserId)).map((message) => toChatMessage(message, currentUserId));
+  const patient = toPatient(contact);
+  const lastMessage = messages.at(-1);
 
   return {
-    id: `${currentUserId}_${patientUserId}`,
+    id: `${currentUserId}_${contact.contactUserId}`,
     patient,
-    preview: "Sin mensajes todavia",
-    lastActivityLabel: "Nuevo",
-    messages: [],
-    canChat: true,
-  };
-}
-
-function toChatMessage(message: ChatMessageResource, currentUserId: string): ChatMessage {
-  return {
-    id: message.id,
-    author: String(message.senderId) === currentUserId ? "NUTRITIONIST" : "PATIENT",
-    text: message.content,
-    time: formatMessageTime(message.timestamp),
-    status: String(message.senderId) === currentUserId ? "SENT" : undefined,
-  };
-}
-
-function toResourceMessage(notification: ChatNotificationResource, currentUserId: string): ChatMessage {
-  return {
-    id: notification.id || `message-${Date.now()}`,
-    author: String(notification.senderId) === currentUserId ? "NUTRITIONIST" : "PATIENT",
-    text: notification.content,
-    time: "Ahora",
-    status: String(notification.senderId) === currentUserId ? "SENT" : undefined,
+    preview: lastMessage?.text || "Sin mensajes todavia",
+    lastActivityLabel: lastMessage?.time ?? "Nuevo",
+    messages,
+    canChat: contact.accepted !== false,
   };
 }
 
@@ -212,87 +248,24 @@ export function usePatientChats() {
       setIsLoading(true);
       setErrorMessage("");
 
-      const loadAcceptedPatientChats = async () => {
-        const acceptedContacts = await getAcceptedPatientContacts(currentUser.id);
-        return acceptedContacts.map(({ relation, profile }) =>
-          toEmptyPatientChat(currentUser.id, relation.patientUserId, profile),
-        );
-      };
-
       try {
-        const [existsResult, contactsResult, usersResult] = await Promise.all([
-          chatApi.get<ChatUserExistsResource>(`/api/v1/chat/users/${currentUser.id}/exists`).catch(() => null),
-          chatApi.get<number[]>(`/api/v1/chat/contacts/${currentUser.id}`).catch(() => ({ data: [] as number[] })),
-          chatApi.get<ChatUserResource[]>("/api/v1/chat/users").catch(() => ({ data: [] as ChatUserResource[] })),
-        ]);
-
-        const contactIds = contactsResult.data;
-        const onlineUsers = usersResult.data;
-
-        if (existsResult?.data.exists === false || contactIds.length === 0) {
-          const fallbackChats = await loadAcceptedPatientChats();
-
-          if (!isMounted) return;
-          setChats(fallbackChats);
-          setActiveChatId(fallbackChats[0]?.id ?? "");
-          setErrorMessage(fallbackChats.length === 0 ? "No hay pacientes aceptados para iniciar conversaciones." : "");
-          return;
-        }
-
-        const contactChats = await Promise.all(
-          contactIds.map(async (contactId) => {
-            const onlineUser = onlineUsers.find((user) => String(user.userId) === String(contactId));
-            const [validationResult, messagesResult] = await Promise.all([
-              chatApi.get<ChatValidateResource>("/api/v1/chat/validate", {
-                params: { userId1: currentUser.id, userId2: contactId },
-              }).catch(() => ({ data: { canChat: true } })),
-              chatApi.get<ChatMessageResource[]>(`/api/v1/chat/messages/${currentUser.id}/${contactId}`).catch(() => ({
-                data: [] as ChatMessageResource[],
-              })),
-            ]);
-
-            const validation = validationResult.data;
-            const messages = messagesResult.data;
-            const mappedMessages = messages.map((message) => toChatMessage(message, currentUser.id));
-            const patient = toPatient(contactId, onlineUser);
-
-            return {
-              id: `${currentUser.id}_${contactId}`,
-              patient,
-              preview: mappedMessages.at(-1)?.text ?? "Sin mensajes todavia",
-              lastActivityLabel: formatLastActivity(mappedMessages),
-              messages: mappedMessages,
-              canChat: validation.canChat,
-            } satisfies PatientChat;
-          }),
+        const contacts = await getChatContacts();
+        const chatResults = await Promise.allSettled(
+          contacts.map((contact) => getContactChat(currentUser.id, contact)),
         );
-
-        if (contactChats.length === 0) {
-          const fallbackChats = await loadAcceptedPatientChats();
-
-          if (!isMounted) return;
-          setChats(fallbackChats);
-          setActiveChatId(fallbackChats[0]?.id ?? "");
-          setErrorMessage(fallbackChats.length === 0 ? "No hay pacientes aceptados para iniciar conversaciones." : "");
-          return;
-        }
+        const contactChats = chatResults.reduce<PatientChat[]>((items, result) => {
+          if (result.status === "fulfilled") items.push(result.value);
+          return items;
+        }, []);
 
         if (!isMounted) return;
         setChats(contactChats);
         setActiveChatId(contactChats[0]?.id ?? "");
+        setErrorMessage(contactChats.length === 0 ? "No hay pacientes aceptados para iniciar conversaciones." : "");
       } catch (error) {
-        if (!isMounted) return;
-        try {
-          const fallbackChats = await loadAcceptedPatientChats();
-          if (!isMounted) return;
-          setChats(fallbackChats);
-          setActiveChatId(fallbackChats[0]?.id ?? "");
-          setErrorMessage(fallbackChats.length === 0 ? "No hay pacientes aceptados para iniciar conversaciones." : "");
-        } catch {
-          setChats([]);
-          setActiveChatId("");
-          setErrorMessage("No se pudieron cargar pacientes asociados para el chat.");
-        }
+        setChats([]);
+        setActiveChatId("");
+        setErrorMessage("No se pudieron cargar los contactos de chat.");
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -308,9 +281,11 @@ export function usePatientChats() {
   useEffect(() => {
     if (!currentUser.id) return;
 
-    const client = new StompClient("/ws");
+    const client = new StompClient();
     stompRef.current = client;
-    client.connect(setConnectionStatus);
+    client.connect(setConnectionStatus, (message) => {
+      setErrorMessage(`Error STOMP: ${message}`);
+    });
 
     const messagesSubscription = client.subscribe("/user/queue/messages", (body) => {
       try {
@@ -408,13 +383,52 @@ export function usePatientChats() {
     );
   };
 
-  const sendMessage = (chatId: string, text: string) => {
+  const replaceMessage = (chatId: string, messageId: string, nextMessage: ChatMessage) => {
+    setChats((current) =>
+      current.map((chat) => {
+        if (chat.id !== chatId) return chat;
+
+        const messages = chat.messages.map((message) => (message.id === messageId ? nextMessage : message));
+        return {
+          ...chat,
+          messages,
+          preview: toPreview(nextMessage),
+          lastActivityLabel: "Ahora",
+        };
+      }),
+    );
+  };
+
+  const removeMessage = (chatId: string, messageId: string) => {
+    setChats((current) =>
+      current.map((chat) => {
+        if (chat.id !== chatId) return chat;
+
+        const messages = chat.messages.filter((message) => message.id !== messageId);
+        const lastMessage = messages.at(-1);
+
+        return {
+          ...chat,
+          messages,
+          preview: lastMessage?.text ?? "Sin mensajes todavia",
+          lastActivityLabel: lastMessage?.time ?? "Nuevo",
+        };
+      }),
+    );
+  };
+
+  const sendMessage = async (chatId: string, text: string) => {
     const chat = chats.find((item) => item.id === chatId);
     const trimmedText = text.trim();
     if (!chat || !trimmedText || chat.canChat === false) return;
+    if (!stompRef.current?.isConnected()) {
+      setErrorMessage("El WebSocket aun no esta conectado. Espera a que indique WS conectado antes de enviar.");
+      return;
+    }
 
+    const localMessageId = `message-local-${Date.now()}`;
     const optimisticMessage: ChatMessage = {
-      id: `message-local-${Date.now()}`,
+      id: localMessageId,
       author: "NUTRITIONIST",
       text: trimmedText,
       time: "Ahora",
@@ -424,11 +438,55 @@ export function usePatientChats() {
     appendMessage(chatId, optimisticMessage);
     setDraft("");
 
-    stompRef.current?.send("/app/chat", JSON.stringify({
-      senderId: currentUser.id,
-      recipientId: chat.patient.userId,
-      content: trimmedText,
-    }));
+    try {
+      const savedMessage = await sendConversationMessage(chat.patient.userId, trimmedText);
+      if (savedMessage) {
+        replaceMessage(chatId, localMessageId, toChatMessage(savedMessage, currentUser.id));
+      }
+    } catch {
+      setErrorMessage("No se pudo confirmar el guardado del mensaje por REST.");
+    } finally {
+      const payload = {
+        senderId: currentUser.id,
+        senderUserId: currentUser.id,
+        recipientId: chat.patient.userId,
+        recipientUserId: chat.patient.userId,
+        receiverId: chat.patient.userId,
+        receiverUserId: chat.patient.userId,
+        contactUserId: chat.patient.userId,
+        content: trimmedText,
+        message: trimmedText,
+        text: trimmedText,
+      };
+
+      void (async () => {
+        for (const destination of CHAT_SEND_DESTINATIONS) {
+          const sent = stompRef.current?.send(destination, JSON.stringify(payload));
+
+          if (!sent) {
+            removeMessage(chatId, localMessageId);
+            setErrorMessage("No se pudo enviar el mensaje porque el WebSocket no esta conectado.");
+            return;
+          }
+
+          await wait(900);
+
+          const savedMessages = await getConversationMessages(chat.patient.userId);
+          const savedMessage = savedMessages.find((message) =>
+            messageMatches(message, currentUser.id, chat.patient.userId, trimmedText),
+          );
+
+          if (savedMessage) {
+            replaceMessage(chatId, localMessageId, toChatMessage(savedMessage, currentUser.id));
+            setErrorMessage("");
+            return;
+          }
+        }
+
+        removeMessage(chatId, localMessageId);
+        setErrorMessage(`El servidor no guardo el mensaje. Se probaron estos destinos STOMP: ${CHAT_SEND_DESTINATIONS.join(", ")}.`);
+      })();
+    }
   };
 
   const attachEvidence = (chatId: string, file: File) => {

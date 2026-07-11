@@ -1,3 +1,5 @@
+import { API_BASE_URL } from "@/app/config/env";
+
 type StompHeaders = Record<string, string>;
 
 type StompSubscription = {
@@ -16,12 +18,13 @@ type ActiveSubscription = {
 };
 
 export type StompMessageHandler = (body: string, headers: StompHeaders) => void;
+export type StompErrorHandler = (message: string, headers: StompHeaders) => void;
 
 function createWsUrl(path: string) {
-  const base = new URL(path, window.location.origin);
-  const apiBase = new URL(import.meta.env.VITE_API_BASE_URL ?? window.location.origin);
+  const wsBaseUrl = (import.meta.env.VITE_WS_BASE_URL as string | undefined) ?? API_BASE_URL;
+  const apiBase = new URL(wsBaseUrl);
+  const base = new URL(path, apiBase);
   base.protocol = apiBase.protocol === "https:" ? "wss:" : "ws:";
-  base.host = apiBase.host;
   return base.toString();
 }
 
@@ -49,11 +52,14 @@ export class StompClient {
   private readonly pendingReceipts: PendingReceipt[] = [];
   private readonly path: string;
 
-  constructor(path = "/ws") {
+  constructor(path = (import.meta.env.VITE_WS_PATH as string | undefined) ?? "/ws/websocket") {
     this.path = path;
   }
 
-  connect(onStatusChange?: (status: "CONNECTING" | "CONNECTED" | "DISCONNECTED") => void) {
+  connect(
+    onStatusChange?: (status: "CONNECTING" | "CONNECTED" | "DISCONNECTED") => void,
+    onError?: StompErrorHandler,
+  ) {
     if (this.socket?.readyState === WebSocket.CONNECTING || this.socket?.readyState === WebSocket.OPEN) return;
 
     this.shouldReconnect = true;
@@ -66,18 +72,18 @@ export class StompClient {
       socket.send(encodeFrame("CONNECT", {
         "accept-version": "1.2",
         "heart-beat": "10000,10000",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(token ? { Authorization: `Bearer ${token}`, authorization: `Bearer ${token}` } : {}),
       }));
     };
 
-    socket.onmessage = (event) => this.handleFrames(String(event.data), onStatusChange);
+    socket.onmessage = (event) => this.handleFrames(String(event.data), onStatusChange, onError);
 
     socket.onclose = () => {
       this.connected = false;
       onStatusChange?.("DISCONNECTED");
       window.clearTimeout(this.reconnectTimer);
       if (this.shouldReconnect) {
-        this.reconnectTimer = window.setTimeout(() => this.connect(onStatusChange), 3000);
+        this.reconnectTimer = window.setTimeout(() => this.connect(onStatusChange, onError), 3000);
       }
     };
 
@@ -113,12 +119,16 @@ export class StompClient {
     };
   }
 
+  isConnected() {
+    return this.connected;
+  }
+
   send(destination: string, body: string, headers?: StompHeaders) {
     const receipt = { destination, body, headers };
 
     if (!this.connected) {
       this.pendingReceipts.push(receipt);
-      return;
+      return false;
     }
 
     this.socket?.send(encodeFrame("SEND", {
@@ -126,9 +136,14 @@ export class StompClient {
       "content-type": "application/json",
       ...(headers ?? {}),
     }, body));
+    return true;
   }
 
-  private handleFrames(rawData: string, onStatusChange?: (status: "CONNECTING" | "CONNECTED" | "DISCONNECTED") => void) {
+  private handleFrames(
+    rawData: string,
+    onStatusChange?: (status: "CONNECTING" | "CONNECTED" | "DISCONNECTED") => void,
+    onError?: StompErrorHandler,
+  ) {
     rawData
       .split("\0")
       .filter(Boolean)
@@ -149,6 +164,10 @@ export class StompClient {
           const subscriptionId = headers.subscription;
           const subscription = subscriptionId ? this.subscriptions.get(subscriptionId) : undefined;
           subscription?.handler(body, headers);
+        }
+
+        if (command === "ERROR") {
+          onError?.(body || headers.message || "Error STOMP del servidor.", headers);
         }
       });
   }
