@@ -140,8 +140,7 @@
   gap: 8px;
 }
 
-.field span,
-.preferenceGroup > span {
+.field span {
   color: #334155;
   font-size: 0.76rem;
   font-weight: 900;
@@ -188,8 +187,7 @@
 
 .secondaryButton,
 .primaryButton,
-.dangerButton,
-.segmentedControl button {
+.dangerButton {
   border: 0;
   border-radius: 9px;
   cursor: pointer;
@@ -214,8 +212,7 @@
 
 .secondaryButton:hover,
 .primaryButton:hover,
-.dangerButton:hover,
-.segmentedControl button:hover {
+.dangerButton:hover {
   transform: translateY(-1px);
 }
 
@@ -225,34 +222,6 @@
   background:
     linear-gradient(145deg, rgba(240, 253, 244, 0.86) 0%, rgba(255, 255, 255, 0.96) 65%),
     #ffffff;
-}
-
-.preferenceGroup {
-  display: grid;
-  gap: 8px;
-}
-
-.segmentedControl {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
-  border: 1px solid #dbe4ee;
-  border-radius: 10px;
-  background: #f8fafc;
-  padding: 5px;
-}
-
-.segmentedControl button {
-  min-height: 34px;
-  background: transparent;
-  color: #64748b;
-  padding: 0 8px;
-}
-
-.segmentedControl .segmentActive {
-  background: #16a34a;
-  color: #ffffff;
-  box-shadow: 0 8px 18px rgba(22, 163, 74, 0.22);
 }
 
 .helperText {
@@ -342,9 +311,5 @@
 
   .hero h1 {
     font-size: 1.65rem;
-  }
-
-  .segmentedControl {
-    grid-template-columns: 1fr;
   }
 }
